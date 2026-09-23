@@ -1,0 +1,1 @@
+com.yueyingiop.payday.compat.kubejs.PayDayKubeJSPlugin

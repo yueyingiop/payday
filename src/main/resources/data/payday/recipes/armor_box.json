@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "ACA",
+    "ABA"
+  ],
+  "key": {
+    "A": {"item": "minecraft:blue_wool"},
+    "B": {"item": "minecraft:iron_trapdoor"},
+    "C": {"item": "minecraft:chest"}
+  },
+  "result": {"item": "payday:armor_box"}
+}

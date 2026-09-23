@@ -1,0 +1,12 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {"item": {"item": "minecraft:iron_ingot"}, "count": 4},
+    {"item": {"item": "minecraft:blue_dye"}, "count": 2}
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {"item": "payday:armor_plate", "count": 1}
+  }
+}

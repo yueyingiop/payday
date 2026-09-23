@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "ACA",
+    "ABA"
+  ],
+  "key": {
+    "A": {"item": "minecraft:red_wool"},
+    "B": {"item": "minecraft:lightning_rod"},
+    "C": {"item": "minecraft:chest"}
+  },
+  "result": {"item": "payday:first_aid_box"}
+}

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.yueyingiop.payday.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "payday.refmap.json",
+  "mixins": [
+    "BlockDataAccessor",
+    "CommonBlockIndexMixin"
+  ],
+  "client": [
+  ]
+}

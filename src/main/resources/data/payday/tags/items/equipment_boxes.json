@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "payday:armor_box",
+    "payday:first_aid_box",
+    "payday:clothes_box"
+  ]
+}

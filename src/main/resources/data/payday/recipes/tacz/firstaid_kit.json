@@ -1,0 +1,12 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {"item": {"item": "minecraft:copper_ingot"}, "count": 3},
+    {"item": {"item": "minecraft:red_dye"}, "count": 1}
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {"item": "payday:firstaid_kit", "count": 1}
+  }
+}

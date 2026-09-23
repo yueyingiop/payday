@@ -1,0 +1,13 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {"item": {"item": "minecraft:leather_chestplate"}, "count": 2},
+    {"item": {"item": "minecraft:iron_chestplate"}, "count": 1},
+    {"item": {"item": "minecraft:brown_dye"}, "count": 2}
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {"item": "payday:heavy_bulletproof_vest", "count": 1}
+  }
+}

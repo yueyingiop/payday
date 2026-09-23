@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "payday:impact_slot",
+    "payday:adaptive_slot",
+    "payday:resistance_slot"
+  ]
+}

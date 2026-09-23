@@ -1,0 +1,14 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {"item": {"item": "minecraft:nether_star"}, "count": 1},
+    {"item": {"item": "minecraft:netherite_chestplate"}, "count": 1},
+    {"item": {"item": "minecraft:brown_dye"}, "count": 2},
+    {"item": {"item": "minecraft:iron_door"}, "count": 4}
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {"item": "payday:improved_composite_heavy_tactical_vest", "count": 1}
+  }
+}

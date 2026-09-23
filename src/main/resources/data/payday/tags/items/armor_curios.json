@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "payday:suit",
+    "payday:light_bulletproof_vest",
+    "payday:heavy_bulletproof_vest",
+    "payday:blast_vest",
+    "payday:composite_tactical_vest",
+    "payday:improved_composite_heavy_tactical_vest"
+  ]
+}

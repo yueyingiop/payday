@@ -1,0 +1,14 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {"item": {"item": "minecraft:leather_chestplate"}, "count": 1},
+    {"item": {"item": "minecraft:leather_leggings"}, "count": 1},
+    {"item": {"item": "minecraft:copper_ingot"}, "count": 2},
+    {"item": {"item": "minecraft:ink_sac"}, "count": 1}
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {"item": "payday:suit", "count": 1}
+  }
+}

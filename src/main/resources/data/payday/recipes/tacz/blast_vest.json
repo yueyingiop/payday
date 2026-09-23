@@ -1,0 +1,16 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {"item": {"item": "minecraft:diamond_chestplate"}, "count": 1},
+    {"item": {"item": "minecraft:leather_chestplate"}, "count": 1},
+    {"item": {"item": "minecraft:iron_leggings"}, "count": 1},
+    {"item": {"item": "minecraft:leather_leggings"}, "count": 1},
+    {"item": {"item": "minecraft:brown_dye"}, "count": 2},
+    {"item": {"item": "minecraft:iron_door"}, "count": 4}
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {"item": "payday:blast_vest", "count": 1}
+  }
+}

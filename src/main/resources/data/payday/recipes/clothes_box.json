@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DAD",
+    "ABA",
+    "DCD"
+  ],
+  "key": {
+    "A": {"item": "minecraft:amethyst_shard"},
+    "B": {"item": "minecraft:armor_stand"},
+    "C": {"item": "minecraft:chest"},
+    "D": {"item": "minecraft:ink_sac"}
+  },
+  "result": {"item": "payday:clothes_box"}
+}
