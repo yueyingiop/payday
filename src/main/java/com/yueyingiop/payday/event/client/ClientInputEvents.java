@@ -1,9 +1,12 @@
 package com.yueyingiop.payday.event.client;
 
 import com.yueyingiop.payday.PayDay;
+import com.yueyingiop.payday.api.PhoneUpgradeAction;
 import com.yueyingiop.payday.init.PayDayClient;
 import com.yueyingiop.payday.network.OpenArmorMenuPacket;
+import com.yueyingiop.payday.network.OpenPhoneMenuPacket;
 import com.yueyingiop.payday.network.PayDayNetwork;
+import com.yueyingiop.payday.network.ActivateHackerSkillPacket;
 import com.yueyingiop.payday.network.UseEquipmentBoxPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -35,8 +38,17 @@ public final class ClientInputEvents {
             return;
         }
 
+        if (PhoneUpgradeAction.hasBoundActivationKey(event.getKey())
+                && minecraft.screen == null) {
+            PayDayNetwork.CHANNEL.sendToServer(new ActivateHackerSkillPacket(event.getKey()));
+            return;
+        }
+
         boolean shift = PayDayClient.MODIFIER.isDown();
-        if (PayDayClient.OPEN_ARMOR.matches(event.getKey(), event.getScanCode()) && shift) {
+        if (PayDayClient.OPEN_PHONE.matches(event.getKey(), event.getScanCode())
+                && minecraft.screen == null) {
+            PayDayNetwork.CHANNEL.sendToServer(new OpenPhoneMenuPacket());
+        } else if (PayDayClient.OPEN_ARMOR.matches(event.getKey(), event.getScanCode()) && shift) {
             PayDayNetwork.CHANNEL.sendToServer(new OpenArmorMenuPacket());
         } else if (PayDayClient.USE_EQUIPMENT_BOX.matches(event.getKey(), event.getScanCode())) {
             PayDayNetwork.CHANNEL.sendToServer(new UseEquipmentBoxPacket(shift));

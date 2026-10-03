@@ -137,6 +137,9 @@ public final class ArmorCurioEvents {
 
             if (event.getFrom().isEmpty() || event.getTo().isEmpty()) {
                 entity.getPersistentData().remove(ServerEventUtil.EQUIPMENT_BOX_CHANGE_COOLDOWN);
+            } else if (entity instanceof Player player && player.getAbilities().instabuild) {
+                // 创造模式可以直接更换装备箱，不记录更换冷却。
+                entity.getPersistentData().remove(ServerEventUtil.EQUIPMENT_BOX_CHANGE_COOLDOWN);
             } else {
                 entity.getPersistentData().putLong(ServerEventUtil.EQUIPMENT_BOX_CHANGE_COOLDOWN,
                         entity.level().getGameTime()
@@ -414,6 +417,10 @@ public final class ArmorCurioEvents {
      */
     public static boolean isEquipmentBoxChangeLocked(LivingEntity entity, String identifier, int index) {
         if (!ServerEventUtil.EQUIPMENT_BOX.equals(identifier)) {
+            return false;
+        }
+        if (entity instanceof Player player && player.getAbilities().instabuild) {
+            // 创造模式下允许直接摘下或替换 EquipmentBoxItem。
             return false;
         }
 

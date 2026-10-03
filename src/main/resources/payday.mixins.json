@@ -6,7 +6,8 @@
   "refmap": "payday.refmap.json",
   "mixins": [
     "BlockDataAccessor",
-    "CommonBlockIndexMixin"
+    "CommonBlockIndexMixin",
+    "AttachmentDataUtilsMixin"
   ],
   "client": [
   ]

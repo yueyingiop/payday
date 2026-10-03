@@ -1,10 +1,12 @@
 package com.yueyingiop.payday.event.server;
 
 import com.yueyingiop.payday.api.helper.CurioHelper;
+import com.yueyingiop.payday.api.ArmorModifier;
 import com.yueyingiop.payday.item.ArmorCurioItem;
 import com.yueyingiop.payday.item.ArmorPlateItem;
 import com.yueyingiop.payday.item.ArmorSlotItem;
 import com.yueyingiop.payday.item.FirstAidKitItem;
+import com.yueyingiop.payday.item.PhoneItem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -68,6 +70,7 @@ public final class SupplyEvents {
      * @return 方法执行结果。
      */
     public static boolean repairArmor(Player player) {
+        PhoneItem.refreshArmorSlotModifiers(player);
         ItemStack selectedArmorStack = ItemStack.EMPTY;
         List<ItemStack> selectedUpgrades = List.of();
         int repairIndex = -1;
@@ -88,7 +91,13 @@ public final class SupplyEvents {
 
                 for (int definitionIndex = 0;
                      definitionIndex < armor.armorDefinitions().size(); definitionIndex++) {
-                    if (!armor.canRepair(stack, definitionIndex)) {
+                    double current = ArmorModifier.current(player, armorStack, armor, stack,
+                            definitionIndex);
+                    double maximum = ArmorModifier.effectiveMax(player, armorStack, armor,
+                            stack, definitionIndex);
+                    boolean canRepair = armor.canRepair(stack, definitionIndex)
+                            || current < maximum;
+                    if (!canRepair) {
                         continue;
                     }
 
@@ -111,7 +120,10 @@ public final class SupplyEvents {
         ItemStack selected = selectedUpgrades.get(repairIndex);
         ArmorSlotItem armor = (ArmorSlotItem) selected.getItem();
         armor.clearPermanent(selected, repairDefinitionIndex);
-        armor.setCurrent(selected, repairDefinitionIndex, armor.maxArmor(repairDefinitionIndex));
+        ArmorModifier.setCurrent(player, selectedArmorStack, armor, selected,
+                repairDefinitionIndex,
+                ArmorModifier.effectiveMax(player, selectedArmorStack, armor, selected,
+                        repairDefinitionIndex));
         armor.clearBroken(selected, repairDefinitionIndex);
         ((ArmorCurioItem) selectedArmorStack.getItem()).setUpgradeStacks(selectedArmorStack, selectedUpgrades);
         return true;

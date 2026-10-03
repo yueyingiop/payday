@@ -6,6 +6,7 @@ import com.yueyingiop.payday.client.render.ArmorCurioRenderer;
 import com.yueyingiop.payday.client.render.EquipmentBoxRenderer;
 import com.yueyingiop.payday.client.render.SupplyBlockRenderer;
 import com.yueyingiop.payday.client.screen.ArmorScreen;
+import com.yueyingiop.payday.client.screen.PhoneScreen;
 import com.yueyingiop.payday.client.screen.PayDayConfigScreen;
 import com.yueyingiop.payday.tooltip.ArmorSlotTooltip;
 
@@ -18,6 +19,7 @@ import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.yueyingiop.payday.menu.ArmorMenu;
+import com.yueyingiop.payday.menu.PhoneMenu;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
@@ -25,11 +27,13 @@ import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.fml.ModLoadingContext;
 
 import com.yueyingiop.payday.item.ArmorCurioItem;
 import com.yueyingiop.payday.item.base.EquipmentBoxItem;
+import com.yueyingiop.payday.item.PhoneUpgradeItem;
 
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,8 +42,23 @@ import net.minecraftforge.registries.ForgeRegistries;
 @Mod.EventBusSubscriber(modid = PayDay.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class PayDayClient {
     public static final KeyMapping OPEN_ARMOR = new KeyMapping("key.payday.open_armor", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, "key.categories.payday");
+    public static final KeyMapping OPEN_PHONE = new KeyMapping("key.payday.open_phone", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.payday");
     public static final KeyMapping USE_EQUIPMENT_BOX = new KeyMapping("key.payday.use_equipment_box", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.payday");
+    public static final KeyMapping HACKER_SKILL = new KeyMapping("key.payday.hacker_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.categories.payday");
     public static final KeyMapping MODIFIER = new KeyMapping("key.payday.modifier", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_SHIFT, "key.categories.payday");
+
+    /** 注册手机升级物品的显式贴图颜色；默认白色，因此不会改变原始纹理。 */
+    @SubscribeEvent
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        event.register((stack, tintIndex) -> {
+            if (tintIndex != 0 || !(stack.getItem() instanceof PhoneUpgradeItem upgrade)) {
+                return 0xFFFFFFFF;
+            }
+            return upgrade.textureColor();
+        }, ForgeRegistries.ITEMS.getValues().stream()
+                .filter(item -> item instanceof PhoneUpgradeItem)
+                .toArray(Item[]::new));
+    }
 
 
     /** 注册客户端菜单界面和护甲饰品渲染器。 */
@@ -64,6 +83,7 @@ public final class PayDayClient {
                 }
             }
             MenuScreens.register(ArmorMenu.TYPE.get(), ArmorScreen::new);
+            MenuScreens.register(PhoneMenu.TYPE.get(), PhoneScreen::new);
         });
     }
 
@@ -75,7 +95,9 @@ public final class PayDayClient {
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(OPEN_ARMOR);
+        event.register(OPEN_PHONE);
         event.register(USE_EQUIPMENT_BOX);
+        event.register(HACKER_SKILL);
         event.register(MODIFIER);
     }
 

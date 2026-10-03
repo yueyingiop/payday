@@ -64,6 +64,11 @@ public final class ExposureRiskHudRenderer {
      * @param configurationMode 配置模式标志
      */
     private static void renderAt(GuiGraphics graphics, int x, int y, int risk, boolean configurationMode) {
+        // 物品渲染器会使用更高的 GUI Z 值，即使本 HUD 在 Foreground 事件中绘制，
+        // 仍可能被物品图标压住；将 HUD 提升到物品之上，但低于随后绘制的 Tooltip。
+        graphics.pose().pushPose();
+        // GuiGraphics.renderItem 会把物品绘制在 z=150；HUD 使用更高层级。
+        graphics.pose().translate(0.0D, 0.0D, 400.0D);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         graphics.blit(TEXTURE, x, y, TEXTURE_X, TEXTURE_Y, HUD_WIDTH, HUD_HEIGHT,
@@ -85,14 +90,15 @@ public final class ExposureRiskHudRenderer {
         }
 
         // 纹理坐标 (12, 110) 是 9x9 的风险数值框，相对于 HUD 纹理起点 (10, 30)。
-        int barColor = clampedRisk <= 30 ? 0xFF0056FF : 0xFFDA0000;
-        graphics.fill(x + 2, y + 80, x + 11, y + 89, barColor);
+        // int barColor = clampedRisk <= 30 ? 0xFF0056FF : 0xFFDA0000;
+        // graphics.fill(x + 2, y + 80, x + 11, y + 89, barColor);
         // 5x7 的数字字形在纹理 (12, 110) 的 9x9 数值框内垂直居中。
         renderRiskDigits(graphics, x + 2, y + 81, clampedRisk, clampedRisk <= 30);
         if (configurationMode) {
             graphics.fill(x, y, x + HUD_WIDTH, y + HUD_HEIGHT, 0x6600FF00);
             graphics.renderOutline(x, y, HUD_WIDTH, HUD_HEIGHT, 0xFF55FF55);
         }
+        graphics.pose().popPose();
     }
 
     /**

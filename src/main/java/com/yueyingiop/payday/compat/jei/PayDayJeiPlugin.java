@@ -1,12 +1,17 @@
 package com.yueyingiop.payday.compat.jei;
 
 import com.yueyingiop.payday.client.screen.ArmorScreen;
+import com.yueyingiop.payday.init.RegistryItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGuiProperties;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 /**
  * PayDay 与 JEI 的客户端兼容插件。
@@ -37,6 +42,34 @@ public final class PayDayJeiPlugin implements IModPlugin {
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         registration.addGuiScreenHandler(ArmorScreen.class, PayDayJeiPlugin::createArmorScreenProperties);
+    }
+
+    /** Registers the shared formula information for the three life-to-armor upgrades. */
+    @Override
+    public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration registration) {
+        List<net.minecraft.world.item.ItemStack> upgrades = List.of(
+                RegistryItems.SPECIAL_ANARCHY_2.get().getDefaultInstance(),
+                RegistryItems.SPECIAL_ANARCHY_3.get().getDefaultInstance(),
+                RegistryItems.SPECIAL_ANARCHY_4.get().getDefaultInstance()
+        );
+        registration.addIngredientInfo(upgrades, VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.payday.linear_edge.description"),
+                Component.translatable("jei.payday.linear_edge.formula"),
+                Component.translatable("jei.payday.linear_edge.variables"),
+                Component.translatable("jei.payday.linear_edge.life_conversion"),
+                Component.translatable("jei.payday.linear_edge.example_level_2"),
+                Component.translatable("jei.payday.linear_edge.example_level_3"),
+                Component.translatable("jei.payday.linear_edge.rounding"));
+
+        registration.addItemStackInfo(RegistryItems.SPECIAL_THIEF_3.get().getDefaultInstance(),
+                Component.translatable("jei.payday.redstone_signal.description"),
+                Component.translatable("jei.payday.redstone_signal.examples"),
+                Component.translatable("jei.payday.redstone_signal.duration"));
+
+        registration.addItemStackInfo(RegistryItems.SPECIAL_LEADER_5.get().getDefaultInstance(),
+                Component.translatable("jei.payday.hostage_event.description"),
+                Component.translatable("jei.payday.hostage_event.counting"),
+                Component.translatable("jei.payday.hostage_event.example"));
     }
 
     /**

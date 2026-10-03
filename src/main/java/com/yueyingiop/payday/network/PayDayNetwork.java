@@ -31,10 +31,24 @@ public final class PayDayNetwork {
         );
         CHANNEL.registerMessage(
             id++,
+            OpenPhoneMenuPacket.class,
+            OpenPhoneMenuPacket::encode,
+            OpenPhoneMenuPacket::decode,
+            OpenPhoneMenuPacket::handle
+        );
+        CHANNEL.registerMessage(
+            id++,
             UseEquipmentBoxPacket.class,
             UseEquipmentBoxPacket::encode,
             UseEquipmentBoxPacket::decode,
             UseEquipmentBoxPacket::handle
+        );
+        CHANNEL.registerMessage(
+            id++,
+            ActivateHackerSkillPacket.class,
+            ActivateHackerSkillPacket::encode,
+            ActivateHackerSkillPacket::decode,
+            ActivateHackerSkillPacket::handle
         );
         CHANNEL.registerMessage(
             id++,

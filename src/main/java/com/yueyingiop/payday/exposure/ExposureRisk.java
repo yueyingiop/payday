@@ -4,6 +4,7 @@ import com.yueyingiop.payday.Config;
 import com.yueyingiop.payday.PayDay;
 import com.yueyingiop.payday.api.ExposureRiskModifier;
 import com.yueyingiop.payday.api.helper.CurioHelper;
+import com.yueyingiop.payday.init.RegistryAttributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -32,12 +33,14 @@ public final class ExposureRisk {
         Contributions contributions = contributions(player);
         int min = Math.min(Config.EXPOSURE_RISK_MIN.get(), Config.EXPOSURE_RISK_MAX.get());
         int max = Math.max(Config.EXPOSURE_RISK_MIN.get(), Config.EXPOSURE_RISK_MAX.get());
+        // 手机升级通过 AttributeDefinition 提供暴露风险修正，未来其他升级可直接复用同一属性。
+        double attributeModifier = player.getAttributeValue(RegistryAttributes.EXPOSURE_RISK.get());
         return Mth.clamp((int) Math.ceil(Config.EXPOSURE_RISK_DEFAULT.get()
                 + Math.ceil(contributions.stackableCount() / 32.0D)
                 + Math.ceil(contributions.unstackableNbtCharacters() / 16.0D)
                 + contributions.specialRisk()
                 + contributions.temporaryModifier()
-                + getPermanentModifier(player)), min, max);
+                + getPermanentModifier(player) + attributeModifier), min, max);
     }
 
     /** The requested 9^((risk - 30) / 30) target-distance multiplier. */

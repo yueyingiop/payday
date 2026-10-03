@@ -15,6 +15,8 @@ import net.minecraft.world.level.Level;
 
 import com.yueyingiop.payday.client.render.EquipmentBoxRenderer;
 import com.yueyingiop.payday.event.server.ArmorCurioEvents;
+import com.yueyingiop.payday.item.ClothesBoxItem;
+import com.yueyingiop.payday.item.PhoneItem;
 
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -211,7 +213,10 @@ public abstract class EquipmentBoxItem extends Item implements ICurioItem, GeoIt
      */
     @Override
     public boolean canEquip(SlotContext slotContext, ItemStack stack) {
-        return "equipment_box".equals(slotContext.identifier());
+        // 衣帽箱只有在玩家安装“特殊升级-衣帽间”时才允许装备。
+        return "equipment_box".equals(slotContext.identifier())
+                && (!(stack.getItem() instanceof ClothesBoxItem)
+                || PhoneItem.hasInstalledUpgrade(slotContext.entity(), "special_wardrobe"));
     }
 
     /**
@@ -222,7 +227,10 @@ public abstract class EquipmentBoxItem extends Item implements ICurioItem, GeoIt
      */
     @Override
     public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
+        // 右键快捷装备同样受“特殊升级-衣帽间”限制。
         return "equipment_box".equals(slotContext.identifier())
+                && (!(stack.getItem() instanceof ClothesBoxItem)
+                || PhoneItem.hasInstalledUpgrade(slotContext.entity(), "special_wardrobe"))
                 && !ArmorCurioEvents.isEquipmentBoxChangeLocked(slotContext.entity(),
                         slotContext.identifier(), slotContext.index());
     }

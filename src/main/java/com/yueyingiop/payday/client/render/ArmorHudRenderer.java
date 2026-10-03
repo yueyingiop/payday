@@ -2,8 +2,10 @@ package com.yueyingiop.payday.client.render;
 
 import com.yueyingiop.payday.item.ArmorCurioItem;
 import com.yueyingiop.payday.item.ArmorSlotItem;
+import com.yueyingiop.payday.api.ArmorModifier;
 import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.helper.TextureFontHelper;
+import com.yueyingiop.payday.item.PhoneItem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -50,6 +52,8 @@ public final class ArmorHudRenderer {
      * @param player 玩家。
      */
     public static void render(GuiGraphics graphics, Player player) {
+        // 客户端也重建手机提供的护甲上下文，保证 HUD 使用升级后的护甲上限。
+        PhoneItem.refreshArmorSlotModifiers(player);
         List<SlotStats> slots = collectSlots(player);
         if (slots.isEmpty()) {
             return;
@@ -123,9 +127,12 @@ public final class ArmorHudRenderer {
                             }
                             for (int definitionIndex = 0;
                                  definitionIndex < armorSlot.armorDefinitions().size(); definitionIndex++) {
+                                double maximum = ArmorModifier.effectiveMax(player, armorStack,
+                                        armorSlot, upgradeStack, definitionIndex);
                                 result.add(new SlotStats(armorSlot.kind(definitionIndex),
-                                        armorSlot.maxArmor(definitionIndex),
-                                        armorSlot.current(upgradeStack, definitionIndex),
+                                        maximum,
+                                        ArmorModifier.current(player, armorStack, armorSlot,
+                                                upgradeStack, definitionIndex),
                                         armorSlot.permanent(upgradeStack, definitionIndex)));
                             }
                         }

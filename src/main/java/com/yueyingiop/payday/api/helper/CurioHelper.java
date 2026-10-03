@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 public final class CurioHelper {
     public static final String ARMOR_SLOT = "armor";
     public static final String EQUIPMENT_BOX_SLOT = "equipment_box";
+    public static final String PHONE_SLOT = "phone";
 
     private CurioHelper() {
     }

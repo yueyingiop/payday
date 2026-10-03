@@ -200,7 +200,8 @@ public final class SupplyBlock extends BaseEntityBlock {
             return place(level, pos, held, type, player);
         }
 
-        if (player.isShiftKeyDown()) {
+        // 创造模式空手右键可以直接取下补给方块；生存模式仍需按住 Shift。
+        if (player.isShiftKeyDown() || (player.getAbilities().instabuild && held.isEmpty())) {
             List<ItemStack> stacks = splitStacks(state.getValue(AMOUNT));
             level.removeBlock(pos, false);
             for (ItemStack stack : stacks) {

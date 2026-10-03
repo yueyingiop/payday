@@ -119,22 +119,36 @@ public class ArmorSlotItem extends Item {
 
     /** 获取指定护甲定义当前剩余值。 */
     public double current(ItemStack stack, int definitionIndex) {
+        return current(stack, definitionIndex, effectiveMax(stack, definitionIndex));
+    }
+
+    /**
+     * 获取指定护甲定义当前剩余值，并使用调用方提供的运行时最大值。
+     *
+     * <p>手机升级可以临时提高护甲上限，因此不能只按物品自身的基础上限截断 NBT 中的值。</p>
+     */
+    public double current(ItemStack stack, int definitionIndex, double maximum) {
         String key = stateKey(CURRENT, definitionIndex);
         if (!stack.hasTag() || !stack.getTag().contains(key)) {
             // 兼容旧版本单类型插槽保存的 payday_current_armor。
             if (definitionIndex == 0 && armorDefinitions.size() == 1
                     && stack.hasTag() && stack.getTag().contains(CURRENT)) {
-                return clamp(stack.getTag().getDouble(CURRENT), effectiveMax(stack, definitionIndex));
+                return clamp(stack.getTag().getDouble(CURRENT), maximum);
             }
-            return effectiveMax(stack, definitionIndex);
+            return Math.max(0.0D, maximum);
         }
-        return clamp(stack.getTag().getDouble(key), effectiveMax(stack, definitionIndex));
+        return clamp(stack.getTag().getDouble(key), maximum);
     }
 
     /** 设置指定护甲定义当前剩余值。 */
     public void setCurrent(ItemStack stack, int definitionIndex, double value) {
+        setCurrent(stack, definitionIndex, value, effectiveMax(stack, definitionIndex));
+    }
+
+    /** 使用调用方提供的运行时最大值设置指定护甲定义当前剩余值。 */
+    public void setCurrent(ItemStack stack, int definitionIndex, double value, double maximum) {
         stack.getOrCreateTag().putDouble(stateKey(CURRENT, definitionIndex),
-                clamp(value, effectiveMax(stack, definitionIndex)));
+                clamp(value, maximum));
     }
 
     /** 获取指定护甲定义的永久损伤。 */

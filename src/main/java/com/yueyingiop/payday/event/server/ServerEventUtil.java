@@ -39,6 +39,14 @@ final class ServerEventUtil {
         return Math.max(1L, Math.round(armor.recoverySeconds(definitionIndex) * 20.0D));
     }
 
+    /** 将护甲升级提供的恢复间隔修正应用到指定实体。 */
+    static long recoveryTicks(net.minecraft.world.entity.LivingEntity entity,
+                              ItemStack armorStack,
+                              com.yueyingiop.payday.item.ArmorSlotItem armor, int definitionIndex) {
+        return Math.max(1L, Math.round(recoveryTicks(armor, definitionIndex)
+                * com.yueyingiop.payday.api.ArmorModifier.recoveryMultiplier(entity, armorStack)));
+    }
+
     /** 将秒数转换为 tick。 */
     /**
      * 执行 <code>cooldownTicks</code> 对应的操作。
