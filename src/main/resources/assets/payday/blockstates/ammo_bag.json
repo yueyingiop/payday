@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "amount=1": {"model":"minecraft:block/air"},
+    "amount=2": {"model":"minecraft:block/air"},
+    "amount=3": {"model":"minecraft:block/air"},
+    "amount=4": {"model":"minecraft:block/air"},
+    "amount=5": {"model":"minecraft:block/air"},
+    "amount=6": {"model":"minecraft:block/air"},
+    "amount=7": {"model":"minecraft:block/air"},
+    "amount=8": {"model":"minecraft:block/air"}
+  }
+}

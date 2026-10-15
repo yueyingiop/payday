@@ -72,14 +72,21 @@ public final class ArmorDamageEvents {
                     }
 
                     double absorbed = Math.min(current, remaining);
-                    boolean wasBroken = armor.isBroken(stack, definitionIndex);
+                    boolean wasBroken = ArmorModifier.isBroken(entity, armorStack, armor,
+                            stack, definitionIndex);
                     ArmorModifier.setCurrent(entity, armorStack, armor, stack, definitionIndex,
                             current - absorbed);
+                    double afterDamage = ArmorModifier.current(entity, armorStack, armor, stack,
+                            definitionIndex);
+                    // 冲击护甲不会写入“损坏”标记，但护甲值归零仍然应视为插槽耗尽，
+                    // 以便触发“护甲插槽损坏时”的全伤害免疫效果。
+                    boolean reachedZero = current > 0.0D && afterDamage <= 0.0D;
 
                     boolean repeatedHit = hasPreviousDamage
                             && now - previousDamage < ServerEventUtil.recoveryTicks(
                             entity, armorStack, armor, definitionIndex);
-                    double permanentBefore = armor.permanent(stack, definitionIndex);
+                    double permanentBefore = ArmorModifier.permanent(entity, armorStack, armor,
+                            stack, definitionIndex);
                     if (armor.kind(definitionIndex) == ArmorSlotItem.Kind.RESISTANCE
                             && repeatedHit && !repeatedResistancePenaltyApplied) {
                         // 永久损伤只记在本次实际吸收伤害的抗性护甲定义上。
@@ -88,12 +95,15 @@ public final class ArmorDamageEvents {
                         repeatedResistancePenaltyApplied = true;
                     }
 
-                    if (armor.permanent(stack, definitionIndex) > permanentBefore
-                            || (!wasBroken && armor.isBroken(stack, definitionIndex))) {
+                    boolean isBroken = ArmorModifier.isBroken(entity, armorStack, armor,
+                            stack, definitionIndex);
+                    if (ArmorModifier.permanent(entity, armorStack, armor, stack,
+                            definitionIndex) > permanentBefore
+                            || (!wasBroken && isBroken)) {
                         armor.markBroken(stack, definitionIndex, nextBrokenSequence(entity));
-                        if (!wasBroken && armor.isBroken(stack, definitionIndex)) {
-                            ArmorModifier.grantBreakImmunity(entity);
-                        }
+                    }
+                    if (reachedZero || (!wasBroken && isBroken)) {
+                        ArmorModifier.grantBreakImmunity(entity);
                     }
                     remaining -= (float) absorbed;
                 }
@@ -147,7 +157,8 @@ public final class ArmorDamageEvents {
                             definitionIndex);
                     boolean fixedRecovery = ArmorModifier.hasFixedRecovery(event.player, armorStack);
                     if (elapsed < wait || fixedRecovery && elapsed % wait != 0L
-                            || armor.isBroken(stack, definitionIndex)) {
+                            || ArmorModifier.isBroken(event.player, armorStack, armor,
+                            stack, definitionIndex)) {
                         continue;
                     }
 
@@ -162,6 +173,9 @@ public final class ArmorDamageEvents {
                                 definitionIndex, Math.min(maximum,
                                         current + ArmorModifier.recoveryAmount(event.player,
                                                 armorStack, armor, stack, definitionIndex)));
+                        if (fixedRecovery) {
+                            ArmorModifier.startAnarchistRecoveryCooldown(event.player, armorStack);
+                        }
                     }
                 }
             }

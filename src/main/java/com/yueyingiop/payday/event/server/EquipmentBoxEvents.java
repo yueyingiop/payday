@@ -3,6 +3,7 @@ package com.yueyingiop.payday.event.server;
 import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.block.SupplyBlock;
 import com.yueyingiop.payday.item.ArmorCurioItem;
+import com.yueyingiop.payday.item.AmmoBagItem;
 import com.yueyingiop.payday.item.ArmorPlateItem;
 import com.yueyingiop.payday.item.ClothesBoxItem;
 import com.yueyingiop.payday.item.FirstAidKitItem;
@@ -45,7 +46,8 @@ public final class EquipmentBoxEvents {
                     player.drop(stored, false);
                     syncClientState(player);
                 }
-            } else if (ArmorCurioEvents.hasClothesBoxCooldown(player)) {
+            } else if (!player.getAbilities().instabuild
+                    && ArmorCurioEvents.hasClothesBoxCooldown(player)) {
                 ArmorCurioEvents.sendClothesBoxCooldownMessage(player);
             } else {
                 changeArmorFromClothesBox(player, boxStack);
@@ -53,7 +55,8 @@ public final class EquipmentBoxEvents {
             return;
         }
 
-        if (!shift && ServerEventUtil.hasEquipmentBoxUseCooldown(player)) {
+        if (!shift && !player.getAbilities().instabuild
+                && ServerEventUtil.hasEquipmentBoxUseCooldown(player)) {
             ServerEventUtil.sendEquipmentBoxUseCooldownMessage(player);
             return;
         }
@@ -66,10 +69,12 @@ public final class EquipmentBoxEvents {
         boolean used = shift ? dropStoredSupply(player, stored)
                 : stored.getItem() instanceof ArmorPlateItem
                 ? SupplyEvents.repairArmor(player)
+                : stored.getItem() instanceof AmmoBagItem
+                ? SupplyEvents.supplyAmmo(player)
                 : stored.getItem() instanceof FirstAidKitItem && SupplyEvents.healPlayer(player);
         if (!used) {
             box.insertOne(boxStack, stored);
-        } else if (!shift) {
+        } else if (!shift && !player.getAbilities().instabuild) {
             ServerEventUtil.setEquipmentBoxUseCooldown(player);
         }
         syncClientState(player);
@@ -134,7 +139,9 @@ public final class EquipmentBoxEvents {
             contents.add(previous.save(new CompoundTag()));
         }
         boxStack.getOrCreateTag().put(EquipmentBoxItem.CONTENTS, contents);
-        ArmorCurioEvents.setClothesBoxCooldown(player);
+        if (!player.getAbilities().instabuild) {
+            ArmorCurioEvents.setClothesBoxCooldown(player);
+        }
         syncClientState(player);
     }
 
@@ -169,6 +176,8 @@ public final class EquipmentBoxEvents {
             type = SupplyBlock.SupplyType.ARMOR_PLATE;
         } else if (stored.getItem() instanceof FirstAidKitItem) {
             type = SupplyBlock.SupplyType.FIRST_AID;
+        } else if (stored.getItem() instanceof AmmoBagItem) {
+            type = SupplyBlock.SupplyType.AMMO_BAG;
         } else {
             return false;
         }

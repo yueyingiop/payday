@@ -33,7 +33,8 @@ public final class ClientInputEvents {
         }
 
         Minecraft minecraft = Minecraft.getInstance();
-        if (event.getKey() == GLFW.GLFW_KEY_H && minecraft.screen == null) {
+        if (PayDayClient.OPEN_HUD_CONFIG.matches(event.getKey(), event.getScanCode())
+                && minecraft.screen == null) {
             minecraft.setScreen(new com.yueyingiop.payday.client.screen.HudConfigScreen());
             return;
         }

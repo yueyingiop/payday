@@ -1,5 +1,7 @@
 package com.yueyingiop.payday.event.server.phone;
 
+import java.util.ArrayList;
+
 import com.yueyingiop.payday.api.PhoneUpgradeAction;
 import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
@@ -66,14 +68,18 @@ public final class UniversalityEvents {
     public static void proxyEvent(Event event) {
         if (event instanceof EntityAttributeModificationEvent) return;
         var server = ServerLifecycleHooks.getCurrentServer();
-        if (server == null) return;
-            
+        // This proxy handles server-side upgrade callbacks only. Client render events can
+        // also reach the global event bus while an integrated server is running.
+        if (server == null || !server.isSameThread()) return;
+
         if (event instanceof LivingHurtEvent hurt) {
             // 每次新的受伤事件都重新计算穿透规则，避免前一次伤害留下旧标记。
             hurt.getEntity().getPersistentData().remove(PhoneUpgradeAction.PIERCE_REDUCTION);
         }
 
-        var players = server.getPlayerList().getPlayers();
+        // PlayerList exposes a view backed by its mutable internal list. Snapshot it
+        // before dispatching callbacks so player join/leave/respawn cannot invalidate iteration.
+        var players = new ArrayList<>(server.getPlayerList().getPlayers());
 
         // 先统一计算穿透/免疫规则，再执行普通代理回调，避免攻击者和受击者的玩家顺序影响穿透结果。
         for (var player : players) {

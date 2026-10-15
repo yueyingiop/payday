@@ -17,8 +17,10 @@ public final class SupplyBlockGeoModel extends GeoModel<SupplyBlockEntity> {
      */
     @Override
     public ResourceLocation getModelResource(SupplyBlockEntity animatable) {
-        String folder = animatable.supplyType() == SupplyBlock.SupplyType.ARMOR_PLATE ? "armor_plate" : "firstaid_kit";
-        String name = animatable.supplyType() == SupplyBlock.SupplyType.ARMOR_PLATE ? "armor_plate" : "firstaid_kit";
+        boolean armorModel = animatable.supplyType() == SupplyBlock.SupplyType.ARMOR_PLATE
+                || animatable.supplyType() == SupplyBlock.SupplyType.AMMO_BAG;
+        String folder = armorModel ? "armor_plate" : "firstaid_kit";
+        String name = armorModel ? "armor_plate" : "firstaid_kit";
         return ResourceLocation.fromNamespaceAndPath(PayDay.MODID,
                 "geo/" + folder + "/" + name + animatable.amount() + "x.geo.json");
     }
@@ -30,7 +32,11 @@ public final class SupplyBlockGeoModel extends GeoModel<SupplyBlockEntity> {
      */
     @Override
     public ResourceLocation getTextureResource(SupplyBlockEntity animatable) {
-        String name = animatable.supplyType() == SupplyBlock.SupplyType.ARMOR_PLATE ? "armor_plate" : "firstaid_kit";
+        String name = switch (animatable.supplyType()) {
+            case ARMOR_PLATE -> "armor_plate";
+            case AMMO_BAG -> "ammo_bag";
+            case FIRST_AID -> "firstaid_kit";
+        };
         return ResourceLocation.fromNamespaceAndPath(PayDay.MODID, "textures/block/" + name + ".png");
     }
 

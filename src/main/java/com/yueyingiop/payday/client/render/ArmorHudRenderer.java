@@ -80,17 +80,20 @@ public final class ArmorHudRenderer {
 
         if (stats[ArmorSlotItem.Kind.IMPACT.ordinal()].present) {
             Stats value = stats[ArmorSlotItem.Kind.IMPACT.ordinal()];
-            renderLine(graphics, value.kind, value.current, value.max, value.permanent,
+            renderLine(graphics, value.kind, value.current, value.max, value.iconMax,
+                    value.permanent,
                     graphics.guiWidth(), anchorY - 10 - row++ * 10);
         }
         if (stats[ArmorSlotItem.Kind.ADAPTIVE.ordinal()].present) {
             Stats value = stats[ArmorSlotItem.Kind.ADAPTIVE.ordinal()];
-            renderLine(graphics, value.kind, value.current, value.max, value.permanent,
+            renderLine(graphics, value.kind, value.current, value.max, value.iconMax,
+                    value.permanent,
                     graphics.guiWidth(), anchorY - 10 - row++ * 10);
         }
         if (stats[ArmorSlotItem.Kind.RESISTANCE.ordinal()].present) {
             Stats value = stats[ArmorSlotItem.Kind.RESISTANCE.ordinal()];
-            renderLine(graphics, value.kind, value.current, value.max, value.permanent,
+            renderLine(graphics, value.kind, value.current, value.max, value.iconMax,
+                    value.permanent,
                     graphics.guiWidth(), anchorY - 10 - row * 10);
         }
     }
@@ -104,7 +107,8 @@ public final class ArmorHudRenderer {
     private static void renderDetailed(GuiGraphics graphics, List<SlotStats> slots, int anchorY) {
         for (int i = 0; i < slots.size(); i++) {
             SlotStats slot = slots.get(i);
-            renderLine(graphics, slot.kind, slot.current, slot.max, slot.permanent,
+            renderLine(graphics, slot.kind, slot.current, slot.max, slot.iconMax,
+                    slot.permanent,
                     graphics.guiWidth(), anchorY - 10 - i * 10);
         }
     }
@@ -117,25 +121,28 @@ public final class ArmorHudRenderer {
     private static List<SlotStats> collectSlots(Player player) {
         List<SlotStats> result = new ArrayList<>();
         for (ItemStack armorStack : CurioHelper.stacks(player, CurioHelper.ARMOR_SLOT)) {
-                        if (!(armorStack.getItem() instanceof ArmorCurioItem armorCurio)) {
-                            continue;
-                        }
+            if (!(armorStack.getItem() instanceof ArmorCurioItem armorCurio)) {
+                continue;
+            }
 
-                        for (ItemStack upgradeStack : armorCurio.getUpgradeStacks(armorStack)) {
-                            if (!(upgradeStack.getItem() instanceof ArmorSlotItem armorSlot)) {
-                                continue;
-                            }
-                            for (int definitionIndex = 0;
-                                 definitionIndex < armorSlot.armorDefinitions().size(); definitionIndex++) {
-                                double maximum = ArmorModifier.effectiveMax(player, armorStack,
-                                        armorSlot, upgradeStack, definitionIndex);
-                                result.add(new SlotStats(armorSlot.kind(definitionIndex),
-                                        maximum,
-                                        ArmorModifier.current(player, armorStack, armorSlot,
-                                                upgradeStack, definitionIndex),
-                                        armorSlot.permanent(upgradeStack, definitionIndex)));
-                            }
-                        }
+            for (ItemStack upgradeStack : armorCurio.getUpgradeStacks(armorStack)) {
+                if (!(upgradeStack.getItem() instanceof ArmorSlotItem armorSlot)) {
+                    continue;
+                }
+                for (int definitionIndex = 0;
+                     definitionIndex < armorSlot.armorDefinitions().size(); definitionIndex++) {
+                    double maximum = ArmorModifier.effectiveMax(player, armorStack,
+                            armorSlot, upgradeStack, definitionIndex);
+                    double iconMaximum = ArmorModifier.maximumBeforePermanent(player,
+                            armorStack, armorSlot, definitionIndex);
+                    result.add(new SlotStats(armorSlot.kind(definitionIndex),
+                            maximum, iconMaximum,
+                            ArmorModifier.current(player, armorStack, armorSlot,
+                                    upgradeStack, definitionIndex),
+                            ArmorModifier.permanent(player, armorStack, armorSlot,
+                                    upgradeStack, definitionIndex)));
+                }
+            }
         }
         return result;
     }
@@ -152,9 +159,10 @@ public final class ArmorHudRenderer {
             stats.kind = slot.kind;
             stats.present = true;
             stats.max += slot.max;
+            stats.iconMax += slot.iconMax;
             stats.current += Mth.clamp(slot.current, 0.0D, slot.max);
             if (slot.kind == ArmorSlotItem.Kind.IMPACT || slot.kind == ArmorSlotItem.Kind.RESISTANCE) {
-                stats.permanent += Mth.clamp(slot.permanent, 0.0D, slot.max);
+                stats.permanent += Mth.clamp(slot.permanent, 0.0D, slot.iconMax);
             }
         }
         return result;
@@ -166,13 +174,15 @@ public final class ArmorHudRenderer {
      * @param kind 护甲类型。
      * @param currentValue 对应参数。
      * @param maxValue 对应参数。
+     * @param iconMaxValue 当前护甲图标比例使用的运行时上限。
      * @param permanentValue 对应参数。
      * @param screenWidth 屏幕宽度。
      * @param y 纵坐标。
      */
     private static void renderLine(GuiGraphics graphics, ArmorSlotItem.Kind kind,
-                                   double currentValue, double maxValue, double permanentValue,
-                                   int screenWidth, int y) {
+                                    double currentValue, double maxValue, double iconMaxValue,
+                                    double permanentValue,
+                                    int screenWidth, int y) {
         int current = integerValue(currentValue);
         int max = integerValue(maxValue);
         int permanent = integerValue(permanentValue);
@@ -208,9 +218,9 @@ public final class ArmorHudRenderer {
         drawSeparator(graphics, textX, y + 1, 0);
 
         int permanentIcons = kind == ArmorSlotItem.Kind.RESISTANCE
-                ? iconCount(permanentValue, maxValue)
+                ? iconCount(permanentValue, iconMaxValue)
                 : 0;
-        int currentIcons = Math.min(10 - permanentIcons, iconCount(currentValue, maxValue));
+        int currentIcons = Math.min(10 - permanentIcons, iconCount(currentValue, iconMaxValue));
         int emptyIcons = 10 - permanentIcons - currentIcons;
         int filledIcon = switch (kind) {
             case IMPACT -> ICON_IMPACT;
@@ -333,6 +343,7 @@ public final class ArmorHudRenderer {
         private ArmorSlotItem.Kind kind;
         private boolean present;
         private double max;
+        private double iconMax;
         private double current;
         private double permanent;
     }
@@ -340,12 +351,15 @@ public final class ArmorHudRenderer {
     private static final class SlotStats {
         private final ArmorSlotItem.Kind kind;
         private final double max;
+        private final double iconMax;
         private final double current;
         private final double permanent;
 
-        private SlotStats(ArmorSlotItem.Kind kind, double max, double current, double permanent) {
+        private SlotStats(ArmorSlotItem.Kind kind, double max, double iconMax,
+                          double current, double permanent) {
             this.kind = kind;
             this.max = max;
+            this.iconMax = iconMax;
             this.current = current;
             this.permanent = permanent;
         }

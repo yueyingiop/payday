@@ -2,7 +2,9 @@ package com.yueyingiop.payday.event.server;
 
 import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.ArmorModifier;
+import com.yueyingiop.payday.api.PhoneUpgradeAction;
 import com.yueyingiop.payday.item.ArmorCurioItem;
+import com.yueyingiop.payday.item.AmmoBagItem;
 import com.yueyingiop.payday.item.ArmorPlateItem;
 import com.yueyingiop.payday.item.ArmorSlotItem;
 import com.yueyingiop.payday.item.FirstAidKitItem;
@@ -12,6 +14,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import com.tacz.guns.api.item.IAmmo;
+import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.init.ModItems;
+import com.tacz.guns.resource.CommonAssetsManager;
+import com.tacz.guns.resource.index.CommonGunIndex;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 
 import java.util.List;
 
@@ -34,7 +43,17 @@ public final class SupplyEvents {
         Player player = event.getEntity();
         ItemStack held = event.getItemStack();
         if (player.isShiftKeyDown() && (held.getItem() instanceof ArmorPlateItem
-                || held.getItem() instanceof FirstAidKitItem)) {
+                || held.getItem() instanceof FirstAidKitItem
+                || held.getItem() instanceof AmmoBagItem)) {
+            return;
+        }
+
+        if (!player.isShiftKeyDown()
+                && event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND
+                && held.getItem() instanceof AmmoBagItem
+                && supplyAmmoFromOffhandGun(player)) {
+            ServerEventUtil.consumeOne(player, held);
+            event.setCanceled(true);
             return;
         }
 
@@ -53,6 +72,11 @@ public final class SupplyEvents {
                 ServerEventUtil.consumeOne(player, held);
                 used = true;
             }
+        } else if (held.getItem() instanceof AmmoBagItem) {
+            if (EquipmentBoxEvents.storeInBox(player, held,
+                    com.yueyingiop.payday.item.AmmoBoxItem.class)) {
+                used = true;
+            }
         } else if (held.getItem() instanceof ArmorCurioItem) {
             used = EquipmentBoxEvents.storeInBox(player, held,
                     com.yueyingiop.payday.item.ClothesBoxItem.class);
@@ -61,6 +85,31 @@ public final class SupplyEvents {
         if (used) {
             event.setCanceled(true);
         }
+    }
+
+    /** 处理主手弹药包配合副手枪械对普通方块的右键使用。 */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void rightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide || event.getEntity().isShiftKeyDown()
+                || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
+            return;
+        }
+
+        if (event.getLevel().getBlockState(event.getPos()).getBlock()
+                instanceof com.yueyingiop.payday.block.SupplyBlock supply
+                && supply.supplyType() == com.yueyingiop.payday.block.SupplyBlock.SupplyType.AMMO_BAG) {
+            return;
+        }
+
+        Player player = event.getEntity();
+        if (!(player.getMainHandItem().getItem() instanceof AmmoBagItem)
+                || !supplyAmmoFromOffhandGun(player)) {
+            return;
+        }
+
+        ServerEventUtil.consumeOne(player, player.getMainHandItem());
+        event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);
+        event.setCanceled(true);
     }
 
     /** 修复最晚损坏且允许修复的护甲插槽。 */
@@ -140,6 +189,74 @@ public final class SupplyEvents {
             return false;
         }
         player.heal(player.getMaxHealth() * 0.5F);
+        return true;
+    }
+
+    /** 给玩家当前主手枪械对应的弹药，数量为最终弹匣容量的两倍。 */
+    public static boolean supplyAmmo(Player player) {
+        if (player.level().isClientSide) {
+            return false;
+        }
+
+        ItemStack gunStack = player.getMainHandItem();
+        return supplyAmmo(player, gunStack);
+    }
+
+    /** 使用副手 TACZ 枪械为弹药包补充两倍弹匣容量的弹药。 */
+    public static boolean supplyAmmoFromOffhandGun(Player player) {
+        if (player.level().isClientSide) {
+            return false;
+        }
+
+        ItemStack gunStack = player.getOffhandItem();
+        if (IGun.getIGunOrNull(gunStack) == null) {
+            return false;
+        }
+        return supplyAmmo(player, gunStack);
+    }
+
+    private static boolean supplyAmmo(Player player, ItemStack gunStack) {
+        IGun gun = IGun.getIGunOrNull(gunStack);
+        if (gun == null) {
+            return false;
+        }
+
+        ResourceLocation gunId = gun.getGunId(gunStack);
+        CommonGunIndex gunIndex = CommonAssetsManager.getInstance().getGunIndex(gunId);
+        if (gunIndex == null || gunIndex.getGunData() == null
+                || gunIndex.getGunData().getAmmoId() == null) {
+            return false;
+        }
+
+        // Refresh first so an installed PayDay ammo expansion is reflected immediately.
+        PhoneUpgradeAction.refreshAmmoExpansion(player, gunStack);
+        int capacity = PhoneUpgradeAction.getEffectiveAmmoCapacity(gunStack);
+        if (capacity <= 0) {
+            return false;
+        }
+
+        Item ammoItem = ModItems.AMMO.get();
+        ItemStack ammoStack = new ItemStack(ammoItem);
+        IAmmo ammo = IAmmo.getIAmmoOrNull(ammoStack);
+        if (ammo == null) {
+            return false;
+        }
+        ammo.setAmmoId(ammoStack, gunIndex.getGunData().getAmmoId());
+        // TACZ 1.20.1 的参数顺序是 gunStack, ammoStack；传反会导致始终判定为不匹配。
+        if (!ammo.isAmmoOfGun(gunStack, ammoStack)) {
+            return false;
+        }
+
+        int amount = capacity * 2;
+        int maxStackSize = Math.max(1, ammoStack.getMaxStackSize());
+        while (amount > 0) {
+            ItemStack supplied = ammoStack.copyWithCount(Math.min(amount, maxStackSize));
+            int before = supplied.getCount();
+            if (!player.addItem(supplied) && !supplied.isEmpty()) {
+                player.drop(supplied, false);
+            }
+            amount -= before;
+        }
         return true;
     }
 }

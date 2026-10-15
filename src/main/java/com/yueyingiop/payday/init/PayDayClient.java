@@ -5,8 +5,11 @@ import com.yueyingiop.payday.client.ClientArmorSlotTooltip;
 import com.yueyingiop.payday.client.render.ArmorCurioRenderer;
 import com.yueyingiop.payday.client.render.EquipmentBoxRenderer;
 import com.yueyingiop.payday.client.render.SupplyBlockRenderer;
+import com.yueyingiop.payday.client.render.TurretBlockRenderer;
+import com.yueyingiop.payday.client.render.TurretEntityRenderer;
 import com.yueyingiop.payday.client.screen.ArmorScreen;
 import com.yueyingiop.payday.client.screen.PhoneScreen;
+import com.yueyingiop.payday.client.screen.TurretScreen;
 import com.yueyingiop.payday.client.screen.PayDayConfigScreen;
 import com.yueyingiop.payday.tooltip.ArmorSlotTooltip;
 
@@ -20,6 +23,7 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.yueyingiop.payday.menu.ArmorMenu;
 import com.yueyingiop.payday.menu.PhoneMenu;
+import com.yueyingiop.payday.menu.TurretMenu;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
@@ -46,6 +50,7 @@ public final class PayDayClient {
     public static final KeyMapping USE_EQUIPMENT_BOX = new KeyMapping("key.payday.use_equipment_box", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.payday");
     public static final KeyMapping HACKER_SKILL = new KeyMapping("key.payday.hacker_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.categories.payday");
     public static final KeyMapping MODIFIER = new KeyMapping("key.payday.modifier", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_SHIFT, "key.categories.payday");
+    public static final KeyMapping OPEN_HUD_CONFIG = new KeyMapping("key.payday.open_hud_config", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.payday");
 
     /** 注册手机升级物品的显式贴图颜色；默认白色，因此不会改变原始纹理。 */
     @SubscribeEvent
@@ -84,6 +89,7 @@ public final class PayDayClient {
             }
             MenuScreens.register(ArmorMenu.TYPE.get(), ArmorScreen::new);
             MenuScreens.register(PhoneMenu.TYPE.get(), PhoneScreen::new);
+            MenuScreens.register(TurretMenu.TYPE.get(), TurretScreen::new);
         });
     }
 
@@ -99,6 +105,7 @@ public final class PayDayClient {
         event.register(USE_EQUIPMENT_BOX);
         event.register(HACKER_SKILL);
         event.register(MODIFIER);
+        event.register(OPEN_HUD_CONFIG);
     }
 
     /** 注册补给方块实体的客户端渲染器。 */
@@ -109,6 +116,8 @@ public final class PayDayClient {
     @SubscribeEvent
     public static void registerBlockRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(RegistryBlockEntities.SUPPLY.get(), SupplyBlockRenderer::new);
+        event.registerBlockEntityRenderer(RegistryBlockEntities.TURRET.get(), TurretBlockRenderer::new);
+        event.registerEntityRenderer(RegistryEntities.TURRET.get(), TurretEntityRenderer::new);
     }
 
     /** 注册护甲饰品 Tooltip 图标的客户端绘制工厂。 */

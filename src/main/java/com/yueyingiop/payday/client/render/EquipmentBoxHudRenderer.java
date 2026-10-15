@@ -3,6 +3,7 @@ package com.yueyingiop.payday.client.render;
 import com.yueyingiop.payday.Config;
 import com.yueyingiop.payday.api.helper.RenderHelper;
 import com.yueyingiop.payday.api.helper.CurioHelper;
+import com.yueyingiop.payday.item.AmmoBoxItem;
 import com.yueyingiop.payday.item.ClothesBoxItem;
 import com.yueyingiop.payday.item.MedicalBoxItem;
 import com.yueyingiop.payday.item.base.EquipmentBoxItem;
@@ -21,7 +22,7 @@ public final class EquipmentBoxHudRenderer {
     private static final ResourceLocation HUD_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             "payday", "textures/gui/equipment_box_hud.png");
     private static final int HUD_TEXTURE_WIDTH = 64;
-    private static final int HUD_TEXTURE_HEIGHT = 128;
+    private static final int HUD_TEXTURE_HEIGHT = 256;
     private static final int HUD_U = 1;
     private static final int HUD_V = 1;
     private static final int HUD_V_STEP = 35;
@@ -126,7 +127,8 @@ public final class EquipmentBoxHudRenderer {
     public enum HudType {
         CLOTHES_BOX(0),
         ARMOR_BOX(1),
-        MEDICAL_BOX(2);
+        MEDICAL_BOX(2),
+        AMMO_BOX(3);
 
         private final int row;
 
@@ -149,6 +151,9 @@ public final class EquipmentBoxHudRenderer {
             }
             if (item instanceof MedicalBoxItem) {
                 return MEDICAL_BOX;
+            }
+            if (item instanceof AmmoBoxItem) {
+                return AMMO_BOX;
             }
             return ARMOR_BOX;
         }

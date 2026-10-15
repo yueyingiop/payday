@@ -2,6 +2,8 @@ package com.yueyingiop.payday.block;
 
 import com.yueyingiop.payday.event.server.SupplyEvents;
 import com.yueyingiop.payday.init.RegistryBlocks;
+import com.yueyingiop.payday.init.RegistryItems;
+import com.yueyingiop.payday.item.AmmoBagItem;
 import com.yueyingiop.payday.item.ArmorPlateItem;
 import com.yueyingiop.payday.item.FirstAidKitItem;
 import net.minecraft.core.BlockPos;
@@ -77,9 +79,11 @@ public final class SupplyBlock extends BaseEntityBlock {
             return InteractionResult.FAIL;
         }
 
-        Block block = type == SupplyType.ARMOR_PLATE
-                ? RegistryBlocks.ARMOR_PLATE.get()
-                : RegistryBlocks.FIRSTAID_KIT.get();
+        Block block = switch (type) {
+            case ARMOR_PLATE -> RegistryBlocks.ARMOR_PLATE.get();
+            case AMMO_BAG -> RegistryBlocks.AMMO_BAG.get();
+            case FIRST_AID -> RegistryBlocks.FIRSTAID_KIT.get();
+        };
         int count = Math.min(8, Math.max(1, stack.getCount()));
         level.setBlock(pos, block.defaultBlockState().setValue(AMOUNT, count), Block.UPDATE_ALL);
         if (player == null || !player.getAbilities().instabuild) {
@@ -200,6 +204,12 @@ public final class SupplyBlock extends BaseEntityBlock {
             return place(level, pos, held, type, player);
         }
 
+        if (!player.isShiftKeyDown() && type == SupplyType.AMMO_BAG
+                && SupplyEvents.supplyAmmoFromOffhandGun(player)) {
+            consumeOne(state, level, pos, player);
+            return InteractionResult.CONSUME;
+        }
+
         // 创造模式空手右键可以直接取下补给方块；生存模式仍需按住 Shift。
         if (player.isShiftKeyDown() || (player.getAbilities().instabuild && held.isEmpty())) {
             List<ItemStack> stacks = splitStacks(state.getValue(AMOUNT));
@@ -214,7 +224,9 @@ public final class SupplyBlock extends BaseEntityBlock {
 
         boolean used = type == SupplyType.ARMOR_PLATE
                 ? SupplyEvents.repairArmor(player)
-                : SupplyEvents.healPlayer(player);
+                : type == SupplyType.FIRST_AID
+                ? SupplyEvents.healPlayer(player)
+                : false;
         if (!used) {
             return InteractionResult.PASS;
         }
@@ -234,9 +246,11 @@ public final class SupplyBlock extends BaseEntityBlock {
      * @return 对应的执行结果。
      */
     private boolean isMatchingSupply(ItemStack stack) {
-        return type == SupplyType.ARMOR_PLATE
-                ? stack.getItem() instanceof ArmorPlateItem
-                : stack.getItem() instanceof FirstAidKitItem;
+        return switch (type) {
+            case ARMOR_PLATE -> stack.getItem() instanceof ArmorPlateItem;
+            case AMMO_BAG -> stack.getItem() instanceof AmmoBagItem;
+            case FIRST_AID -> stack.getItem() instanceof FirstAidKitItem;
+        };
     }
 
     /**
@@ -252,9 +266,11 @@ public final class SupplyBlock extends BaseEntityBlock {
 
     /** 按补给物品的最大堆叠数拆分方块中的数量，避免拾取后得到非法的大堆叠。 */
     private List<ItemStack> splitStacks(int amount) {
-        net.minecraft.world.item.Item item = type == SupplyType.ARMOR_PLATE
-                ? com.yueyingiop.payday.init.RegistryItems.ARMOR_PLATE.get()
-                : com.yueyingiop.payday.init.RegistryItems.FIRSTAID_KIT.get();
+        net.minecraft.world.item.Item item = switch (type) {
+            case ARMOR_PLATE -> RegistryItems.ARMOR_PLATE.get();
+            case AMMO_BAG -> RegistryItems.AMMO_BAG.get();
+            case FIRST_AID -> RegistryItems.FIRSTAID_KIT.get();
+        };
         List<ItemStack> result = new java.util.ArrayList<>();
         int remaining = Math.max(0, amount);
         while (remaining > 0) {
@@ -267,6 +283,19 @@ public final class SupplyBlock extends BaseEntityBlock {
 
     public enum SupplyType {
         ARMOR_PLATE,
+        AMMO_BAG,
         FIRST_AID
+    }
+
+    private static void consumeOne(BlockState state, Level level, BlockPos pos, Player player) {
+        if (player.getAbilities().instabuild) {
+            return;
+        }
+        int amount = state.getValue(AMOUNT);
+        if (amount <= 1) {
+            level.removeBlock(pos, false);
+        } else {
+            level.setBlock(pos, state.setValue(AMOUNT, amount - 1), Block.UPDATE_ALL);
+        }
     }
 }

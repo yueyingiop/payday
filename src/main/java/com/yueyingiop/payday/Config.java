@@ -41,6 +41,16 @@ public class Config {
     public static final ForgeConfigSpec.BooleanValue EXPOSURE_RISK_HUD_ENABLED;
     public static final ForgeConfigSpec.BooleanValue EXPOSURE_RISK_HUD_POSITION_MIGRATED;
 
+    public static final ForgeConfigSpec.ConfigValue<String> TURRET_AIM_DISPLAY_ITEM;
+    public static final ForgeConfigSpec.DoubleValue TURRET_ATTACK_DAMAGE;
+    public static final ForgeConfigSpec.DoubleValue TURRET_ATTACK_RANGE;
+    public static final ForgeConfigSpec.IntValue TURRET_YAW_ANGLE;
+    public static final ForgeConfigSpec.IntValue TURRET_PITCH_DOWN_ANGLE;
+    public static final ForgeConfigSpec.IntValue TURRET_PITCH_UP_ANGLE;
+    public static final ForgeConfigSpec.DoubleValue TURRET_MAX_TEMPERATURE;
+    public static final ForgeConfigSpec.IntValue TURRET_OVERLOAD_DESTROY_TIME_SECONDS;
+    public static final ForgeConfigSpec.IntValue TURRET_ATTACK_INTERVAL_TICKS;
+
     static {
         BUILDER.push("ArmorCurio");
         SUIT_UPGRADES = BUILDER
@@ -165,6 +175,46 @@ public class Config {
         EXPOSURE_RISK_HUD_POSITION_MIGRATED = CLIENT_BUILDER
             .comment("标记暴露风险 HUD 是否已经按默认物品栏左侧位置初始化")
             .define("exposure_risk_hud_position_migrated", false);
+        CLIENT_BUILDER.pop();
+
+        BUILDER.push("Turret");
+        TURRET_ATTACK_DAMAGE = BUILDER
+            .comment("炮台基础攻击伤害")
+            .defineInRange("attack_damage", 10.0D, 0.0D, 100000.0D);
+
+        TURRET_ATTACK_RANGE = BUILDER
+            .comment("炮台攻击范围(方块)")
+            .defineInRange("attack_range", 16.0D, 1.0D, 256.0D);
+
+        TURRET_YAW_ANGLE = BUILDER
+            .comment("炮台左右偏航角(度),左右对称")
+            .defineInRange("yaw_angle", 7, 1, 180);
+
+        TURRET_PITCH_DOWN_ANGLE = BUILDER
+            .comment("炮台最大俯角(度)")
+            .defineInRange("pitch_down_angle", 30, 1, 90);
+
+        TURRET_PITCH_UP_ANGLE = BUILDER
+            .comment("炮台最大仰角(度)")
+            .defineInRange("pitch_up_angle", 60, 1, 90);
+
+        TURRET_MAX_TEMPERATURE = BUILDER
+            .comment("炮台默认最大温度")
+            .defineInRange("max_temperature", 100.0D, 1.0D, 100000.0D);
+
+        TURRET_OVERLOAD_DESTROY_TIME_SECONDS = BUILDER
+            .comment("炮台过载后自然销毁时间(秒)")
+            .defineInRange("overload_destroy_time_seconds", 1800, 0, 604800);
+
+        TURRET_ATTACK_INTERVAL_TICKS = BUILDER
+            .comment("炮台攻击间隔(游戏刻，20游戏刻=1秒)")
+            .defineInRange("turret_attack_interval_ticks", 10, 1, 1200);
+        BUILDER.pop();
+
+        CLIENT_BUILDER.push("Turret");
+        TURRET_AIM_DISPLAY_ITEM = CLIENT_BUILDER
+            .comment("手持该物品时显示炮台判断区域，填写物品ID")
+            .define("aim_display_item", "minecraft:stick");
         CLIENT_BUILDER.pop();
     }
 

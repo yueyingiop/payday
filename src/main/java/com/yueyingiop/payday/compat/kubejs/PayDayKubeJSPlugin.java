@@ -1,7 +1,11 @@
 package com.yueyingiop.payday.compat.kubejs;
 
 import com.yueyingiop.payday.api.ArmorModifier;
+import com.yueyingiop.payday.api.CooldownHud;
+import com.yueyingiop.payday.api.CooldownHudManager;
 import com.yueyingiop.payday.api.ExposureRiskModifier;
+import com.yueyingiop.payday.api.TurretFluid;
+import com.yueyingiop.payday.api.TurretFluidManager;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
@@ -38,5 +42,9 @@ public class PayDayKubeJSPlugin extends KubeJSPlugin {
         event.add("PhoneUpgradeBuilder", PhoneUpgradeBuilder.class);
         event.add("PhoneUpgradeHelper", PhoneUpgradeHelper.class);
         event.add("PhoneUpgradeHealingMode", PhoneUpgradeHelper.HealingMode.class);
+        event.add("CooldownHud", CooldownHud.class);
+        event.add("CooldownHudManager", CooldownHudManager.class);
+        event.add("TurretFluid", TurretFluid.class);
+        event.add("TurretFluidManager", TurretFluidManager.class);
     }
 }

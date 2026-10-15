@@ -283,7 +283,21 @@ public final class PhoneUpgradeAction {
         if (!(owner instanceof Player player) || player.level().isClientSide) {
             return;
         }
-        ItemStack heldGun = player.getMainHandItem();
+        refreshAmmoExpansion(player, player.getMainHandItem());
+    }
+
+    /**
+     * 根据当前升级刷新指定枪械物品的最终弹匣容量。
+     *
+     * <p>除主手枪械外，弹药包也支持读取副手枪械，因此不能只依赖玩家主手。</p>
+     *
+     * @param owner 持有手机升级的玩家
+     * @param heldGun 要刷新的枪械物品
+     */
+    public static void refreshAmmoExpansion(LivingEntity owner, ItemStack heldGun) {
+        if (!(owner instanceof Player player) || player.level().isClientSide) {
+            return;
+        }
         IGun gun = IGun.getIGunOrNull(heldGun);
         if (gun == null) {
             return;
@@ -322,6 +336,31 @@ public final class PhoneUpgradeAction {
         if (currentAmmo > capacity) {
             gun.setCurrentAmmoCount(heldGun, capacity);
         }
+    }
+
+    /**
+     * 获取枪械当前生效的弹匣容量；包含 TACZ 配件和 PayDay 手机扩容。
+     *
+     * @param gunStack 要查询的枪械
+     * @return 最终弹匣容量；无法识别枪械或容量时返回0
+     */
+    public static int getEffectiveAmmoCapacity(ItemStack gunStack) {
+        IGun gun = IGun.getIGunOrNull(gunStack);
+        if (gun == null) {
+            return 0;
+        }
+
+        CompoundTag tag = gunStack.getTag();
+        if (tag != null && tag.contains(AMMO_CAPACITY, Tag.TAG_INT)) {
+            return Math.max(0, tag.getInt(AMMO_CAPACITY));
+        }
+
+        CommonGunIndex gunIndex = CommonAssetsManager.getInstance().getGunIndex(gun.getGunId(gunStack));
+        if (gunIndex == null || gunIndex.getGunData() == null) {
+            return 0;
+        }
+        return Math.max(0, AttachmentDataUtils.getAmmoCountWithAttachment(gunStack,
+                gunIndex.getGunData()));
     }
 
     /**

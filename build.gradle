@@ -143,6 +143,7 @@ dependencies {
 
     implementation fg.deobf("curse.maven:powerful-dummy-1276893:8876874") // 假人
 
+    implementation fg.deobf("curse.maven:create-328085:7178761") // 机械动力
     // 使用 Mixin
     implementation 'org.spongepowered:mixin:0.8.5'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

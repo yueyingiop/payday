@@ -1,9 +1,11 @@
 package com.yueyingiop.payday.api;
 
 import com.yueyingiop.payday.PayDay;
+import com.yueyingiop.payday.api.CooldownHud.Type;
 import com.yueyingiop.payday.item.ArmorCurioItem;
 import com.yueyingiop.payday.item.ArmorSlotItem;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +28,12 @@ import java.util.function.BiConsumer;
 public class ArmorModifier {
     public static final String FULL_IMMUNITY_END = "payday_full_damage_immunity_end";
     public static final String FULL_IMMUNITY_COOLDOWN_END = "payday_full_damage_immunity_cooldown_end";
+    private static final String BREAK_IMMUNITY_HUD_ID = "payday_armor_break_immunity";
+    private static final String BREAK_IMMUNITY_TEXTURE =
+            "payday:item/phone_upgrade/generated/special_armorer_4";
+    private static final String ANARCHIST_RECOVERY_HUD_ID = "payday_anarchist_recovery";
+    private static final String ANARCHIST_RECOVERY_TEXTURE =
+            "payday:item/phone_upgrade/generated/special_anarchist_1";
 
     private static final Map<LivingEntity, RuntimeState> ACTIVE =
             Collections.synchronizedMap(new WeakHashMap<>());
@@ -145,16 +153,33 @@ public class ArmorModifier {
         }
         runtimeState.fixedRecoverySeconds.put(armorStack, (slotCount + 1) * 0.25D);
         runtimeState.fixedRecoveryPercent.put(armorStack, 0.15D + slotCount * 0.10D);
+        runtimeState.anarchistRecoveryHudTexture = ANARCHIST_RECOVERY_TEXTURE;
         return this;
     }
 
     /** 为护甲插槽注册“损坏后短暂无敌”的规则。 */
     public ArmorModifier breakImmunity(double durationSeconds, double cooldownSeconds) {
+        return breakImmunity(durationSeconds, cooldownSeconds, BREAK_IMMUNITY_TEXTURE);
+    }
+
+    /**
+     * 为护甲插槽注册“损坏后短暂无敌”的规则，并指定冷却 HUD 图标。
+     *
+     * @param durationSeconds 无敌持续时间，单位为秒
+     * @param cooldownSeconds 冷却时间，单位为秒
+     * @param hudTexture 冷却 HUD 图标纹理
+     * @return 当前护甲修改器
+     */
+    public ArmorModifier breakImmunity(double durationSeconds, double cooldownSeconds,
+                                       String hudTexture) {
         requireRuntimeContext();
         runtimeState.immunityDurationSeconds = Math.max(runtimeState.immunityDurationSeconds,
                 durationSeconds);
         runtimeState.immunityCooldownSeconds = Math.max(runtimeState.immunityCooldownSeconds,
                 cooldownSeconds);
+        if (hudTexture != null && !hudTexture.isBlank()) {
+            runtimeState.immunityHudTexture = hudTexture;
+        }
         return this;
     }
 
@@ -180,9 +205,37 @@ public class ArmorModifier {
     public static double effectiveMax(LivingEntity owner, ItemStack armorStack,
                                       ArmorSlotItem armor, ItemStack stack,
                                       int definitionIndex) {
+        return Math.max(0.0D, maximumBeforePermanent(owner, armorStack, armor, definitionIndex)
+                - permanent(owner, armorStack, armor, stack, definitionIndex));
+    }
+
+    /** 返回永久损伤使用的基础护甲上限。永久损伤 NBT 按此上限保存。 */
+    public static double maximumBeforePermanent(ArmorSlotItem armor, int definitionIndex) {
+        return armor.maxArmor(definitionIndex);
+    }
+
+    /** 返回手机护甲效果修正后的永久损伤前上限，用于当前护甲 HUD 比例。 */
+    public static double maximumBeforePermanent(LivingEntity owner, ItemStack armorStack,
+                                                ArmorSlotItem armor, int definitionIndex) {
         RuntimeState state = ACTIVE.get(owner);
         double flat = state == null ? 0.0D : state.maxFlat.getOrDefault(armorStack, 0.0D);
-        return armor.effectiveMax(stack, definitionIndex) * maxMultiplier(owner, armorStack) + flat;
+        return armor.maxArmor(definitionIndex) * maxMultiplier(owner, armorStack) + flat;
+    }
+
+    /** 获取手机护甲效果修正后的永久损伤。 */
+    public static double permanent(LivingEntity owner, ItemStack armorStack,
+                                   ArmorSlotItem armor, ItemStack stack,
+                                   int definitionIndex) {
+        return Math.min(armor.storedPermanent(stack, definitionIndex),
+                maximumBeforePermanent(owner, armorStack, armor, definitionIndex));
+    }
+
+    /** 判断指定护甲定义在手机护甲上限规则下是否损坏。 */
+    public static boolean isBroken(LivingEntity owner, ItemStack armorStack,
+                                   ArmorSlotItem armor, ItemStack stack,
+                                   int definitionIndex) {
+        return armor.kind(definitionIndex) != ArmorSlotItem.Kind.IMPACT
+                && current(owner, armorStack, armor, stack, definitionIndex) <= 0.0D;
     }
 
     /** 获取手机护甲效果修正后的当前护甲值。 */
@@ -206,7 +259,11 @@ public class ArmorModifier {
                                     ArmorSlotItem armor, ItemStack stack,
                                     int definitionIndex, double value) {
         double before = current(owner, armorStack, armor, stack, definitionIndex);
-        armor.addPermanent(stack, definitionIndex, value);
+        double maximum = maximumBeforePermanent(owner, armorStack, armor, definitionIndex);
+        double damage = Math.min(maximum,
+                permanent(owner, armorStack, armor, stack, definitionIndex)
+                        + Math.max(0.0D, value));
+        armor.setStoredPermanent(stack, definitionIndex, damage);
         setCurrent(owner, armorStack, armor, stack, definitionIndex, before);
     }
 
@@ -253,7 +310,12 @@ public class ArmorModifier {
             for (int definitionIndex = 0;
                  definitionIndex < armor.armorDefinitions().size(); definitionIndex++) {
                 double current = current(owner, armorStack, armor, stack, definitionIndex);
-                setCurrent(owner, armorStack, armor, stack, definitionIndex, current + amount);
+                double maximum = effectiveMax(owner, armorStack, armor, stack, definitionIndex);
+                setCurrent(owner, armorStack, armor, stack, definitionIndex,
+                        Math.min(maximum, current + amount));
+                if (current <= 0.0D && maximum > 0.0D) {
+                    armor.clearBroken(stack, definitionIndex);
+                }
             }
         }
         item.setUpgradeStacks(armorStack, upgrades);
@@ -274,6 +336,48 @@ public class ArmorModifier {
                 now + Math.max(1L, Math.round(state.immunityDurationSeconds * 20.0D)));
         entity.getPersistentData().putLong(FULL_IMMUNITY_COOLDOWN_END,
                 now + Math.max(1L, Math.round(state.immunityCooldownSeconds * 20.0D)));
+        if (entity instanceof Player player && state.immunityCooldownSeconds > 0.0D) {
+            CooldownHudManager.startTimer(player, BREAK_IMMUNITY_HUD_ID,
+                    CooldownHud.builder()
+                            .type(Type.TIMER)
+                            .texture(state.immunityHudTexture)
+                            .value(state.immunityCooldownSeconds)
+                            .build());
+        }
+    }
+
+    /**
+     * 启动无政府主义者固定护甲恢复的计时型冷却 HUD。
+     *
+     * <p>只有实际恢复护甲后才会调用此方法，避免护甲效果每 tick 重算时重置 HUD。</p>
+     *
+     * @param owner 护甲拥有者
+     * @param armorStack 发生恢复的护甲饰品
+     */
+    public static void startAnarchistRecoveryCooldown(LivingEntity owner, ItemStack armorStack) {
+        if (!(owner instanceof Player player)) {
+            return;
+        }
+        RuntimeState state = ACTIVE.get(owner);
+        if (state == null) {
+            return;
+        }
+        Double seconds = state.fixedRecoverySeconds.get(armorStack);
+        if (seconds == null || seconds <= 0.0D) {
+            return;
+        }
+        CooldownHudManager.startTimer(player, ANARCHIST_RECOVERY_HUD_ID,
+                CooldownHud.builder()
+                        .type(Type.TIMER)
+                        .texture(state.anarchistRecoveryHudTexture)
+                        .value(seconds)
+                        .build());
+    }
+
+    /** 判断实体是否处于护甲损坏提供的全伤害免疫期间。 */
+    public static boolean hasFullImmunity(LivingEntity entity) {
+        return entity.getPersistentData().getLong(FULL_IMMUNITY_END)
+                > entity.level().getGameTime();
     }
 
     /** 修改护甲属性修饰符。 */
@@ -316,5 +420,7 @@ public class ArmorModifier {
         private final Map<ItemStack, Double> fixedRecoveryPercent = new IdentityHashMap<>();
         private double immunityDurationSeconds;
         private double immunityCooldownSeconds;
+        private String immunityHudTexture = BREAK_IMMUNITY_TEXTURE;
+        private String anarchistRecoveryHudTexture = ANARCHIST_RECOVERY_TEXTURE;
     }
 }

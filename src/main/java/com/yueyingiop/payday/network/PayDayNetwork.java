@@ -64,5 +64,12 @@ public final class PayDayNetwork {
             SyncEquipmentBoxStatePacket::decode,
             SyncEquipmentBoxStatePacket::handle
         );
+        CHANNEL.registerMessage(
+            id++,
+            CooldownHudSyncPacket.class,
+            CooldownHudSyncPacket::encode,
+            CooldownHudSyncPacket::decode,
+            CooldownHudSyncPacket::handle
+        );
     }
 }

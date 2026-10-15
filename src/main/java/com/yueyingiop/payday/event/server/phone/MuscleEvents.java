@@ -12,16 +12,18 @@ public final class MuscleEvents {
     private static final String MUSCLE_HEAL_NEXT = "payday_muscle5_next_heal";
     
     /** 横行霸道：每5秒恢复玩家最大生命值的3%。 */
-    public static void tickMuscle5(net.minecraft.world.entity.LivingEntity entity) {
+    public static boolean tickMuscle5(net.minecraft.world.entity.LivingEntity entity) {
         if (!(entity instanceof Player player)) {
-            return;
+            return false;
         }
         long now = player.level().getGameTime();
         long next = player.getPersistentData().getLong(MUSCLE_HEAL_NEXT);
         if (now >= next) {
             player.heal(player.getMaxHealth() * 0.03F);
             player.getPersistentData().putLong(MUSCLE_HEAL_NEXT, now + 100L);
+            return true;
         }
+        return false;
     }
 
     /** 人肉护盾：替半径8格内的其他玩家承担5%的最终伤害。 */

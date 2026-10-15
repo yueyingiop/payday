@@ -1,5 +1,7 @@
 package com.yueyingiop.payday.event.server.phone;
 
+import com.yueyingiop.payday.api.CooldownHud;
+import com.yueyingiop.payday.api.CooldownHudManager;
 import com.yueyingiop.payday.api.ArmorModifier;
 import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.record.ArmorTarget;
@@ -42,7 +44,8 @@ public final class AssassinEvents {
         for (int offset = 0; offset < targets.size(); offset++) {
             int index = (start + offset) % targets.size();
             ArmorTarget target = targets.get(index);
-            if (!target.armor().isBroken(target.stack(), target.definitionIndex())) {
+            if (!ArmorModifier.isBroken(player, target.armorStack(), target.armor(),
+                    target.stack(), target.definitionIndex())) {
                 ArmorModifier.setCurrent(player, target.armorStack(), target.armor(),
                         target.stack(), target.definitionIndex(),
                         ArmorModifier.effectiveMax(player, target.armorStack(), target.armor(),
@@ -53,6 +56,12 @@ public final class AssassinEvents {
             }
         }
         player.getPersistentData().putLong(ASSASSIN5_NEXT, now + 30L);
+        CooldownHudManager.startTimer(player, "payday_assassin5_repair",
+                CooldownHud.builder()
+                        .type(CooldownHud.Type.TIMER)
+                        .texture("payday:item/phone_upgrade/generated/special_assassin_5")
+                        .value(1.5D)
+                        .build());
     }
 
     private static List<ArmorTarget> armorTargets(Player player) {

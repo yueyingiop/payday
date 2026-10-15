@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "payday:armor_box",
+    "payday:ammo_box",
     "payday:first_aid_box",
     "payday:clothes_box"
   ]

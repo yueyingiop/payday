@@ -5,6 +5,8 @@ import com.yueyingiop.payday.item.ArmorCurioItem;
 import com.yueyingiop.payday.item.ArmorPlateItem;
 import com.yueyingiop.payday.item.ArmorSlotItem;
 import com.yueyingiop.payday.item.ArmorBoxItem;
+import com.yueyingiop.payday.item.AmmoBagItem;
+import com.yueyingiop.payday.item.AmmoBoxItem;
 import com.yueyingiop.payday.item.ClothesBoxItem;
 import com.yueyingiop.payday.item.FirstAidKitItem;
 import com.yueyingiop.payday.item.MedicalBoxItem;
@@ -12,6 +14,7 @@ import com.yueyingiop.payday.item.PhoneItem;
 import com.yueyingiop.payday.item.PhoneUpgradeItem;
 import com.yueyingiop.payday.api.PhoneUpgradeAction;
 import com.yueyingiop.payday.item.TestEffectStickItem;
+import com.yueyingiop.payday.item.TurretItem;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
@@ -43,8 +46,13 @@ public class RegistryItems {
     public static final RegistryObject<Item> RESISTANCE_SLOT = ITEMS.register("resistance_slot",
             () -> new ArmorSlotItem("resistance_slot"));
     public static final RegistryObject<Item> ARMOR_PLATE = ITEMS.register("armor_plate", ArmorPlateItem::new);
+    public static final RegistryObject<Item> AMMO_BAG = ITEMS.register("ammo_bag", AmmoBagItem::new);
     public static final RegistryObject<Item> FIRSTAID_KIT = ITEMS.register("firstaid_kit", FirstAidKitItem::new);
+    public static final RegistryObject<Item> TURRET = ITEMS.register("turret",
+            () -> new TurretItem((com.yueyingiop.payday.block.TurretBlock) RegistryBlocks.TURRET.get(),
+                    new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ARMOR_BOX = ITEMS.register("armor_box", ArmorBoxItem::new);
+    public static final RegistryObject<Item> AMMO_BOX = ITEMS.register("ammo_box", AmmoBoxItem::new);
     public static final RegistryObject<Item> FIRST_AID_BOX = ITEMS.register("first_aid_box", MedicalBoxItem::new);
     public static final RegistryObject<Item> CLOTHES_BOX = ITEMS.register("clothes_box", ClothesBoxItem::new);
     public static final RegistryObject<Item> PHONE = ITEMS.register("phone", PhoneItem::new);

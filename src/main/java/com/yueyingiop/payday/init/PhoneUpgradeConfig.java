@@ -2,6 +2,8 @@ package com.yueyingiop.payday.init;
 
 import com.yueyingiop.payday.api.PhoneUpgradeAction;
 import com.yueyingiop.payday.api.ArmorModifier;
+import com.yueyingiop.payday.api.CooldownHud;
+import com.yueyingiop.payday.api.CooldownHudManager;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
 import com.yueyingiop.payday.event.server.phone.AnarchistEvents;
 import com.yueyingiop.payday.event.server.phone.AntisocialEvents;
@@ -48,9 +50,6 @@ import java.util.Map;
 public final class PhoneUpgradeConfig {
     public static final PhoneUpgradeAction EMPTY = PhoneUpgradeAction.builder().build();
     private static final String HACKER1_COOLDOWN_END = "payday_hacker1_cooldown_end";
-
-    private PhoneUpgradeConfig() {
-    }
 
     public static PhoneUpgradeAction basic(String series, int level) {
         return switch (series) {
@@ -128,7 +127,6 @@ public final class PhoneUpgradeConfig {
         // 1.暴露风险-10
         .attribute(RegistryAttributes.EXPOSURE_RISK, -10.0D, AttributeModifier.Operation.ADDITION)
         // 2.佩戴护甲饰品(ArmorCurioItem)时,并且处于移动状态+15%移速
-        // 3.佩戴护甲饰品(ArmorCurioItem)时,并且处于静止状态-7.5%移速
         .curioTick((identifier, index, livingEntity, itemStack) -> {
             // 没有装备护甲饰品时，不应用叶蔽于林的条件移速效果。
             if (!CurioHelper.hasStack(livingEntity, CurioHelper.ARMOR_SLOT,
@@ -236,8 +234,15 @@ public final class PhoneUpgradeConfig {
         .attribute(Attributes.MAX_HEALTH, 0.60D, AttributeModifier.Operation.MULTIPLY_TOTAL)
         // 2.每5秒恢复玩家最大生命值的3%生命值
         .curioTick((identifier, index, livingEntity, itemStack) -> {
-            
-            MuscleEvents.tickMuscle5(livingEntity);
+            if (MuscleEvents.tickMuscle5(livingEntity)
+                    && livingEntity instanceof Player player) {
+                CooldownHudManager.startTimer(player, "payday_muscle5_heal",
+                        CooldownHud.builder()
+                                .type(CooldownHud.Type.TIMER)
+                                .texture("payday:item/phone_upgrade/generated/special_muscle_5")
+                                .value(5.0D)
+                                .build());
+            }
         })
         // 3.经验+25%
         .addProxyEvent(LivingExperienceDropEvent.class,
@@ -394,7 +399,7 @@ public final class PhoneUpgradeConfig {
         .build();
 
     public static final PhoneUpgradeAction ASSASSIN5 = PhoneUpgradeAction.builder()
-        // 护甲恢复间隔缩短10%；每1.5秒恢复一个未损坏护甲定义；获取经验数量+25%。
+        // 护甲恢复间隔缩短10%；每1.5秒恢复一个未损坏护甲; 获取经验数量+25%。
         .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.10D))
         .curioTick((identifier, index, livingEntity, itemStack) -> AssassinEvents.tickAssassin5(livingEntity))
         .addProxyEvent(LivingExperienceDropEvent.class,
@@ -537,9 +542,16 @@ public final class PhoneUpgradeConfig {
         // 近战攻击恢复20%血量, 每10秒最多一次; 获取经验数量+25%
         .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
             if (owner instanceof Player player) {
-                PhoneUpgradeHelper.tryMeleeHeal(event, player, 0.20D,
+                if (PhoneUpgradeHelper.tryMeleeHealAndReport(event, player, 0.20D,
                         PhoneUpgradeHelper.HealingMode.PERCENTAGE, 200L,
-                        "payday_infiltrator5_lifesteal_cooldown");
+                        "payday_infiltrator5_lifesteal_cooldown")) {
+                    CooldownHudManager.startTimer(player, "payday_infiltrator5_lifesteal",
+                            CooldownHud.builder()
+                                    .type(CooldownHud.Type.TIMER)
+                                    .texture("payday:item/phone_upgrade/generated/special_infiltrator_5")
+                                    .value(10.0D)
+                                    .build());
+                }
             }
         })
         .addProxyEvent(LivingExperienceDropEvent.class,
@@ -549,240 +561,241 @@ public final class PhoneUpgradeConfig {
 
     //#region 反社会者
     public static final PhoneUpgradeAction ANTISOCIAL1 = PhoneUpgradeAction.builder()
-            // 半径8格内有至少3个非友善生物时, 近战命中非友善生物后给予1秒渗透。
-            .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
-                if (!(owner instanceof Player player)
-                        || !AntisocialEvents.isQualifiedMeleeHit(event, player, 8.0D, 3)) {
-                    return;
-                }
-                event.getEntity().addEffect(new MobEffectInstance(
-                        RegistryEffects.INFILTRATION.get(), 20, 0, false, true, true));
-            })
-            .build();
+        // 半径8格内有至少3个非友善生物时, 近战命中非友善生物后给予1秒渗透。
+        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
+            if (!(owner instanceof Player player)
+                    || !AntisocialEvents.isQualifiedMeleeHit(event, player, 8.0D, 3)) {
+                return;
+            }
+            event.getEntity().addEffect(new MobEffectInstance(
+                    RegistryEffects.INFILTRATION.get(), 20, 0, false, true, true));
+        })
+        .build();
     public static final PhoneUpgradeAction ANTISOCIAL2 = PhoneUpgradeAction.builder()
-            // 每个护甲升级插槽的护甲上限额外+10%。
-            .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
-            // 击杀非友善生物后恢复30点护甲, 每1秒至多生效一次。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (owner instanceof Player player) {
-                    PhoneUpgradeHelper.restoreArmor(event, player, 30.0D, 20L,
-                            "payday_antisocial2_next_repair");
-                }
-            })
-            .build();
+        // 每个护甲升级插槽的护甲上限额外+10%。
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
+        .build();
     public static final PhoneUpgradeAction ANTISOCIAL3 = PhoneUpgradeAction.builder()
-            // 近战击杀恢复10%最大生命值, 每1秒至多生效一次。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (!(owner instanceof Player player)
-                        || !PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
-                    return;
-                }
-                long now = player.level().getGameTime();
-                String key = "payday_antisocial3_next_heal";
-                if (now < player.getPersistentData().getLong(key)) {
-                    return;
-                }
-                player.heal(player.getMaxHealth() * 0.10F);
-                player.getPersistentData().putLong(key, now + 20L);
-            })
-            // 半径16格内有至少1个非友善生物时, 受到伤害降低8%。
-            .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
-                if (owner instanceof Player player && event.getEntity() == player
-                        && !PhoneUpgradeHelper.isPiercing(event)
-                        && PhoneUpgradeHelper.countUnfriendly(player, 16.0D) >= 1) {
-                    event.setAmount(event.getAmount() * 0.92F);
-                }
-            })
-            .build();
+        // 近战击杀恢复10%最大生命值, 每1秒至多生效一次。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (!(owner instanceof Player player)
+                    || !PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
+                return;
+            }
+            long now = player.level().getGameTime();
+            String key = "payday_antisocial3_next_heal";
+            if (now < player.getPersistentData().getLong(key)) {
+                return;
+            }
+            player.heal(player.getMaxHealth() * 0.10F);
+            player.getPersistentData().putLong(key, now + 20L);
+        })
+        // 半径16格内有至少1个非友善生物时, 受到伤害降低8%。
+        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
+            if (owner instanceof Player player && event.getEntity() == player
+                    && !PhoneUpgradeHelper.isPiercing(event)
+                    && PhoneUpgradeHelper.countUnfriendly(player, 16.0D) >= 1) {
+                event.setAmount(event.getAmount() * 0.92F);
+            }
+        })
+        .build();
     public static final PhoneUpgradeAction ANTISOCIAL4 = PhoneUpgradeAction.builder()
-            // 每个护甲升级插槽的护甲上限额外+10%。
-            .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
-            // 击杀非友善生物后恢复30点护甲, 每0.5秒至多生效一次。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (owner instanceof Player player) {
-                    PhoneUpgradeHelper.restoreArmor(event, player, 30.0D, 10L,
-                            "payday_antisocial4_next_repair");
-                }
-            })
-            .build();
+        // 每个护甲升级插槽的护甲上限额外+10%。
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
+        // 击杀非友善生物后恢复30点护甲, 每0.5秒至多生效一次。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (owner instanceof Player player) {
+                PhoneUpgradeHelper.restoreArmor(event, player, 30.0D, 10L,
+                        "payday_antisocial4_next_repair");
+            }
+        })
+        .build();
     public static final PhoneUpgradeAction ANTISOCIAL5 = PhoneUpgradeAction.builder()
-            // 半径16格内击杀非玩家生物后, 75%概率给予范围内所有非玩家生物1秒恐惧。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (!(owner instanceof Player player)
-                        || !PhoneUpgradeHelper.isPlayerKillOfNonPlayer(event, player)
-                        || player.getRandom().nextDouble() >= 0.75D) {
-                    return;
-                }
-                for (LivingEntity target : player.level().getEntitiesOfClass(
-                        LivingEntity.class, player.getBoundingBox().inflate(16.0D),
-                        target -> target != player && !(target instanceof Player)
-                                && target.isAlive()
-                                && target.distanceToSqr(player) <= 256.0D)) {
-                    target.addEffect(new MobEffectInstance(
-                            RegistryEffects.FEAR.get(), 20, 0, false, true, true));
-                }
-            })
-            // 玩家获取经验数量+25%。
-            .addProxyEvent(LivingExperienceDropEvent.class,
-                    (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
-            .build();
+        // 击杀非友善生物后恢复30点护甲, 每1秒至多生效一次。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (owner instanceof Player player) {
+                PhoneUpgradeHelper.restoreArmor(event, player, 30.0D, 20L,
+                        "payday_antisocial5_next_repair");
+            }
+        })
+        // 半径16格内击杀非玩家生物后, 75%概率给予范围内所有非玩家生物1秒恐惧。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (!(owner instanceof Player player)
+                    || !PhoneUpgradeHelper.isPlayerKillOfNonPlayer(event, player)
+                    || player.getRandom().nextDouble() >= 0.75D) {
+                return;
+            }
+            for (LivingEntity target : player.level().getEntitiesOfClass(
+                    LivingEntity.class, player.getBoundingBox().inflate(16.0D),
+                    target -> target != player && !(target instanceof Player)
+                            && target.isAlive()
+                            && target.distanceToSqr(player) <= 256.0D)) {
+                target.addEffect(new MobEffectInstance(
+                        RegistryEffects.FEAR.get(), 20, 0, false, true, true));
+            }
+        })
+        // 玩家获取经验数量+25%。
+        .addProxyEvent(LivingExperienceDropEvent.class,
+                (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
+        .build();
     //#endregion
 
     //#region 无政府主义者
     public static final PhoneUpgradeAction ANARCHIST1 = PhoneUpgradeAction.builder()
-            // 禁用普通护甲恢复间隔，改为按 ArmorModifier 的固定规则恢复；损坏时提供2秒无敌，15秒冷却。
-            .armorSoltModifier(modifier -> modifier
-                    .enableAnarchistRecovery()
-                    .breakImmunity(2.0D, 15.0D))
-            .build();
+        // 禁用普通护甲恢复间隔，改为按 ArmorModifier 的固定规则恢复；损坏时提供2秒无敌，15秒冷却。
+        .armorSoltModifier(modifier -> modifier
+                .enableAnarchistRecovery()
+                .breakImmunity(2.0D, 15.0D,
+                        "payday:item/phone_upgrade/generated/special_anarchist_1"))
+        .build();
     public static final PhoneUpgradeAction ANARCHIST2 = PhoneUpgradeAction.builder()
-            // 最大生命值按当前无政府主义者等级缩放，并按公式增加每个 ArmorDefinition 的护甲上限。
-            .curioTick((identifier, index, livingEntity, itemStack) -> {
-                if (livingEntity instanceof Player player) {
-                    AnarchistEvents.applyAnarchistHealth(player);
-                }
-            })
-            .armorSoltModifier(modifier -> {
-                if (!(modifier.owner() instanceof Player player)) {
-                    return;
-                }
-                int level = PhoneItem.installedSeriesLevel(player, "anarchist");
-                if (level < 2) {
-                    return;
-                }
-                double currentHealth = player.getMaxHealth();
-                double originalHealth = currentHealth / Math.pow(0.5D, level - 1);
-                modifier.addArmorMax(AnarchistEvents.anarchistArmorBonus(originalHealth, level));
-            })
-            .build();
-    public static final PhoneUpgradeAction ANARCHIST3 = PhoneUpgradeAction.builder()
-            // 该等级本身没有额外独立效果；公式由 ANARCHIST2 根据当前系列等级统一计算。
-            .build();
+        // 最大生命值按当前无政府主义者等级缩放，并按公式增加每个 ArmorDefinition 的护甲上限。
+        .curioTick((identifier, index, livingEntity, itemStack) -> {
+            if (livingEntity instanceof Player player) {
+                AnarchistEvents.applyAnarchistHealth(player);
+            }
+        })
+        .armorSoltModifier(modifier -> {
+            if (!(modifier.owner() instanceof Player player)) {
+                return;
+            }
+            int level = PhoneItem.installedSeriesLevel(player, "anarchist");
+            if (level < 2) {
+                return;
+            }
+            double currentHealth = player.getMaxHealth();
+            double originalHealth = currentHealth / Math.pow(0.5D, level - 1);
+            modifier.addArmorMax(AnarchistEvents.anarchistArmorBonus(originalHealth, level));
+        })
+        .build();
+public static final PhoneUpgradeAction ANARCHIST3 = PhoneUpgradeAction.builder()
+        // 该等级本身没有额外独立效果；公式由 ANARCHIST2 根据当前系列等级统一计算。
+        .build();
     public static final PhoneUpgradeAction ANARCHIST4 = PhoneUpgradeAction.builder()
-            // 该等级本身没有额外独立效果；公式由 ANARCHIST2 根据当前系列等级统一计算。
-            .build();
+        // 该等级本身没有额外独立效果；公式由 ANARCHIST2 根据当前系列等级统一计算。
+        .build();
     public static final PhoneUpgradeAction ANARCHIST5 = PhoneUpgradeAction.builder()
-            // 造成伤害恢复20点护甲, 每15秒至多生效一次。
-            .addProxyEvent(net.minecraftforge.event.entity.living.LivingDamageEvent.class,
-                    (event, owner) -> {
-                        if (!(owner instanceof Player player)
-                                || event.getAmount() <= 0.0F
-                                || !PhoneUpgradeHelper.isPlayerAttacker(event.getSource(), player)) {
-                            return;
+        // 造成伤害恢复20点护甲, 每15秒至多生效一次。
+        .addProxyEvent(net.minecraftforge.event.entity.living.LivingDamageEvent.class,
+                (event, owner) -> {
+                    if (!(owner instanceof Player player)
+                            || event.getAmount() <= 0.0F
+                            || !PhoneUpgradeHelper.isPlayerAttacker(event.getSource(), player)) {
+                        return;
+                    }
+                    long now = player.level().getGameTime();
+                    String key = "payday_anarchist5_next_repair";
+                    if (now < player.getPersistentData().getLong(key)) {
+                        return;
+                    }
+                    PhoneItem.refreshArmorSlotModifiers(player);
+                    for (CurioHelper.SlotStack slot : CurioHelper.slots(player,
+                            CurioHelper.ARMOR_SLOT)) {
+                        if (slot.stack().getItem() instanceof ArmorCurioItem curio) {
+                            new ArmorModifier(ItemStack.EMPTY, slot.stack(), curio, player)
+                                    .restoreArmor(20.0D);
                         }
-                        long now = player.level().getGameTime();
-                        String key = "payday_anarchist5_next_repair";
-                        if (now < player.getPersistentData().getLong(key)) {
-                            return;
-                        }
-                        PhoneItem.refreshArmorSlotModifiers(player);
-                        for (CurioHelper.SlotStack slot : CurioHelper.slots(player,
-                                CurioHelper.ARMOR_SLOT)) {
-                            if (slot.stack().getItem() instanceof ArmorCurioItem curio) {
-                                new ArmorModifier(ItemStack.EMPTY, slot.stack(), curio, player)
-                                        .restoreArmor(20.0D);
-                            }
-                        }
-                        player.getPersistentData().putLong(key, now + 300L);
-                    })
-            // 玩家获取经验数量+25%。
-            .addProxyEvent(LivingExperienceDropEvent.class,
-                    (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
-            .build();
+                    }
+                    player.getPersistentData().putLong(key, now + 300L);
+                })
+        // 玩家获取经验数量+25%。
+        .addProxyEvent(LivingExperienceDropEvent.class,
+                (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
+        .build();
     //#endregion
 
     //#region 黑客
     public static final PhoneUpgradeAction HACKER1 = PhoneUpgradeAction.builder()
-            // Z键激活“电磁干扰”，45秒冷却；击杀敌对生物会减少5秒冷却。
-            .bindKeyActivate(InputConstants.KEY_Z, player -> {
-                if (player.level().isClientSide) {
-                    return false;
-                }
-                long now = player.level().getGameTime();
-                if (now < player.getPersistentData().getLong(HACKER1_COOLDOWN_END)) {
-                    return false;
-                }
-                player.addEffect(new MobEffectInstance(RegistryEffects.HOWL.get(), 100, 0, false, true, true));
-                player.getPersistentData().putLong(HACKER1_COOLDOWN_END, now + 900L);
-                return true;
-            })
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (!(owner instanceof Player player)
-                        || !PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
-                    return;
-                }
-                long now = player.level().getGameTime();
-                long cooldownEnd = player.getPersistentData().getLong(HACKER1_COOLDOWN_END);
-                player.getPersistentData().putLong(HACKER1_COOLDOWN_END,
-                        Math.max(now, cooldownEnd - 100L));
-            })
-            .build();
+        // Z键激活“电磁干扰”，45秒冷却；击杀敌对生物会减少5秒冷却。
+        .bindKeyActivate(InputConstants.KEY_Z, player -> {
+            if (player.level().isClientSide) {
+                return false;
+            }
+            long now = player.level().getGameTime();
+            if (now < player.getPersistentData().getLong(HACKER1_COOLDOWN_END)) {
+                return false;
+            }
+            player.addEffect(new MobEffectInstance(RegistryEffects.HOWL.get(), 100, 0, false, true, true));
+            player.getPersistentData().putLong(HACKER1_COOLDOWN_END, now + 900L);
+            return true;
+        })
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (!(owner instanceof Player player)
+                    || !PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
+                return;
+            }
+            long now = player.level().getGameTime();
+            long cooldownEnd = player.getPersistentData().getLong(HACKER1_COOLDOWN_END);
+            player.getPersistentData().putLong(HACKER1_COOLDOWN_END,
+                    Math.max(now, cooldownEnd - 100L));
+        })
+        .build();
 
     public static final PhoneUpgradeAction HACKER2 = PhoneUpgradeAction.builder()
-            // 最大生命值+20%。
-            .attribute(Attributes.MAX_HEALTH, 0.20D, AttributeModifier.Operation.MULTIPLY_TOTAL)
-            .build();
+        // 最大生命值+20%。
+        .attribute(Attributes.MAX_HEALTH, 0.20D, AttributeModifier.Operation.MULTIPLY_TOTAL)
+        .build();
 
     public static final PhoneUpgradeAction HACKER3 = PhoneUpgradeAction.builder()
-            // 啸叫期间击杀敌对生物恢复20点生命。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (owner instanceof Player player && player.hasEffect(RegistryEffects.HOWL.get())
-                        && PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
-                    player.heal(20.0F);
-                }
-            })
-            // 啸叫期间提供15%闪避，交由DebuffEvents读取DODGE_CHANCE属性判定。
-            .curioTick((identifier, index, livingEntity, itemStack) -> {
-                if (livingEntity instanceof Player player
-                        && player.hasEffect(RegistryEffects.HOWL.get())) {
-                            HackerEvents.addDodgeChanceModifier(player, HackerEvents.HACKER3_DODGE_MODIFIER,
-                            "payday_phone_upgrade_hacker3_dodge", 1500.0D);
-                }
-            })
-            .build();
+        // 啸叫期间击杀敌对生物恢复20点生命。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (owner instanceof Player player && player.hasEffect(RegistryEffects.HOWL.get())
+                    && PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
+                player.heal(20.0F);
+            }
+        })
+        // 啸叫期间提供15%闪避，交由DebuffEvents读取DODGE_CHANCE属性判定。
+        .curioTick((identifier, index, livingEntity, itemStack) -> {
+            if (livingEntity instanceof Player player
+                    && player.hasEffect(RegistryEffects.HOWL.get())) {
+                        HackerEvents.addDodgeChanceModifier(player, HackerEvents.HACKER3_DODGE_MODIFIER,
+                        "payday_phone_upgrade_hacker3_dodge", 1500.0D);
+            }
+        })
+        .build();
 
     public static final PhoneUpgradeAction HACKER4 = PhoneUpgradeAction.builder()
-            // 啸叫期间击杀敌对生物获得30秒20%闪避，效果不可叠加。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (!(owner instanceof Player player) || !player.hasEffect(RegistryEffects.HOWL.get())
-                        || !PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
-                    return;
-                }
-                long now = player.level().getGameTime();
-                if (now >= player.getPersistentData().getLong(HackerEvents.HACKER4_DODGE_END)) {
-                    player.getPersistentData().putLong(HackerEvents.HACKER4_DODGE_END, now + 600L);
-                    HackerEvents.addDodgeChanceModifier(player, HackerEvents.HACKER4_DODGE_MODIFIER,
-                            "payday_phone_upgrade_hacker4_dodge", 2000.0D);
-                }
-            })
-            // 临时闪避有效期间提供20%闪避，交由DebuffEvents读取DODGE_CHANCE属性判定。
-            .curioTick((identifier, index, livingEntity, itemStack) -> {
-                if (!(livingEntity instanceof Player player)
-                        || player.level().getGameTime()
-                        >= player.getPersistentData().getLong(HackerEvents.HACKER4_DODGE_END)) {
-                    return;
-                }
+        // 啸叫期间击杀敌对生物获得30秒20%闪避，效果不可叠加。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (!(owner instanceof Player player) || !player.hasEffect(RegistryEffects.HOWL.get())
+                    || !PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, player)) {
+                return;
+            }
+            long now = player.level().getGameTime();
+            if (now >= player.getPersistentData().getLong(HackerEvents.HACKER4_DODGE_END)) {
+                player.getPersistentData().putLong(HackerEvents.HACKER4_DODGE_END, now + 600L);
                 HackerEvents.addDodgeChanceModifier(player, HackerEvents.HACKER4_DODGE_MODIFIER,
                         "payday_phone_upgrade_hacker4_dodge", 2000.0D);
-            })
-            .build();
+            }
+        })
+        // 临时闪避有效期间提供20%闪避，交由DebuffEvents读取DODGE_CHANCE属性判定。
+        .curioTick((identifier, index, livingEntity, itemStack) -> {
+            if (!(livingEntity instanceof Player player)
+                    || player.level().getGameTime()
+                    >= player.getPersistentData().getLong(HackerEvents.HACKER4_DODGE_END)) {
+                return;
+            }
+            HackerEvents.addDodgeChanceModifier(player, HackerEvents.HACKER4_DODGE_MODIFIER,
+                    "payday_phone_upgrade_hacker4_dodge", 2000.0D);
+        })
+        .build();
 
     public static final PhoneUpgradeAction HACKER5 = PhoneUpgradeAction.builder()
-            // 啸叫期间，半径64格内的玩家击杀敌对生物恢复10点生命。
-            .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
-                if (!(owner instanceof Player provider)
-                        || !provider.hasEffect(RegistryEffects.HOWL.get())) {
-                    return;
-                }
-                Player killer = PhoneUpgradeHelper.getPlayerAttacker(event.getSource());
-                if (killer != null && PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, killer)
-                        && provider.distanceToSqr(killer) <= 4096.0D) {
-                    killer.heal(10.0F);
-                }
-            })
-            .addProxyEvent(LivingExperienceDropEvent.class,
-                    (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
-            .build();
+        // 啸叫期间，半径64格内的玩家击杀敌对生物恢复10点生命。
+        .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
+            if (!(owner instanceof Player provider)
+                    || !provider.hasEffect(RegistryEffects.HOWL.get())) {
+                return;
+            }
+            Player killer = PhoneUpgradeHelper.getPlayerAttacker(event.getSource());
+            if (killer != null && PhoneUpgradeHelper.isPlayerKillOfUnfriendly(event, killer)
+                    && provider.distanceToSqr(killer) <= 4096.0D) {
+                killer.heal(10.0F);
+            }
+        })
+        .addProxyEvent(LivingExperienceDropEvent.class,
+                (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
+        .build();
     //#endregion
 
 }

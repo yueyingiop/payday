@@ -2,6 +2,7 @@ package com.yueyingiop.payday.init;
 
 import com.yueyingiop.payday.PayDay;
 import com.yueyingiop.payday.block.SupplyBlock;
+import com.yueyingiop.payday.block.TurretBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -12,8 +13,11 @@ public final class RegistryBlocks {
 
     public static final RegistryObject<Block> ARMOR_PLATE = BLOCKS.register("armor_plate",
             () -> new SupplyBlock(SupplyBlock.SupplyType.ARMOR_PLATE));
+    public static final RegistryObject<Block> AMMO_BAG = BLOCKS.register("ammo_bag",
+            () -> new SupplyBlock(SupplyBlock.SupplyType.AMMO_BAG));
     public static final RegistryObject<Block> FIRSTAID_KIT = BLOCKS.register("firstaid_kit",
             () -> new SupplyBlock(SupplyBlock.SupplyType.FIRST_AID));
+    public static final RegistryObject<Block> TURRET = BLOCKS.register("turret", TurretBlock::new);
 
     private RegistryBlocks() {
     }

@@ -1,16 +1,24 @@
 package com.yueyingiop.payday.compat.jei;
 
 import com.yueyingiop.payday.client.screen.ArmorScreen;
+import com.yueyingiop.payday.api.TurretFluid;
+import com.yueyingiop.payday.api.TurretFluidManager;
 import com.yueyingiop.payday.init.RegistryItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.handlers.IGuiProperties;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,6 +52,18 @@ public final class PayDayJeiPlugin implements IModPlugin {
         registration.addGuiScreenHandler(ArmorScreen.class, PayDayJeiPlugin::createArmorScreenProperties);
     }
 
+    @Override
+    public void registerCategories(IRecipeCategoryRegistration registration) {
+        registration.addRecipeCategories(
+                new TurretFluidRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+    }
+
+    @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        registration.addRecipeCatalyst(RegistryItems.TURRET.get(),
+                TurretFluidRecipeCategory.RECIPE_TYPE);
+    }
+
     /** Registers the shared formula information for the three life-to-armor upgrades. */
     @Override
     public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration registration) {
@@ -70,6 +90,34 @@ public final class PayDayJeiPlugin implements IModPlugin {
                 Component.translatable("jei.payday.hostage_event.description"),
                 Component.translatable("jei.payday.hostage_event.counting"),
                 Component.translatable("jei.payday.hostage_event.example"));
+
+        List<TurretFluidJeiRecipe> turretFluidRecipes = createTurretFluidRecipes();
+        registration.addRecipes(TurretFluidRecipeCategory.RECIPE_TYPE, turretFluidRecipes);
+        registerTurretFluidInfo(registration, turretFluidRecipes);
+    }
+
+    /** 注册所有炮台流体的纹理、类型和行为参数说明。 */
+    private static void registerTurretFluidInfo(
+            mezz.jei.api.registration.IRecipeRegistration registration,
+            List<TurretFluidJeiRecipe> recipes) {
+        for (TurretFluidJeiRecipe recipe : recipes) {
+            FluidStack stack = recipe.fluidStack();
+            registration.addIngredientInfo(stack, ForgeTypes.FLUID_STACK,
+                    recipe.typeText(), recipe.effectText());
+        }
+    }
+
+    /** 创建所有当前可用的炮台流体配方。 */
+    private static List<TurretFluidJeiRecipe> createTurretFluidRecipes() {
+        List<TurretFluidJeiRecipe> recipes = new ArrayList<>();
+        for (TurretFluid definition : TurretFluidManager.all()) {
+            var fluid = ForgeRegistries.FLUIDS.getValue(definition.fluidId());
+            if (fluid == null) {
+                continue;
+            }
+            recipes.add(new TurretFluidJeiRecipe(definition, new FluidStack(fluid, 1000)));
+        }
+        return recipes;
     }
 
     /**

@@ -17,6 +17,8 @@ import com.yueyingiop.payday.event.server.SupplyEvents;
 import com.yueyingiop.payday.event.server.ExposureRiskEvents;
 import com.yueyingiop.payday.event.server.CommandEvents;
 import com.yueyingiop.payday.event.server.TestEffectStickEvents;
+import com.yueyingiop.payday.event.server.TurretEvents;
+import com.yueyingiop.payday.event.server.CooldownHudEvents;
 import com.yueyingiop.payday.event.server.phone.DebuffEvents;
 import com.yueyingiop.payday.event.server.phone.HackerEvents;
 import com.yueyingiop.payday.event.server.phone.LeaderEvents;
@@ -24,12 +26,15 @@ import com.yueyingiop.payday.event.server.phone.MuscleEvents;
 import com.yueyingiop.payday.event.server.phone.ThiefEvents;
 import com.yueyingiop.payday.event.server.phone.UniversalityEvents;
 import com.yueyingiop.payday.init.RegistryItems;
+import com.yueyingiop.payday.api.TurretFluidManager;
 import com.yueyingiop.payday.init.RegistryAttributes;
 import com.yueyingiop.payday.init.RegistryEffects;
 import com.yueyingiop.payday.init.RegistryBlocks;
 import com.yueyingiop.payday.init.RegistryBlockEntities;
+import com.yueyingiop.payday.init.RegistryEntities;
 import com.yueyingiop.payday.menu.ArmorMenu;
 import com.yueyingiop.payday.menu.PhoneMenu;
+import com.yueyingiop.payday.menu.TurretMenu;
 import com.yueyingiop.payday.network.PayDayNetwork;
 
 import org.apache.logging.log4j.LogManager;
@@ -58,7 +63,9 @@ public class PayDay
     public PayDay(FMLJavaModLoadingContext context)
     {
         IEventBus modEventBus = context.getModEventBus();
+        TurretFluidManager.registerDefaults();
         modEventBus.addListener(UniversalityEvents::addPlayerAttributes);
+        modEventBus.addListener(RegistryEntities::registerAttributes);
 
         CREATIVE_MODE_TABS.register(modEventBus);
         RegistryItems.ITEMS.register(modEventBus);
@@ -66,8 +73,10 @@ public class PayDay
         RegistryEffects.EFFECTS.register(modEventBus);
         RegistryBlocks.BLOCKS.register(modEventBus);
         RegistryBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        RegistryEntities.ENTITIES.register(modEventBus);
         ArmorMenu.MENUS.register(modEventBus);
         PhoneMenu.MENUS.register(modEventBus);
+        TurretMenu.MENUS.register(modEventBus);
         PayDayNetwork.register();
         context.registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, Config.SPEC);
         context.registerConfig(net.minecraftforge.fml.config.ModConfig.Type.CLIENT, Config.CLIENT_SPEC,
@@ -86,6 +95,8 @@ public class PayDay
         MinecraftForge.EVENT_BUS.register(DebuffEvents.class);
         MinecraftForge.EVENT_BUS.register(ThiefEvents.class);
         MinecraftForge.EVENT_BUS.register(TestEffectStickEvents.class);
+        MinecraftForge.EVENT_BUS.register(TurretEvents.class);
+        MinecraftForge.EVENT_BUS.register(CooldownHudEvents.class);
     }
 
 }

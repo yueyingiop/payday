@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -61,6 +62,7 @@ public final class DebuffEvents {
                 player.getBoundingBox().inflate(64.0D), entity -> entity != player
                         && !(entity instanceof Player)
                         && entity.isAlive()
+                        && !entity.getType().is(Tags.EntityTypes.BOSSES)
                         && entity.distanceToSqr(player) <= 4096.0D)) {
             target.addEffect(new MobEffectInstance(
                     RegistryEffects.FEAR.get(), 600, 0, false, true, true));
@@ -99,8 +101,7 @@ public final class DebuffEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void fearAttack(LivingAttackEvent event) {
         if (!event.getEntity().level().isClientSide
-                && event.getEntity().getPersistentData().getLong(
-                ArmorModifier.FULL_IMMUNITY_END) > event.getEntity().level().getGameTime()) {
+                && ArmorModifier.hasFullImmunity(event.getEntity())) {
             event.setCanceled(true);
             return;
         }
@@ -113,6 +114,15 @@ public final class DebuffEvents {
         }
         if (attacker != null && !attacker.level().isClientSide
                 && attacker.hasEffect(RegistryEffects.FEAR.get())) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** 在受伤事件阶段再次拦截全伤害免疫，覆盖未经过 LivingAttackEvent 的伤害来源。 */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void fullImmunity(LivingHurtEvent event) {
+        if (!event.getEntity().level().isClientSide
+                && ArmorModifier.hasFullImmunity(event.getEntity())) {
             event.setCanceled(true);
         }
     }

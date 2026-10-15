@@ -164,6 +164,25 @@ public class ArmorSlotItem extends Item {
         return clamp(stack.getTag().getDouble(key), maxArmor(definitionIndex));
     }
 
+    /** 获取未按基础护甲上限截断的永久损伤，用于运行时护甲修改器。 */
+    public double storedPermanent(ItemStack stack, int definitionIndex) {
+        String key = stateKey(PERMANENT, definitionIndex);
+        if (stack.hasTag() && stack.getTag().contains(key)) {
+            return Math.max(0.0D, stack.getTag().getDouble(key));
+        }
+        if (definitionIndex == 0 && armorDefinitions.size() == 1
+                && stack.hasTag() && stack.getTag().contains(PERMANENT)) {
+            return Math.max(0.0D, stack.getTag().getDouble(PERMANENT));
+        }
+        return 0.0D;
+    }
+
+    /** 写入未按基础护甲上限截断的永久损伤。 */
+    public void setStoredPermanent(ItemStack stack, int definitionIndex, double value) {
+        stack.getOrCreateTag().putDouble(stateKey(PERMANENT, definitionIndex),
+                Math.max(0.0D, value));
+    }
+
     /** 为指定护甲定义增加永久损伤。 */
     public void addPermanent(ItemStack stack, int definitionIndex, double value) {
         double damage = clamp(permanent(stack, definitionIndex) + Math.max(0.0D, value),

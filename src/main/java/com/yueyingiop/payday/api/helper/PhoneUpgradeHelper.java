@@ -185,7 +185,7 @@ public final class PhoneUpgradeHelper {
      */
     public static void tryMeleeHeal(LivingHurtEvent event, LivingEntity attacker,
                                     double amount, HealingMode mode, long cooldownTicks) {
-        tryMeleeHeal(event, attacker, amount, mode, cooldownTicks,
+        tryMeleeHealAndReport(event, attacker, amount, mode, cooldownTicks,
                 DEFAULT_MELEE_HEAL_COOLDOWN_KEY);
     }
 
@@ -204,9 +204,26 @@ public final class PhoneUpgradeHelper {
     public static void tryMeleeHeal(LivingHurtEvent event, LivingEntity attacker,
                                     double amount, HealingMode mode, long cooldownTicks,
                                     String cooldownKey) {
+        tryMeleeHealAndReport(event, attacker, amount, mode, cooldownTicks, cooldownKey);
+    }
+
+    /**
+     * 在近战命中后回复攻击者生命值，并返回本次是否实际触发。
+     *
+     * @param event 受伤事件
+     * @param attacker 近战攻击者，也是生命值回复对象
+     * @param amount 回复量；{@link HealingMode#PERCENTAGE} 下为最大生命值比例
+     * @param mode 回复效果，直接回复或按最大生命值百分比回复
+     * @param cooldownTicks 冷却间隔，单位为游戏刻；小于等于 {@code 0} 表示无冷却
+     * @param cooldownKey 存储在攻击者持久化数据中的冷却键
+     * @return 是否成功触发回血
+     */
+    public static boolean tryMeleeHealAndReport(LivingHurtEvent event, LivingEntity attacker,
+                                                double amount, HealingMode mode,
+                                                long cooldownTicks, String cooldownKey) {
         if (!isMeleeHit(event, attacker) || event.getEntity() == attacker
                 || amount <= 0.0D || mode == null) {
-            return;
+            return false;
         }
 
         long now = attacker.level().getGameTime();
@@ -214,7 +231,7 @@ public final class PhoneUpgradeHelper {
                 ? DEFAULT_MELEE_HEAL_COOLDOWN_KEY : cooldownKey;
         if (cooldownTicks > 0L
                 && now < attacker.getPersistentData().getLong(effectiveCooldownKey)) {
-            return;
+            return false;
         }
 
         double healing = mode == HealingMode.PERCENTAGE
@@ -224,6 +241,7 @@ public final class PhoneUpgradeHelper {
         if (cooldownTicks > 0L) {
             attacker.getPersistentData().putLong(effectiveCooldownKey, now + cooldownTicks);
         }
+        return true;
     }
 
     /**

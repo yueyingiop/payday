@@ -155,6 +155,13 @@ public final class ArmorCurioEvents {
             return;
         }
 
+        if (entity instanceof Player player && player.getAbilities().instabuild) {
+            // 创造模式下护甲饰品可以直接摘下或替换，不产生更换冷却。
+            entity.getPersistentData().remove(ServerEventUtil.ARMOR_CHANGE_COOLDOWN);
+            syncClientState(entity);
+            return;
+        }
+
         ForcedArmorChange forcedChange = FORCED_ARMOR_CHANGES.remove(entity);
         boolean forced = forcedChange != null
                 && ItemStack.isSameItemSameTags(forcedChange.stack(), event.getTo());
@@ -387,6 +394,9 @@ public final class ArmorCurioEvents {
      */
     public static boolean isArmorChangeLocked(LivingEntity entity, String identifier, int index) {
         if (!ServerEventUtil.ARMOR.equals(identifier)) {
+            return false;
+        }
+        if (entity instanceof Player player && player.getAbilities().instabuild) {
             return false;
         }
 
