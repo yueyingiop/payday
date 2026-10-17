@@ -17,7 +17,7 @@ public final class RegistryEntities {
     public static final RegistryObject<EntityType<TurretEntity>> TURRET = ENTITIES.register("turret",
             () -> EntityType.Builder.<TurretEntity>of(TurretEntity::new, MobCategory.MISC)
                     .sized(1.0F, 2.0F)
-                    .clientTrackingRange(8)
+                    .clientTrackingRange(64)
                     .updateInterval(1)
                     .build(PayDay.MODID + ":turret"));
 

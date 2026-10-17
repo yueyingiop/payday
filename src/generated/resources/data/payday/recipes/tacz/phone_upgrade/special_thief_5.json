@@ -1,0 +1,31 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "count": 2,
+      "item": {
+        "item": "payday:phone_upgrade/special_thief_4"
+      }
+    },
+    {
+      "count": 1,
+      "item": {
+        "item": "minecraft:magma_cream"
+      }
+    },
+    {
+      "count": 1,
+      "item": {
+        "item": "minecraft:honeycomb"
+      }
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:phone_upgrades",
+    "item": {
+      "count": 1,
+      "item": "payday:phone_upgrade/special_thief_5"
+    }
+  }
+}

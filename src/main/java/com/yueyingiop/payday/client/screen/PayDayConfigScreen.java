@@ -1,16 +1,20 @@
 package com.yueyingiop.payday.client.screen;
 
 import com.yueyingiop.payday.Config;
+import com.yueyingiop.payday.api.helper.ConfigScreenHelper;
+import com.yueyingiop.payday.api.helper.ConfigScreenHelper.ActionButton;
+import com.yueyingiop.payday.api.helper.ConfigScreenHelper.Field;
+import com.yueyingiop.payday.api.helper.ConfigScreenHelper.FieldType;
+import com.yueyingiop.payday.api.helper.ConfigScreenHelper.Toggle;
+import com.yueyingiop.payday.client.base.StringListEditScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -26,9 +30,11 @@ public final class PayDayConfigScreen extends Screen {
     private final Screen parent;
     private final List<Field> fields = new ArrayList<>();
     private final List<Toggle> toggles = new ArrayList<>();
+    private final List<ActionButton> actionButtons = new ArrayList<>();
     private Page page = Page.ARMOR_CURIO;
     private Button previousButton;
     private Button nextButton;
+    private Button specialItemRisksButton;
     private int scroll;
     private int contentHeight;
 
@@ -70,8 +76,11 @@ public final class PayDayConfigScreen extends Screen {
     private void buildPage() {
         fields.forEach(field -> removeWidget(field.box()));
         toggles.forEach(toggle -> removeWidget(toggle.checkbox()));
+        actionButtons.forEach(action -> removeWidget(action.button()));
         fields.clear();
         toggles.clear();
+        actionButtons.clear();
+        specialItemRisksButton = null;
         int x = Math.max(8, (width - Math.min(FIELD_WIDTH, width - 32)) / 2);
         int[] y = {CONTENT_TOP};
         switch (page) {
@@ -99,12 +108,52 @@ public final class PayDayConfigScreen extends Screen {
                 addInt("暴露风险最小值", x, y, Config.EXPOSURE_RISK_MIN::set, Config.EXPOSURE_RISK_MIN.get());
                 addInt("暴露风险最大值", x, y, Config.EXPOSURE_RISK_MAX::set, Config.EXPOSURE_RISK_MAX.get());
                 addInt("暴露风险默认值", x, y, Config.EXPOSURE_RISK_DEFAULT::set, Config.EXPOSURE_RISK_DEFAULT.get());
-                addText("特殊物品风险 (ID或#标签=值,逗号分隔)", x, y, this::setSpecialItemRisks, String.join(", ", Config.EXPOSURE_SPECIAL_ITEM_RISKS.get()));
+                specialItemRisksButton = addActionButton(
+                        "编辑特殊物品风险 (" + Config.EXPOSURE_SPECIAL_ITEM_RISKS.get().size() + "项)",
+                        x, y, () -> minecraft.setScreen(new StringListEditScreen(
+                                this,
+                                Component.literal("特殊物品风险"),
+                                Component.literal("每行填写一个物品 ID 或 #标签=风险值"),
+                                Config.EXPOSURE_SPECIAL_ITEM_RISKS.get(),
+                                values -> {
+                                    Config.EXPOSURE_SPECIAL_ITEM_RISKS.set(values);
+                                    refreshSpecialItemRisksButton();
+                                })));
             }
             case HUD -> {
                 addToggle("开启精简 HUD", x, y, Config.COMPACT_HUD::set, Config.COMPACT_HUD.get());
                 addToggle("开启装备箱 HUD", x, y, Config.EQUIPMENT_BOX_HUD_ENABLED::set, Config.EQUIPMENT_BOX_HUD_ENABLED.get());
                 addToggle("开启暴露风险 HUD", x, y, Config.EXPOSURE_RISK_HUD_ENABLED::set, Config.EXPOSURE_RISK_HUD_ENABLED.get());
+                addDouble("装备箱 HUD 左侧位置比例", x, y,
+                        Config.EQUIPMENT_BOX_HUD_X_RATIO::set, Config.EQUIPMENT_BOX_HUD_X_RATIO.get());
+                addDouble("装备箱 HUD 顶部位置比例", x, y,
+                        Config.EQUIPMENT_BOX_HUD_Y_RATIO::set, Config.EQUIPMENT_BOX_HUD_Y_RATIO.get());
+                addDouble("暴露风险 HUD 左侧位置比例", x, y,
+                        Config.EXPOSURE_RISK_HUD_X_RATIO::set, Config.EXPOSURE_RISK_HUD_X_RATIO.get());
+                addDouble("暴露风险 HUD 顶部位置比例", x, y,
+                        Config.EXPOSURE_RISK_HUD_Y_RATIO::set, Config.EXPOSURE_RISK_HUD_Y_RATIO.get());
+            }
+            case TURRET -> {
+                addText("炮台瞄准显示物品 ID", x, y,
+                        Config.TURRET_AIM_DISPLAY_ITEM::set, Config.TURRET_AIM_DISPLAY_ITEM.get());
+                addDouble("炮台基础攻击伤害", x, y,
+                        Config.TURRET_ATTACK_DAMAGE::set, Config.TURRET_ATTACK_DAMAGE.get());
+                addDouble("炮台攻击范围", x, y,
+                        Config.TURRET_ATTACK_RANGE::set, Config.TURRET_ATTACK_RANGE.get());
+                addInt("炮台左右偏航角", x, y,
+                        Config.TURRET_YAW_ANGLE::set, Config.TURRET_YAW_ANGLE.get());
+                addInt("炮台最大俯角", x, y,
+                        Config.TURRET_PITCH_DOWN_ANGLE::set, Config.TURRET_PITCH_DOWN_ANGLE.get());
+                addInt("炮台最大仰角", x, y,
+                        Config.TURRET_PITCH_UP_ANGLE::set, Config.TURRET_PITCH_UP_ANGLE.get());
+                addDouble("炮台最大温度", x, y,
+                        Config.TURRET_MAX_TEMPERATURE::set, Config.TURRET_MAX_TEMPERATURE.get());
+                addInt("炮台过载销毁时间秒数", x, y,
+                        Config.TURRET_OVERLOAD_DESTROY_TIME_SECONDS::set,
+                        Config.TURRET_OVERLOAD_DESTROY_TIME_SECONDS.get());
+                addInt("炮台攻击间隔游戏刻", x, y,
+                        Config.TURRET_ATTACK_INTERVAL_TICKS::set,
+                        Config.TURRET_ATTACK_INTERVAL_TICKS.get());
             }
         }
         previousButton.active = page.ordinal() > 0;
@@ -149,6 +198,16 @@ public final class PayDayConfigScreen extends Screen {
         addField(label, x, y, setter, value, FieldType.TEXT);
     }
 
+    /** 添加一个打开独立编辑器的按钮。 */
+    private Button addActionButton(String label, int x, int[] y, Runnable action) {
+        int fieldWidth = ConfigScreenHelper.fieldWidth(width, FIELD_WIDTH);
+        Button button = addRenderableWidget(Button.builder(Component.literal(label), ignored -> action.run())
+                .bounds(x, y[0] + 8, fieldWidth, 24).build());
+        actionButtons.add(new ActionButton(button, y[0]));
+        y[0] += ROW_HEIGHT;
+        return button;
+    }
+
     /**
      * 创建并登记配置输入框。
      * @param label 标签。
@@ -159,11 +218,10 @@ public final class PayDayConfigScreen extends Screen {
      * @param type 类型。
      */
     private <T> void addField(String label, int x, int[] y, Consumer<T> setter, String value, FieldType type) {
-        int fieldWidth = Math.min(FIELD_WIDTH, Math.max(120, width - 32));
+        int fieldWidth = ConfigScreenHelper.fieldWidth(width, FIELD_WIDTH);
         EditBox box = new EditBox(font, x, y[0] + 14, fieldWidth, 20, Component.literal(label));
         box.setValue(value);
-        if (type == FieldType.INTEGER) box.setFilter(text -> text.matches("-?\\d*"));
-        if (type == FieldType.DOUBLE) box.setFilter(text -> text.matches("-?\\d*(\\.\\d*)?"));
+        ConfigScreenHelper.applyFilter(box, type);
         fields.add(new Field(box, label, setter, type, y[0]));
         addRenderableWidget(box);
         y[0] += ROW_HEIGHT;
@@ -188,32 +246,7 @@ public final class PayDayConfigScreen extends Screen {
      * 将当前分页的控件值写入配置。
      */
     private void applyCurrentPage() {
-        for (Field field : fields) {
-            try {
-                if (field.type() == FieldType.INTEGER) {
-                    @SuppressWarnings("unchecked") Consumer<Integer> setter = (Consumer<Integer>) field.setter();
-                    setter.accept(Integer.parseInt(field.box().getValue()));
-                } else if (field.type() == FieldType.DOUBLE) {
-                    @SuppressWarnings("unchecked") Consumer<Double> setter = (Consumer<Double>) field.setter();
-                    setter.accept(Double.parseDouble(field.box().getValue()));
-                } else {
-                    @SuppressWarnings("unchecked") Consumer<String> setter = (Consumer<String>) field.setter();
-                    setter.accept(field.box().getValue());
-                }
-            } catch (RuntimeException ignored) {
-            }
-        }
-        toggles.forEach(toggle -> toggle.setter().accept(toggle.checkbox().selected()));
-    }
-
-    /**
-     * 解析并保存特殊物品风险列表。
-     * @param value 数值。
-     */
-    private void setSpecialItemRisks(String value) {
-        List<String> entries = Arrays.stream(value.split(",")).map(String::trim)
-                .filter(entry -> !entry.isEmpty()).toList();
-        Config.EXPOSURE_SPECIAL_ITEM_RISKS.set(entries);
+        ConfigScreenHelper.applyFields(fields, toggles);
     }
 
     /**
@@ -231,7 +264,7 @@ public final class PayDayConfigScreen extends Screen {
      * @return 对应的执行结果。
      */
     private int maxScroll() {
-        return Math.max(0, contentHeight - (height - CONTENT_BOTTOM_MARGIN));
+        return ConfigScreenHelper.maxScroll(contentHeight, height, CONTENT_BOTTOM_MARGIN);
     }
 
     /**
@@ -242,12 +275,20 @@ public final class PayDayConfigScreen extends Screen {
         for (Field field : fields) {
             int top = field.baseY() - scroll;
             field.box().setY(top + 14);
-            field.box().visible = top + 14 + field.box().getHeight() >= CONTENT_TOP && top < bottom;
+            field.box().visible = ConfigScreenHelper.isVisible(
+                    top + 14, field.box().getHeight(), CONTENT_TOP, bottom);
         }
         for (Toggle toggle : toggles) {
             int top = toggle.baseY() - scroll;
             toggle.checkbox().setY(top);
-            toggle.checkbox().visible = top + toggle.checkbox().getHeight() >= CONTENT_TOP && top < bottom;
+            toggle.checkbox().visible = ConfigScreenHelper.isVisible(
+                    top, toggle.checkbox().getHeight(), CONTENT_TOP, bottom);
+        }
+        for (ActionButton action : actionButtons) {
+            int top = action.baseY() - scroll;
+            action.button().setY(top + 8);
+            action.button().visible = ConfigScreenHelper.isVisible(
+                    top + 8, action.button().getHeight(), CONTENT_TOP, bottom);
         }
     }
 
@@ -261,7 +302,8 @@ public final class PayDayConfigScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (mouseY >= CONTENT_TOP && mouseY < height - CONTENT_BOTTOM_MARGIN) {
-            scroll = Mth.clamp(scroll - (int) Math.round(delta * 18.0D), 0, maxScroll());
+            scroll = ConfigScreenHelper.clampScroll(
+                    scroll, contentHeight, height, CONTENT_BOTTOM_MARGIN, delta);
             repositionPageContents();
             return true;
         }
@@ -294,6 +336,13 @@ public final class PayDayConfigScreen extends Screen {
         minecraft.setScreen(parent);
     }
 
+    private void refreshSpecialItemRisksButton() {
+        if (specialItemRisksButton != null) {
+            specialItemRisksButton.setMessage(Component.literal(
+                    "编辑特殊物品风险 (" + Config.EXPOSURE_SPECIAL_ITEM_RISKS.get().size() + "项)"));
+        }
+    }
+
     /**
      * 绘制对应内容。
      * @param graphics 图形渲染上下文。
@@ -317,12 +366,10 @@ public final class PayDayConfigScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    private record Field(EditBox box, String label, Consumer<?> setter, FieldType type, int baseY) { }
-    private record Toggle(Checkbox checkbox, Consumer<Boolean> setter, int baseY) { }
-    private enum FieldType { INTEGER, DOUBLE, TEXT }
     private enum Page {
-        ARMOR_CURIO("ArmorCurio"), ARMOR_SLOT("ArmorSolt"), OTHER("Other"), HUD("HUD");
+        ARMOR_CURIO("ArmorCurio"), ARMOR_SLOT("ArmorSolt"), OTHER("Other"), HUD("HUD"), TURRET("Turret");
         private final String title;
         Page(String title) { this.title = title; }
     }
+
 }

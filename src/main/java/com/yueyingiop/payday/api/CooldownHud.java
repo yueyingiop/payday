@@ -99,7 +99,8 @@ public final class CooldownHud {
     /**
      * 获取 HUD 数值。
      *
-     * <p>计时型单位为秒，概率型单位为百分比，触发型忽略该数值。</p>
+     * <p>计时型单位为秒，概率型单位为百分比，触发型忽略该数值。概率型也可以显示负数，
+     * 用于属性减少类 HUD。</p>
      *
      * @return HUD 数值
      */
@@ -209,7 +210,7 @@ public final class CooldownHud {
             }
             double normalizedValue = switch (type) {
                 case TIMER -> Math.max(0.0D, Math.min(999.9D, value));
-                case PROBABILITY -> Math.max(0.0D, Math.min(999.0D, value));
+                case PROBABILITY -> Math.max(-999.0D, Math.min(999.0D, value));
                 case TRIGGER -> 0.0D;
             };
             Component normalizedName = name == null

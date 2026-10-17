@@ -3,6 +3,7 @@ package com.yueyingiop.payday.item;
 import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.ArmorModifier;
 import com.yueyingiop.payday.api.PhoneUpgradeAction;
+import com.yueyingiop.payday.api.ProbabilityHudManager;
 import top.theillusivec4.curios.api.SlotContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -90,6 +91,7 @@ public class PhoneItem extends Item implements ICurioItem {
         }
         // 只刷新最终弹匣容量，不因为装备扩容直接增加当前弹药。
         PhoneUpgradeAction.refreshAmmoExpansion(livingEntity);
+        ProbabilityHudManager.refresh(livingEntity);
     }
 
     /**
@@ -104,6 +106,7 @@ public class PhoneItem extends Item implements ICurioItem {
         PhoneUpgradeAction.clearAttributeModifiers(livingEntity);
         ArmorModifier.clear(livingEntity);
         PhoneUpgradeAction.refreshAmmoExpansion(livingEntity);
+        ProbabilityHudManager.clear(livingEntity);
     }
 
     /** 重新计算实体当前手机提供的护甲插槽效果，供护甲事件读取。 */

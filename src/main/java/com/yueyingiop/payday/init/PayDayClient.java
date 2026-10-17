@@ -5,7 +5,6 @@ import com.yueyingiop.payday.client.ClientArmorSlotTooltip;
 import com.yueyingiop.payday.client.render.ArmorCurioRenderer;
 import com.yueyingiop.payday.client.render.EquipmentBoxRenderer;
 import com.yueyingiop.payday.client.render.SupplyBlockRenderer;
-import com.yueyingiop.payday.client.render.TurretBlockRenderer;
 import com.yueyingiop.payday.client.render.TurretEntityRenderer;
 import com.yueyingiop.payday.client.screen.ArmorScreen;
 import com.yueyingiop.payday.client.screen.PhoneScreen;
@@ -116,7 +115,6 @@ public final class PayDayClient {
     @SubscribeEvent
     public static void registerBlockRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(RegistryBlockEntities.SUPPLY.get(), SupplyBlockRenderer::new);
-        event.registerBlockEntityRenderer(RegistryBlockEntities.TURRET.get(), TurretBlockRenderer::new);
         event.registerEntityRenderer(RegistryEntities.TURRET.get(), TurretEntityRenderer::new);
     }
 

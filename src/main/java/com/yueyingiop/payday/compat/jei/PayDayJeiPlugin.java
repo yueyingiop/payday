@@ -64,7 +64,7 @@ public final class PayDayJeiPlugin implements IModPlugin {
                 TurretFluidRecipeCategory.RECIPE_TYPE);
     }
 
-    /** Registers the shared formula information for the three life-to-armor upgrades. */
+    /** Registers the level-specific information for the three Anarchist upgrades. */
     @Override
     public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration registration) {
         List<net.minecraft.world.item.ItemStack> upgrades = List.of(
@@ -79,7 +79,7 @@ public final class PayDayJeiPlugin implements IModPlugin {
                 Component.translatable("jei.payday.linear_edge.life_conversion"),
                 Component.translatable("jei.payday.linear_edge.example_level_2"),
                 Component.translatable("jei.payday.linear_edge.example_level_3"),
-                Component.translatable("jei.payday.linear_edge.rounding"));
+                Component.translatable("jei.payday.linear_edge.example_level_4"));
 
         registration.addItemStackInfo(RegistryItems.SPECIAL_THIEF_3.get().getDefaultInstance(),
                 Component.translatable("jei.payday.redstone_signal.description"),

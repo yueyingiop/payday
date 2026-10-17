@@ -188,7 +188,7 @@ public class Config {
 
         TURRET_YAW_ANGLE = BUILDER
             .comment("炮台左右偏航角(度),左右对称")
-            .defineInRange("yaw_angle", 7, 1, 180);
+            .defineInRange("yaw_angle", 35, 1, 180);
 
         TURRET_PITCH_DOWN_ANGLE = BUILDER
             .comment("炮台最大俯角(度)")

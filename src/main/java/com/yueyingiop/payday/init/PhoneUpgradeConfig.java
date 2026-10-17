@@ -5,7 +5,6 @@ import com.yueyingiop.payday.api.ArmorModifier;
 import com.yueyingiop.payday.api.CooldownHud;
 import com.yueyingiop.payday.api.CooldownHudManager;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
-import com.yueyingiop.payday.event.server.phone.AnarchistEvents;
 import com.yueyingiop.payday.event.server.phone.AntisocialEvents;
 import com.yueyingiop.payday.event.server.phone.HackerEvents;
 import com.yueyingiop.payday.event.server.phone.AssassinEvents;
@@ -164,7 +163,7 @@ public final class PhoneUpgradeConfig {
             event.getDrops().forEach(drop -> drop.getItem().setCount((int) Math.ceil(drop.getItem().getCount() * 1.35D)));
         })
         .addProxyEvent(LivingExperienceDropEvent.class,
-                (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
+                (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.35D))
         .build();
 
     // 玩命关头
@@ -202,8 +201,8 @@ public final class PhoneUpgradeConfig {
         .build();
 
     public static final PhoneUpgradeAction MUSCLE2 = PhoneUpgradeAction.builder()
-         // 1.最大生命值+10%。   
-        .attribute(Attributes.MAX_HEALTH, 0.10D, AttributeModifier.Operation.MULTIPLY_TOTAL)
+         // 1.最大生命值+15%。
+        .attribute(Attributes.MAX_HEALTH, 0.15D, AttributeModifier.Operation.MULTIPLY_TOTAL)
         // 半径8格内存在其他玩家时，替其他玩家承担5%最终伤害；由战斗事件最低优先级处理。
         .build();
 
@@ -213,10 +212,10 @@ public final class PhoneUpgradeConfig {
         .build();
 
     public static final PhoneUpgradeAction MUSCLE4 = PhoneUpgradeAction.builder()
-        // 使用TACZ枪械开火时，有10%概率给予半径16格内的非玩家生物1秒恐惧。
+        // 使用TACZ枪械开火时，有25%概率给予半径16格内的非玩家生物3秒恐惧。
         .addProxyEvent(GunFireEvent.class, (event, owner) -> {
             if (!(owner instanceof Player player) || event.getLogicalSide().isClient()
-                    || event.getShooter() != player || player.getRandom().nextFloat() >= 0.10F) {
+                    || event.getShooter() != player || player.getRandom().nextFloat() >= 0.25F) {
                 return;
             }
             for (LivingEntity target : player.level().getEntitiesOfClass(LivingEntity.class,
@@ -224,7 +223,7 @@ public final class PhoneUpgradeConfig {
                             && !(entity instanceof Player) && entity.isAlive()
                             && entity.distanceToSqr(player) <= 256.0D)) {
                 target.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                        RegistryEffects.FEAR.get(), 20, 0, false, true, true));
+                        RegistryEffects.FEAR.get(), 60, 0, false, true, true));
             }
         })
         .build();
@@ -270,6 +269,7 @@ public final class PhoneUpgradeConfig {
         .build();
     public static final PhoneUpgradeAction LEADER4 = PhoneUpgradeAction.builder()
         // 每个护甲升级插槽额外+15%护甲值; 范围内其他玩家再次+5%最大生命值
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.15D))
         .build();
     public static final PhoneUpgradeAction LEADER5 = PhoneUpgradeAction.builder()
         // 自身伤害减免再次+10%；范围玩家人数加成；获取经验数量+25%。
@@ -285,29 +285,30 @@ public final class PhoneUpgradeConfig {
         .build();
 
     public static final PhoneUpgradeAction ARMORER2 = PhoneUpgradeAction.builder()
-        // 每个护甲升级插槽额外+10%护甲值
-        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
+        // 每个护甲升级插槽额外+15%护甲值
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.15D))
         .build();
 
     public static final PhoneUpgradeAction ARMORER3 = PhoneUpgradeAction.builder()
-        // 每个护甲升级插槽额外+10%护甲值
-        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
+        // 每个护甲升级插槽额外+20%护甲值
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.20D))
         .build();
 
     public static final PhoneUpgradeAction ARMORER4 = PhoneUpgradeAction.builder()
-        // 护甲恢复间隔缩短10%；护甲插槽损坏时提供2秒全伤害免疫，15秒冷却。
+        // 护甲恢复间隔缩短10%；每个护甲升级插槽额外+25%护甲值;
         .armorSoltModifier(
             modifier -> modifier
                 .reduceRecoveryInterval(0.10D)
-                .breakImmunity(2.0D, 15.0D)
+                .addArmorMaxMultiplier(0.25D)
         )
         .build();
     public static final PhoneUpgradeAction ARMORER5 = PhoneUpgradeAction.builder()
-        // 每个护甲升级插槽额外+5%护甲值；恢复间隔再次缩短25%；获取经验数量+25%。
+        // 护甲插槽损坏时提供2秒全伤害免疫，15秒冷却；恢复间隔再次缩短25%；获取经验数量+25%。
         .armorSoltModifier(
             modifier -> modifier
                 .addArmorMaxMultiplier(0.05D)
                 .reduceRecoveryInterval(0.25D)
+                .breakImmunity(2.0D, 15.0D)
         )
         .addProxyEvent(LivingExperienceDropEvent.class,
                 (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
@@ -316,7 +317,7 @@ public final class PhoneUpgradeConfig {
 
     // #region 浪人
     public static final PhoneUpgradeAction ROGUE1 = PhoneUpgradeAction.builder()
-        .attribute(RegistryAttributes.DODGE_CHANCE, 1500.0D, AttributeModifier.Operation.ADDITION)
+        .attribute(RegistryAttributes.DODGE_CHANCE, 1000.0D, AttributeModifier.Operation.ADDITION)
         .build();
     public static final PhoneUpgradeAction ROGUE2 = PhoneUpgradeAction.builder()
         // 半径8格内存在其他玩家时，闪避几率+15%。
@@ -364,8 +365,6 @@ public final class PhoneUpgradeConfig {
         .build();
 
     public static final PhoneUpgradeAction ASSASSIN2 = PhoneUpgradeAction.builder()
-        // 护甲恢复间隔缩短5%
-        .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.05D))
         // 当前枪械弹药容量+50%
         .ammoExpansion(0.50D, PhoneUpgradeAction.Operation.MULTIPLY)
         // 枪械精准度-16
@@ -389,18 +388,17 @@ public final class PhoneUpgradeConfig {
         .build();
 
     public static final PhoneUpgradeAction ASSASSIN3 = PhoneUpgradeAction.builder()
-        // 护甲恢复间隔缩短10%
-        .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.10D))
+        // 护甲恢复间隔缩短15%
+        .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.15D))
         .build();
 
     public static final PhoneUpgradeAction ASSASSIN4 = PhoneUpgradeAction.builder()
-        // 护甲恢复间隔缩短10%
-        .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.10D))
+        // 护甲恢复间隔缩短20%
+        .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.20D))
         .build();
 
     public static final PhoneUpgradeAction ASSASSIN5 = PhoneUpgradeAction.builder()
-        // 护甲恢复间隔缩短10%；每1.5秒恢复一个未损坏护甲; 获取经验数量+25%。
-        .armorSoltModifier(modifier -> modifier.reduceRecoveryInterval(0.10D))
+        // 每1.5秒恢复一个未损坏护甲; 获取经验数量+25%。
         .curioTick((identifier, index, livingEntity, itemStack) -> AssassinEvents.tickAssassin5(livingEntity))
         .addProxyEvent(LivingExperienceDropEvent.class,
                 (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
@@ -409,11 +407,11 @@ public final class PhoneUpgradeConfig {
 
     //#region 窃贼
     public static final PhoneUpgradeAction THIEF1 = PhoneUpgradeAction.builder()
-        .attribute(RegistryAttributes.DODGE_CHANCE, 2000.0D, AttributeModifier.Operation.ADDITION)
+        .attribute(RegistryAttributes.DODGE_CHANCE, 1000.0D, AttributeModifier.Operation.ADDITION)
         .build();
 
     public static final PhoneUpgradeAction THIEF2 = PhoneUpgradeAction.builder()
-        // 停止移动时, 闪避几率+20%
+        // 停止移动时, 闪避几率+15%
         .curioTick((identifier, index, livingEntity, itemStack) -> {
             if (!(livingEntity instanceof Player player)) {
                 return;
@@ -426,7 +424,7 @@ public final class PhoneUpgradeConfig {
                 UUID id = UUID.nameUUIDFromBytes(
                         "payday_phone_upgrade_thief2_stationary_dodge".getBytes(StandardCharsets.UTF_8));
                 dodge.addTransientModifier(new AttributeModifier(id,
-                        "payday_phone_upgrade_thief2_stationary_dodge", 2000.0D,
+                        "payday_phone_upgrade_thief2_stationary_dodge", 1500.0D,
                         AttributeModifier.Operation.ADDITION));
             }
         })
@@ -602,10 +600,10 @@ public final class PhoneUpgradeConfig {
     public static final PhoneUpgradeAction ANTISOCIAL4 = PhoneUpgradeAction.builder()
         // 每个护甲升级插槽的护甲上限额外+10%。
         .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
-        // 击杀非友善生物后恢复30点护甲, 每0.5秒至多生效一次。
+        // 击杀非友善生物后恢复20点护甲, 每0.5秒至多生效一次。
         .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
             if (owner instanceof Player player) {
-                PhoneUpgradeHelper.restoreArmor(event, player, 30.0D, 10L,
+                PhoneUpgradeHelper.restoreArmor(event, player, 20.0D, 10L,
                         "payday_antisocial4_next_repair");
             }
         })
@@ -618,7 +616,7 @@ public final class PhoneUpgradeConfig {
                         "payday_antisocial5_next_repair");
             }
         })
-        // 半径16格内击杀非玩家生物后, 75%概率给予范围内所有非玩家生物1秒恐惧。
+        // 半径16格内击杀非玩家生物后, 75%概率给予范围内所有非玩家生物5秒恐惧。
         .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
             if (!(owner instanceof Player player)
                     || !PhoneUpgradeHelper.isPlayerKillOfNonPlayer(event, player)
@@ -631,7 +629,7 @@ public final class PhoneUpgradeConfig {
                             && target.isAlive()
                             && target.distanceToSqr(player) <= 256.0D)) {
                 target.addEffect(new MobEffectInstance(
-                        RegistryEffects.FEAR.get(), 20, 0, false, true, true));
+                        RegistryEffects.FEAR.get(), 100, 0, false, true, true));
             }
         })
         // 玩家获取经验数量+25%。
@@ -649,30 +647,19 @@ public final class PhoneUpgradeConfig {
                         "payday:item/phone_upgrade/generated/special_anarchist_1"))
         .build();
     public static final PhoneUpgradeAction ANARCHIST2 = PhoneUpgradeAction.builder()
-        // 最大生命值按当前无政府主义者等级缩放，并按公式增加每个 ArmorDefinition 的护甲上限。
-        .curioTick((identifier, index, livingEntity, itemStack) -> {
-            if (livingEntity instanceof Player player) {
-                AnarchistEvents.applyAnarchistHealth(player);
-            }
-        })
-        .armorSoltModifier(modifier -> {
-            if (!(modifier.owner() instanceof Player player)) {
-                return;
-            }
-            int level = PhoneItem.installedSeriesLevel(player, "anarchist");
-            if (level < 2) {
-                return;
-            }
-            double currentHealth = player.getMaxHealth();
-            double originalHealth = currentHealth / Math.pow(0.5D, level - 1);
-            modifier.addArmorMax(AnarchistEvents.anarchistArmorBonus(originalHealth, level));
-        })
+        // 最大生命值降低50%；每个护甲升级插槽的护甲上限额外+100%。
+        .attribute(Attributes.MAX_HEALTH, -0.5D, AttributeModifier.Operation.MULTIPLY_TOTAL)
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(1.0D))
         .build();
-public static final PhoneUpgradeAction ANARCHIST3 = PhoneUpgradeAction.builder()
-        // 该等级本身没有额外独立效果；公式由 ANARCHIST2 根据当前系列等级统一计算。
+    public static final PhoneUpgradeAction ANARCHIST3 = PhoneUpgradeAction.builder()
+        // 最大生命值降低50%；每个护甲升级插槽的护甲上限额外+110%。
+        .attribute(Attributes.MAX_HEALTH, -0.5D, AttributeModifier.Operation.MULTIPLY_TOTAL)
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(1.10D))
         .build();
     public static final PhoneUpgradeAction ANARCHIST4 = PhoneUpgradeAction.builder()
-        // 该等级本身没有额外独立效果；公式由 ANARCHIST2 根据当前系列等级统一计算。
+        // 最大生命值降低50%；每个护甲升级插槽的护甲上限额外+120%。
+        .attribute(Attributes.MAX_HEALTH, -0.5D, AttributeModifier.Operation.MULTIPLY_TOTAL)
+        .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(1.20D))
         .build();
     public static final PhoneUpgradeAction ANARCHIST5 = PhoneUpgradeAction.builder()
         // 造成伤害恢复20点护甲, 每15秒至多生效一次。

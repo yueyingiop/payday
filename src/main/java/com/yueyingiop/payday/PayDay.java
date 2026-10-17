@@ -36,6 +36,8 @@ import com.yueyingiop.payday.menu.ArmorMenu;
 import com.yueyingiop.payday.menu.PhoneMenu;
 import com.yueyingiop.payday.menu.TurretMenu;
 import com.yueyingiop.payday.network.PayDayNetwork;
+import com.yueyingiop.payday.datagen.PhoneUpgradeRecipeProvider;
+import net.minecraftforge.data.event.GatherDataEvent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,6 +68,7 @@ public class PayDay
         TurretFluidManager.registerDefaults();
         modEventBus.addListener(UniversalityEvents::addPlayerAttributes);
         modEventBus.addListener(RegistryEntities::registerAttributes);
+        modEventBus.addListener(PayDay::gatherData);
 
         CREATIVE_MODE_TABS.register(modEventBus);
         RegistryItems.ITEMS.register(modEventBus);
@@ -97,6 +100,11 @@ public class PayDay
         MinecraftForge.EVENT_BUS.register(TestEffectStickEvents.class);
         MinecraftForge.EVENT_BUS.register(TurretEvents.class);
         MinecraftForge.EVENT_BUS.register(CooldownHudEvents.class);
+    }
+
+    private static void gatherData(GatherDataEvent event) {
+        event.getGenerator().addProvider(event.includeServer(),
+                new PhoneUpgradeRecipeProvider(event.getGenerator().getPackOutput()));
     }
 
 }

@@ -1,0 +1,31 @@
+{
+  "type": "tacz:gun_smith_table_crafting",
+  "materials": [
+    {
+      "count": 1,
+      "item": {
+        "item": "minecraft:scute"
+      }
+    },
+    {
+      "count": 1,
+      "item": {
+        "item": "minecraft:lime_dye"
+      }
+    },
+    {
+      "count": 4,
+      "item": {
+        "item": "minecraft:amethyst_shard"
+      }
+    }
+  ],
+  "result": {
+    "type": "custom",
+    "group": "payday:misc",
+    "item": {
+      "count": 1,
+      "item": "payday:ammo_bag"
+    }
+  }
+}

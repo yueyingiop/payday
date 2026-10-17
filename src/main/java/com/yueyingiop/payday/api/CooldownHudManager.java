@@ -185,6 +185,22 @@ public final class CooldownHudManager {
         HUDS.remove(player.getUUID());
     }
 
+    /** Removes every HUD whose ID starts with the supplied internal prefix. */
+    public static void removeByPrefix(Player player, String prefix) {
+        if (!(player instanceof ServerPlayer serverPlayer) || prefix == null) {
+            return;
+        }
+        Map<String, Entry> entries = HUDS.get(serverPlayer.getUUID());
+        if (entries == null) {
+            return;
+        }
+        for (String id : new ArrayList<>(entries.keySet())) {
+            if (id.startsWith(prefix)) {
+                remove(serverPlayer, id);
+            }
+        }
+    }
+
     private static Entry createEntry(CooldownHud hud, long now) {
         return switch (hud.type()) {
             case TIMER -> {

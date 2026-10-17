@@ -51,6 +51,7 @@ minecraft {
         client {
             property 'forge.enabledGameTestNamespaces', mod_id
             property 'mixin.env.remapRefMap', 'true'
+            jvmArgs '-Xms512M', '-Xmx3G'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
         }
 

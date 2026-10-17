@@ -52,13 +52,8 @@ public final class CooldownHudRenderer {
             int x = 0;
             int y = 0;
             for (CooldownHudClientManager.VisibleHud entry : entries) {
-                int width = width(entry.hud().type());
-                if (x + width > graphics.guiWidth()) {
-                    x = 0;
-                    y += HUD_HEIGHT + GAP;
-                }
                 renderEntry(graphics, entry, x, y);
-                x += width + GAP;
+                y += HUD_HEIGHT + GAP;
             }
         } finally {
             graphics.pose().popPose();
@@ -148,6 +143,11 @@ public final class CooldownHudRenderer {
                 graphics.blit(TEXTURE, cursor, y,
                         TIMER_DIGIT_X + digit * DIGIT_SOURCE_STEP, TIMER_DIGIT_Y,
                         DIGIT_WIDTH, DIGIT_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                cursor += DIGIT_WIDTH;
+            } else if (character == '-') {
+                if (cursor + DIGIT_WIDTH <= x + maxWidth) {
+                    graphics.fill(cursor, y + 2, cursor + DIGIT_WIDTH, y + 3, 0xFFFFFFFF);
+                }
                 cursor += DIGIT_WIDTH;
             } else if (character == '.') {
                 if (cursor < x + maxWidth) {

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": {"item": "minecraft:daylight_detector"},
+    "B": {"item": "minecraft:repeater"},
+    "C": {"item": "minecraft:lightning_rod"},
+    "D": {"item": "minecraft:clock"},
+    "E": {"item": "minecraft:observer"},
+    "F": {"item": "minecraft:tripwire_hook"},
+    "G": {"item": "minecraft:note_block"},
+    "H": {"item": "minecraft:lectern"},
+    "I": {"item": "minecraft:redstone_lamp"}
+  },
+  "result": {"item": "payday:phone"}
+}

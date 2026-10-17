@@ -1,0 +1,10 @@
+[18:02:27] [INIT] KubeJS 2001.6.5-build.16; MC 2001 forge
+[18:02:27] [INIT] Loaded plugins:
+[18:02:27] [INIT] - dev.latvian.mods.kubejs.forge.BuiltinKubeJSForgePlugin
+[18:02:27] [INIT] - dev.latvian.mods.kubejs.forge.BuiltinKubeJSForgeClientPlugin
+[18:02:27] [INIT] - com.tacz.guns.compat.kubejs.TimelessKubeJSPlugin
+[18:02:27] [INIT] - com.probejs.ProbeJSPlugin
+[18:02:27] [INIT] - com.yueyingiop.payday.compat.kubejs.PayDayKubeJSPlugin
+[18:02:27] [INFO] example.js#5: Hello, World! (Loaded startup scripts)
+[18:02:27] [INFO] Loaded script startup_scripts:example.js in 0.048 s
+[18:02:27] [INFO] Loaded 1/1 KubeJS startup scripts in 0.716 s with 0 errors and 0 warnings

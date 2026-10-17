@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AED",
+    "BFC"
+  ],
+  "key": {
+    "A": {"item": "minecraft:netherite_scrap"},
+    "B": {"item": "minecraft:iron_ingot"},
+    "C": {"item": "minecraft:dispenser"},
+    "D": {"item": "minecraft:observer"},
+    "E": {"item": "minecraft:lightning_rod"},
+    "F": {"item": "minecraft:redstone_lamp"}
+  },
+  "result": {"item": "payday:turret"}
+}

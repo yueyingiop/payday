@@ -4,6 +4,9 @@ import com.yueyingiop.payday.api.ArmorModifier;
 import com.yueyingiop.payday.api.CooldownHud;
 import com.yueyingiop.payday.api.CooldownHudManager;
 import com.yueyingiop.payday.api.ExposureRiskModifier;
+import com.yueyingiop.payday.api.PhoneUpgradeRecipeGenerator;
+import com.yueyingiop.payday.api.ProbabilityHudManager;
+import com.yueyingiop.payday.api.TaczTabRegistry;
 import com.yueyingiop.payday.api.TurretFluid;
 import com.yueyingiop.payday.api.TurretFluidManager;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
@@ -41,9 +44,12 @@ public class PayDayKubeJSPlugin extends KubeJSPlugin {
         event.add("PhoneUpgradeAction", com.yueyingiop.payday.api.PhoneUpgradeAction.class);
         event.add("PhoneUpgradeBuilder", PhoneUpgradeBuilder.class);
         event.add("PhoneUpgradeHelper", PhoneUpgradeHelper.class);
+        event.add("PhoneUpgradeRecipeGenerator", PhoneUpgradeRecipeGenerator.class);
+        event.add("TaczTabRegistry", TaczTabRegistry.class);
         event.add("PhoneUpgradeHealingMode", PhoneUpgradeHelper.HealingMode.class);
         event.add("CooldownHud", CooldownHud.class);
         event.add("CooldownHudManager", CooldownHudManager.class);
+        event.add("ProbabilityHudManager", ProbabilityHudManager.class);
         event.add("TurretFluid", TurretFluid.class);
         event.add("TurretFluidManager", TurretFluidManager.class);
     }

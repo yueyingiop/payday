@@ -79,7 +79,7 @@ public final class TurretBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.INVISIBLE;
     }
 
     @Override
@@ -166,6 +166,7 @@ public final class TurretBlock extends BaseEntityBlock {
                             ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
         if (!level.isClientSide && level.getBlockEntity(pos) instanceof TurretBlockEntity turret) {
+            turret.setBaseYaw(placer.getYRot());
             if (!turret.isOverloaded()) {
                 turret.activate();
             }

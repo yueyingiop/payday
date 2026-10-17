@@ -6,7 +6,7 @@
 				"identifier": "geometry.unknown",
 				"texture_width": 64,
 				"texture_height": 64,
-				"visible_bounds_width": 6,
+				"visible_bounds_width": 3,
 				"visible_bounds_height": 2.5,
 				"visible_bounds_offset": [0, 0.75, 0]
 			},
@@ -96,12 +96,31 @@
 				{
 					"name": "head",
 					"parent": "out_support",
-					"pivot": [0, 3, 7]
+					"pivot": [0, -5, 7]
+				},
+				{
+					"name": "shaft",
+					"parent": "head",
+					"pivot": [0, 2.5, 1.4],
+					"cubes": [
+						{
+							"origin": [-1, 1, -0.1],
+							"size": [2, 3, 3],
+							"uv": {
+								"north": {"uv": [14, 36], "uv_size": [2, -3]},
+								"east": {"uv": [3, 0], "uv_size": [-3, 3]},
+								"south": {"uv": [20, 4], "uv_size": [2, -3]},
+								"west": {"uv": [0, 0], "uv_size": [3, 3]},
+								"up": {"uv": [2, 3], "uv_size": [-2, -3]},
+								"down": {"uv": [2, 3], "uv_size": [-2, -3]}
+							}
+						}
+					]
 				},
 				{
 					"name": "gun",
-					"parent": "head",
-					"pivot": [0, 5, 1.9],
+					"parent": "shaft",
+					"pivot": [0, 4, 1.5],
 					"cubes": [
 						{
 							"origin": [-3.5, 4, -9],
@@ -137,25 +156,6 @@
 								"west": {"uv": [4, 30], "uv_size": [3, 2]},
 								"up": {"uv": [9, 33], "uv_size": [-2, -3]},
 								"down": {"uv": [11, 33], "uv_size": [-2, -3]}
-							}
-						}
-					]
-				},
-				{
-					"name": "laser",
-					"parent": "gun",
-					"pivot": [0, 5, 0],
-					"cubes": [
-						{
-							"origin": [0.5, 6, 9],
-							"size": [1, 1, 29],
-							"uv": {
-								"north": {"uv": [11, 32], "uv_size": [1, 1]},
-								"east": {"uv": [31, 2], "uv_size": [29, 1]},
-								"south": {"uv": [11, 32], "uv_size": [1, 1]},
-								"west": {"uv": [60, 2], "uv_size": [-29, 1]},
-								"up": {"uv": [1, 59], "uv_size": [-1, -29]},
-								"down": {"uv": [0, 30], "uv_size": [1, 29]}
 							}
 						}
 					]

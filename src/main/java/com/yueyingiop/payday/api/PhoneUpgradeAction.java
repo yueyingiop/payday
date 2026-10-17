@@ -270,6 +270,15 @@ public final class PhoneUpgradeAction {
         return effects;
     }
 
+    /** Returns whether this upgrade proxies the supplied Forge event type. */
+    public boolean hasProxyEvent(Class<? extends Event> eventType) {
+        if (eventType == null) {
+            return false;
+        }
+        return proxyEvents.stream().anyMatch(definition -> eventType.isAssignableFrom(
+                definition.eventType()));
+    }
+
     /**
      * 根据当前安装的扩容升级同步 TACZ 枪械的最终弹匣容量。
      *

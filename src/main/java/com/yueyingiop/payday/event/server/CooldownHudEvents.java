@@ -1,6 +1,7 @@
 package com.yueyingiop.payday.event.server;
 
 import com.yueyingiop.payday.api.CooldownHudManager;
+import com.yueyingiop.payday.api.ProbabilityHudManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -47,5 +48,6 @@ public final class CooldownHudEvents {
     @SubscribeEvent
     public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         CooldownHudManager.forget(event.getEntity());
+        ProbabilityHudManager.forget(event.getEntity());
     }
 }
