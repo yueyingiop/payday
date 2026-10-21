@@ -8,6 +8,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Locale;
 
@@ -15,6 +17,10 @@ import java.util.Locale;
 public final class CooldownHudRenderer {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             "payday", "textures/gui/cd.png");
+    private static final ResourceLocation TEXTURE_TEXT = ResourceLocation.fromNamespaceAndPath(
+            "payday", "textures/gui/cd_text.png");
+    private static final ResourceLocation TEXTURE_ATTRIBUTE = ResourceLocation.fromNamespaceAndPath(
+            "payday", "textures/gui/cd_attribute.png");
     private static final int TEXTURE_WIDTH = 128;
     private static final int TEXTURE_HEIGHT = 64;
     private static final int TIMER_WIDTH = 42;
@@ -27,6 +33,7 @@ public final class CooldownHudRenderer {
     private static final int DIGIT_WIDTH = 3;
     private static final int DIGIT_HEIGHT = 5;
     private static final int DIGIT_SOURCE_STEP = 6;
+    private static final int DIGIT_SPACING = 1;
 
     private CooldownHudRenderer() {
     }
@@ -65,22 +72,31 @@ public final class CooldownHudRenderer {
                                     CooldownHudClientManager.VisibleHud entry,
                                     int x, int y) {
         CooldownHud.Type type = entry.hud().type();
+        boolean textMode = type == CooldownHud.Type.PROBABILITY
+                && Minecraft.getInstance().options.keyPlayerList.isDown();
         int width = width(type);
         int sourceX = switch (type) {
             case TIMER -> 0;
             case PROBABILITY -> 43;
             case TRIGGER -> 84;
         };
-        graphics.blit(TEXTURE, x, y, sourceX, 0, width, HUD_HEIGHT,
-                TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        if (textMode) {
+            graphics.blit(TEXTURE_TEXT, x, y, 0, 0, PROBABILITY_WIDTH, HUD_HEIGHT,
+                    PROBABILITY_WIDTH, HUD_HEIGHT);
+        } else {
+            graphics.blit(TEXTURE, x, y, sourceX, 0, width, HUD_HEIGHT,
+                    TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        }
 
-        if (entry.hud().texture() != null) {
+        if (!textMode && entry.hud().texture() != null) {
+            int sourceWidth = TEXTURE_ATTRIBUTE.equals(entry.hud().texture()) ? 64 : 16;
             graphics.blit(entry.hud().texture(), x + 3, y + 3,
-                    0, 0, 16, 16, 16, 16);
+                    entry.hud().textureU(), entry.hud().textureV(),
+                    16, 16, sourceWidth, sourceWidth);
         }
         switch (type) {
             case TIMER -> renderTimer(graphics, entry, x, y);
-            case PROBABILITY -> renderProbability(graphics, entry, x, y);
+            case PROBABILITY -> renderProbability(graphics, entry, x, y, textMode);
             case TRIGGER -> {
             }
         }
@@ -102,32 +118,63 @@ public final class CooldownHudRenderer {
 
     private static void renderProbability(GuiGraphics graphics,
                                           CooldownHudClientManager.VisibleHud entry,
-                                          int x, int y) {
-        String value = Integer.toString((int) Math.round(entry.hud().value()));
-        drawCompactDigits(graphics, value, x + 20, y + 3, 11);
-        if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
+                                          int x, int y, boolean textMode) {
+        if (textMode) {
             renderProbabilityName(graphics, entry.hud(), x, y);
+        } else if (entry.hud().showValue()) {
+            String value = entry.hud().percentage()
+                    ? Integer.toString((int) Math.round(entry.hud().value()))
+                    : formatNumber(entry.hud().value());
+            drawCompactDigits(graphics, value, x + 20, y + 3, 18);
         }
     }
 
-    /** 按住 Tab 时在概率型 HUD 右下角显示属性名称。 */
+    /** 按住 Tab 时在 cd_text 纹理的中间区域显示概率型 HUD 名称。 */
     private static void renderProbabilityName(GuiGraphics graphics, CooldownHud hud,
                                               int x, int y) {
         Font font = Minecraft.getInstance().font;
-        int maxWidth = PROBABILITY_WIDTH - 22;
-        int maxHeight = HUD_HEIGHT - 11;
-        int textWidth = font.width(hud.name());
+        int maxWidth = 34;
+        int maxHeight = 16;
+        String text = hud.name().getString();
+        int textWidth = spacedTextWidth(font, text, 1);
         float scale = textWidth <= 0 ? 1.0F : Math.min(1.0F, maxWidth / (float) textWidth);
         int scaledWidth = Math.round(textWidth * scale);
         int scaledHeight = Math.round(font.lineHeight * scale);
-        float drawX = x + 22.0F + (maxWidth - scaledWidth) / 2.0F;
-        float drawY = y + 11.0F + Math.max(0.0F, (maxHeight - scaledHeight) / 2.0F);
+        float drawX = x + 3.0F + (maxWidth - scaledWidth) / 2.0F;
+        float drawY = y + 3.0F + Math.max(0.0F, (maxHeight - scaledHeight) / 2.0F);
 
         graphics.pose().pushPose();
         graphics.pose().translate(drawX, drawY, 0.0D);
         graphics.pose().scale(scale, scale, 1.0F);
-        graphics.drawString(font, hud.name(), 0, 0, 0xFFFFFFFF, false);
+        drawSpacedText(graphics, font, text, 0, 0, 0xFFFFFFFF, 1);
         graphics.pose().popPose();
+    }
+
+    /** 计算带字间距的文本宽度。 */
+    private static int spacedTextWidth(Font font, String text, int spacing) {
+        int width = 0;
+        int index = 0;
+        while (index < text.length()) {
+            int codePoint = text.codePointAt(index);
+            String character = new String(Character.toChars(codePoint));
+            width += font.width(character) + spacing;
+            index += Character.charCount(codePoint);
+        }
+        return Math.max(0, width - spacing);
+    }
+
+    /** 绘制带字间距的单行文本。 */
+    private static void drawSpacedText(GuiGraphics graphics, Font font, String text,
+                                       int x, int y, int color, int spacing) {
+        int cursor = x;
+        int index = 0;
+        while (index < text.length()) {
+            int codePoint = text.codePointAt(index);
+            String character = new String(Character.toChars(codePoint));
+            graphics.drawString(font, character, cursor, y, color, false);
+            cursor += font.width(character) + spacing;
+            index += Character.charCount(codePoint);
+        }
     }
 
     private static void drawCompactDigits(GuiGraphics graphics, String value,
@@ -143,21 +190,27 @@ public final class CooldownHudRenderer {
                 graphics.blit(TEXTURE, cursor, y,
                         TIMER_DIGIT_X + digit * DIGIT_SOURCE_STEP, TIMER_DIGIT_Y,
                         DIGIT_WIDTH, DIGIT_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-                cursor += DIGIT_WIDTH;
+                cursor += DIGIT_WIDTH + DIGIT_SPACING;
             } else if (character == '-') {
                 if (cursor + DIGIT_WIDTH <= x + maxWidth) {
                     graphics.fill(cursor, y + 2, cursor + DIGIT_WIDTH, y + 3, 0xFFFFFFFF);
                 }
-                cursor += DIGIT_WIDTH;
+                cursor += DIGIT_WIDTH + DIGIT_SPACING;
             } else if (character == '.') {
                 if (cursor < x + maxWidth) {
                     graphics.fill(cursor, y + DIGIT_HEIGHT - 1,
                             Math.min(cursor + 1, x + maxWidth), y + DIGIT_HEIGHT,
                             0xFFFFFFFF);
                 }
-                cursor++;
+                cursor += 1 + DIGIT_SPACING;
             }
         }
+    }
+
+    /** 将属性原始值格式化为不带百分号的紧凑数字。 */
+    private static String formatNumber(double value) {
+        return BigDecimal.valueOf(value).setScale(3, RoundingMode.HALF_UP)
+                .stripTrailingZeros().toPlainString();
     }
 
     private static int width(CooldownHud.Type type) {

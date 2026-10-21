@@ -29,7 +29,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
 import com.tacz.guns.api.event.common.GunFireEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -112,13 +111,8 @@ public final class PhoneUpgradeConfig {
     // 头盔飞舞
     public static final PhoneUpgradeAction MISC_HELMET_DANCE = PhoneUpgradeAction.builder()
         // 1.爆头伤害+25%〔来自于TACZ〕
-        .addProxyEvent(EntityHurtByGunEvent.Pre.class, (event, owner) -> {
-            if (!(owner instanceof Player player) || event.getLogicalSide().isClient()
-                    || event.getAttacker() != player || !event.isHeadShot()) {
-                return;
-            }
-            event.setHeadshotMultiplier(event.getHeadshotMultiplier() * 1.25F);
-        })
+        .attribute(RegistryAttributes.HEADSHOT_DAMAGE, 0.25D,
+                AttributeModifier.Operation.MULTIPLY_TOTAL)
         .build();
 
     // 叶蔽于林

@@ -12,7 +12,9 @@ import java.util.function.Supplier;
 /** 服务端向客户端同步冷却 HUD 状态。 */
 public record CooldownHudSyncPacket(int entityId, String id, boolean remove,
                                     int type, String texture, double value,
-                                    Component name, long remainingTicks, long totalTicks) {
+                                    Component name, boolean showValue, boolean percentage,
+                                    int textureU, int textureV,
+                                    long remainingTicks, long totalTicks) {
     /**
      * 编码数据包。
      *
@@ -27,6 +29,10 @@ public record CooldownHudSyncPacket(int entityId, String id, boolean remove,
         buffer.writeUtf(packet.texture());
         buffer.writeDouble(packet.value());
         buffer.writeComponent(packet.name());
+        buffer.writeBoolean(packet.showValue());
+        buffer.writeBoolean(packet.percentage());
+        buffer.writeInt(packet.textureU());
+        buffer.writeInt(packet.textureV());
         buffer.writeLong(packet.remainingTicks());
         buffer.writeLong(packet.totalTicks());
     }
@@ -40,6 +46,7 @@ public record CooldownHudSyncPacket(int entityId, String id, boolean remove,
     public static CooldownHudSyncPacket decode(FriendlyByteBuf buffer) {
         return new CooldownHudSyncPacket(buffer.readInt(), buffer.readUtf(), buffer.readBoolean(),
                 buffer.readInt(), buffer.readUtf(), buffer.readDouble(), buffer.readComponent(),
+                buffer.readBoolean(), buffer.readBoolean(), buffer.readInt(), buffer.readInt(),
                 buffer.readLong(), buffer.readLong());
     }
 

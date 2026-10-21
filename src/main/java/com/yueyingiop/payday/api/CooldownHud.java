@@ -14,7 +14,7 @@ public final class CooldownHud {
     public enum Type {
         /** 显示剩余时间和冷却进度。 */
         TIMER,
-        /** 显示永久存在的百分比数值。 */
+        /** 显示永久存在的概率型数值。默认按百分比格式绘制。 */
         PROBABILITY,
         /** 触发后显示固定五秒。 */
         TRIGGER;
@@ -44,12 +44,22 @@ public final class CooldownHud {
     private final ResourceLocation texture;
     private final double value;
     private final Component name;
+    private final boolean showValue;
+    private final boolean percentage;
+    private final int textureU;
+    private final int textureV;
 
-    private CooldownHud(Type type, ResourceLocation texture, double value, Component name) {
+    /** 创建不可变的 HUD 描述对象。 */
+    private CooldownHud(Type type, ResourceLocation texture, double value, Component name,
+                        boolean showValue, boolean percentage, int textureU, int textureV) {
         this.type = type;
         this.texture = texture;
         this.value = value;
         this.name = name;
+        this.showValue = showValue;
+        this.percentage = percentage;
+        this.textureU = textureU;
+        this.textureV = textureV;
     }
 
     /**
@@ -78,6 +88,29 @@ public final class CooldownHud {
         return new Builder().type(type).texture(texture).value(value).showName(name).build();
     }
 
+    /** 创建一个已经解析好的冷却 HUD，并控制是否绘制数值。 */
+    public static CooldownHud of(Type type, ResourceLocation texture, double value,
+                                 Component name, boolean showValue) {
+        return new Builder().type(type).texture(texture).value(value).showName(name)
+                .showValue(showValue).build();
+    }
+
+    /** 创建一个已经解析好的冷却 HUD，并控制数值和百分比格式。 */
+    public static CooldownHud of(Type type, ResourceLocation texture, double value,
+                                 Component name, boolean showValue, boolean percentage) {
+        return new Builder().type(type).texture(texture).value(value).showName(name)
+                .showValue(showValue).percentage(percentage).build();
+    }
+
+    /** 创建一个已经解析好的冷却 HUD，并指定图标纹理分块坐标。 */
+    public static CooldownHud of(Type type, ResourceLocation texture, double value,
+                                 Component name, boolean showValue, boolean percentage,
+                                 int textureU, int textureV) {
+        return new Builder().type(type).texture(texture).value(value).showName(name)
+                .showValue(showValue).percentage(percentage)
+                .texturePosition(textureU, textureV).build();
+    }
+
     /**
      * 获取 HUD 类型。
      *
@@ -99,8 +132,8 @@ public final class CooldownHud {
     /**
      * 获取 HUD 数值。
      *
-     * <p>计时型单位为秒，概率型单位为百分比，触发型忽略该数值。概率型也可以显示负数，
-     * 用于属性减少类 HUD。</p>
+     * <p>计时型单位为秒；概率型默认按百分比数值处理，也可以通过
+     * {@link Builder#percentage(boolean)} 使用原始数值；触发型忽略该数值。</p>
      *
      * @return HUD 数值
      */
@@ -113,13 +146,38 @@ public final class CooldownHud {
         return name;
     }
 
+    /** 获取 HUD 是否绘制数值。 */
+    public boolean showValue() {
+        return showValue;
+    }
+
+    /** 获取概率型 HUD 是否按百分比数值格式绘制。 */
+    public boolean percentage() {
+        return percentage;
+    }
+
+    /** 获取图标纹理的横向分块坐标。 */
+    public int textureU() {
+        return textureU;
+    }
+
+    /** 获取图标纹理的纵向分块坐标。 */
+    public int textureV() {
+        return textureV;
+    }
+
     /** 冷却 HUD 构造器。 */
     public static final class Builder {
         private Type type;
         private ResourceLocation texture;
         private double value;
         private Component name;
+        private boolean showValue = true;
+        private boolean percentage = true;
+        private int textureU;
+        private int textureV;
 
+        /** Creates an empty HUD builder with percentage formatting enabled. */
         private Builder() {
         }
 
@@ -185,10 +243,32 @@ public final class CooldownHud {
             return this;
         }
 
+        /** 设置 HUD 是否绘制数字。 */
+        public Builder showValue(boolean showValue) {
+            this.showValue = showValue;
+            return this;
+        }
+
+        /** 设置概率型 HUD 是否按百分比数值格式绘制。 */
+        public Builder percentage(boolean percentage) {
+            this.percentage = percentage;
+            return this;
+        }
+
+        /** 设置 16x16 图标在纹理表中的左上角坐标。 */
+        public Builder texturePosition(int textureU, int textureV) {
+            if (textureU < 0 || textureV < 0) {
+                throw new IllegalArgumentException("Texture position must not be negative");
+            }
+            this.textureU = textureU;
+            this.textureV = textureV;
+            return this;
+        }
+
         /**
          * 设置 HUD 数值。
          *
-         * @param value 计时型为秒，概率型为百分比，触发型忽略该值
+         * @param value 计时型为秒，概率型按 {@link #percentage(boolean)} 决定格式，触发型忽略该值
          * @return 当前构造器
          */
         public Builder value(double value) {
@@ -210,14 +290,18 @@ public final class CooldownHud {
             }
             double normalizedValue = switch (type) {
                 case TIMER -> Math.max(0.0D, Math.min(999.9D, value));
-                case PROBABILITY -> Math.max(-999.0D, Math.min(999.0D, value));
+                case PROBABILITY -> percentage
+                        ? Math.max(-999.0D, Math.min(999.0D, value))
+                        : Math.max(-999999.0D, Math.min(999999.0D, value));
                 case TRIGGER -> 0.0D;
             };
             Component normalizedName = name == null
                     ? Component.translatable("cooldown_hud.payday.unknown") : name;
-            return new CooldownHud(type, texture, normalizedValue, normalizedName);
+            return new CooldownHud(type, texture, normalizedValue, normalizedName,
+                    showValue, percentage, textureU, textureV);
         }
 
+        /** 解析字符串形式的纹理资源路径。 */
         private static ResourceLocation parseTexture(String value) {
             if (value == null || value.isBlank()) {
                 return null;
@@ -229,6 +313,7 @@ public final class CooldownHud {
             return normalizeTexture(parsed);
         }
 
+        /** 将纹理路径规范化为带 textures 前缀和 png 后缀的资源路径。 */
         private static ResourceLocation normalizeTexture(ResourceLocation texture) {
             if (texture == null) {
                 return null;

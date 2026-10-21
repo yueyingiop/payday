@@ -128,6 +128,7 @@
   "effect.payday.infiltration": "渗透",
 
   "attribute.name.payday.ranged_damage": "远程伤害",
+  "attribute.name.payday.headshot_damage": "爆头伤害",
   "attribute.name.payday.dodge_chance": "闪避几率",
   "attribute.name.payday.exposure_risk": "暴露风险",
 

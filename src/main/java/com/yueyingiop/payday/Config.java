@@ -31,6 +31,8 @@ public class Config {
     public static final ForgeConfigSpec.IntValue EXPOSURE_RISK_MAX;
     public static final ForgeConfigSpec.IntValue EXPOSURE_RISK_DEFAULT;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> EXPOSURE_SPECIAL_ITEM_RISKS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>>
+            PROBABILITY_HUD_ATTRIBUTE_ICONS;
 
     public static final ForgeConfigSpec.BooleanValue COMPACT_HUD;
     public static final ForgeConfigSpec.DoubleValue EQUIPMENT_BOX_HUD_X_RATIO;
@@ -139,6 +141,22 @@ public class Config {
             .defineListAllowEmpty(
                 List.of("exposure_special_item_risks"),
                 List::of, 
+                value -> value instanceof String
+            );
+
+        PROBABILITY_HUD_ATTRIBUTE_ICONS = BUILDER
+            .comment("概率型 CDHUD 属性图标白名单。格式：属性ID.-图标资源路径")
+            .comment("示例：minecraft:generic.attack_damage.-payday:item/phone_upgrade/generated/basic_attack_1")
+            .comment("内置图标表 payday:gui/cd_attribute 的顺序：速度、近战、远程、爆头、闪避、减伤")
+            .defineListAllowEmpty(
+                List.of("probability_hud_attribute_icons"),
+                () -> List.of(
+                    "minecraft:generic.movement_speed.-payday:gui/cd_attribute",
+                    "minecraft:generic.attack_damage.-payday:gui/cd_attribute",
+                    "payday:ranged_damage.-payday:gui/cd_attribute",
+                    "payday:headshot_damage.-payday:gui/cd_attribute",
+                    "payday:dodge_chance.-payday:gui/cd_attribute",
+                    "tacz:tacz.bullet_resistance.-payday:gui/cd_attribute"),
                 value -> value instanceof String
             );
         BUILDER.pop();

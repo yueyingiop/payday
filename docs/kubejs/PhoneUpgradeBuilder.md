@@ -182,6 +182,12 @@ StartupEvents.registry('item', event => {
 .attribute('minecraft:generic.movement_speed', 0.15, 'MULTIPLY_BASE')
 ```
 
+TACZ 爆头伤害也可以直接使用通用属性，不需要额外的事件回调：
+
+```js
+.attribute('payday:headshot_damage', 0.25, 'MULTIPLY_TOTAL')
+```
+
 ### effect(effectId, durationTicks, amplifier)
 
 添加药水效果。

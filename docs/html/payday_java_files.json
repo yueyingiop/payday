@@ -1,0 +1,1587 @@
+[
+  {
+    "path": "api/ArmorModifier.java",
+    "name": "ArmorModifier",
+    "folder": "api",
+    "doc": "描述护甲修饰、护盾冷却和伤害免疫等运行时状态。",
+    "links": [
+      "api/ArmorModifierRegistry.java",
+      "api/CooldownHud.java",
+      "api/CooldownHudManager.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "api/ArmorModifierRegistry.java",
+    "name": "ArmorModifierRegistry",
+    "folder": "api",
+    "doc": "ArmorModifierRegistry：对外提供可复用的手机升级、护甲、冷却 HUD、暴露风险和炮台接口。",
+    "links": [
+      "item/ArmorCurioItem.java"
+    ]
+  },
+  {
+    "path": "api/CooldownHud.java",
+    "name": "CooldownHud",
+    "folder": "api",
+    "doc": "描述可显示冷却、概率属性或文本信息的 HUD 项。",
+    "links": [
+      "api/CooldownHudManager.java"
+    ]
+  },
+  {
+    "path": "api/CooldownHudClientManager.java",
+    "name": "CooldownHudClientManager",
+    "folder": "api",
+    "doc": "维护客户端收到的冷却 HUD 状态。",
+    "links": [
+      "api/CooldownHud.java",
+      "network/CooldownHudSyncPacket.java"
+    ]
+  },
+  {
+    "path": "api/CooldownHudManager.java",
+    "name": "CooldownHudManager",
+    "folder": "api",
+    "doc": "管理服务器侧冷却 HUD 的创建、触发和同步。",
+    "links": [
+      "api/CooldownHud.java",
+      "network/CooldownHudSyncPacket.java",
+      "network/PayDayNetwork.java"
+    ]
+  },
+  {
+    "path": "api/ExposureRiskModifier.java",
+    "name": "ExposureRiskModifier",
+    "folder": "api",
+    "doc": "描述暴露风险的增加、减少和持续时间修饰。",
+    "links": [
+      "exposure/ExposureRisk.java"
+    ]
+  },
+  {
+    "path": "api/helper/AttributeModifierHelper.java",
+    "name": "AttributeModifierHelper",
+    "folder": "api/helper",
+    "doc": "AttributeModifierHelper：存放跨系统复用的属性、渲染、配置、Curios 和手机升级辅助逻辑。",
+    "links": []
+  },
+  {
+    "path": "api/helper/ConfigScreenHelper.java",
+    "name": "ConfigScreenHelper",
+    "folder": "api/helper",
+    "doc": "ConfigScreenHelper：存放跨系统复用的属性、渲染、配置、Curios 和手机升级辅助逻辑。",
+    "links": []
+  },
+  {
+    "path": "api/helper/CurioHelper.java",
+    "name": "CurioHelper",
+    "folder": "api/helper",
+    "doc": "CurioHelper：存放跨系统复用的属性、渲染、配置、Curios 和手机升级辅助逻辑。",
+    "links": []
+  },
+  {
+    "path": "api/helper/PhoneUpgradeHelper.java",
+    "name": "PhoneUpgradeHelper",
+    "folder": "api/helper",
+    "doc": "PhoneUpgradeHelper：存放跨系统复用的属性、渲染、配置、Curios 和手机升级辅助逻辑。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/CurioHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "init/RegistryEffects.java",
+      "item/ArmorCurioItem.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "api/helper/RenderHelper.java",
+    "name": "RenderHelper",
+    "folder": "api/helper",
+    "doc": "RenderHelper：存放跨系统复用的属性、渲染、配置、Curios 和手机升级辅助逻辑。",
+    "links": []
+  },
+  {
+    "path": "api/helper/TextureFontHelper.java",
+    "name": "TextureFontHelper",
+    "folder": "api/helper",
+    "doc": "TextureFontHelper：存放跨系统复用的属性、渲染、配置、Curios 和手机升级辅助逻辑。",
+    "links": []
+  },
+  {
+    "path": "api/KeyActivate.java",
+    "name": "KeyActivate",
+    "folder": "api",
+    "doc": "KeyActivate：对外提供可复用的手机升级、护甲、冷却 HUD、暴露风险和炮台接口。",
+    "links": []
+  },
+  {
+    "path": "api/phone/AmmoExpansion.java",
+    "name": "AmmoExpansion",
+    "folder": "api/phone",
+    "doc": "AmmoExpansion：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": [
+      "api/PhoneUpgradeAction.java"
+    ]
+  },
+  {
+    "path": "api/phone/ArmorSoltModifier.java",
+    "name": "ArmorSoltModifier",
+    "folder": "api/phone",
+    "doc": "ArmorSoltModifier：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": [
+      "api/ArmorModifier.java"
+    ]
+  },
+  {
+    "path": "api/phone/AttributeDefinition.java",
+    "name": "AttributeDefinition",
+    "folder": "api/phone",
+    "doc": "AttributeDefinition：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": []
+  },
+  {
+    "path": "api/phone/CurioTick.java",
+    "name": "CurioTick",
+    "folder": "api/phone",
+    "doc": "CurioTick：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": [
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "api/phone/DamageImmunity.java",
+    "name": "DamageImmunity",
+    "folder": "api/phone",
+    "doc": "DamageImmunity：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": []
+  },
+  {
+    "path": "api/phone/ProxyEvent.java",
+    "name": "ProxyEvent",
+    "folder": "api/phone",
+    "doc": "ProxyEvent：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": []
+  },
+  {
+    "path": "api/phone/ProxyEventDefinition.java",
+    "name": "ProxyEventDefinition",
+    "folder": "api/phone",
+    "doc": "ProxyEventDefinition：定义手机升级 API 使用的回调接口、属性定义和事件代理数据。",
+    "links": [
+      "api/phone/ProxyEvent.java"
+    ]
+  },
+  {
+    "path": "api/PhoneUpgradeAction.java",
+    "name": "PhoneUpgradeAction",
+    "folder": "api",
+    "doc": "描述手机升级提供的属性、状态、事件代理和护甲处理效果。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/AttributeModifierHelper.java",
+      "api/helper/CurioHelper.java",
+      "api/KeyActivate.java",
+      "api/phone/AmmoExpansion.java",
+      "api/phone/ArmorSoltModifier.java",
+      "api/phone/AttributeDefinition.java",
+      "api/phone/CurioTick.java",
+      "api/phone/DamageImmunity.java",
+      "api/phone/ProxyEvent.java",
+      "api/phone/ProxyEventDefinition.java",
+      "item/ArmorCurioItem.java",
+      "item/PhoneItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "api/PhoneUpgradeRecipeGenerator.java",
+    "name": "PhoneUpgradeRecipeGenerator",
+    "folder": "api",
+    "doc": "提供手机升级配方的程序化生成方法。",
+    "links": [
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "api/ProbabilityHudManager.java",
+    "name": "ProbabilityHudManager",
+    "folder": "api",
+    "doc": "收集并合并概率型属性 HUD。",
+    "links": [
+      "api/CooldownHud.java",
+      "api/CooldownHudManager.java",
+      "api/helper/CurioHelper.java",
+      "api/helper/PhoneUpgradeHelper.java",
+      "api/phone/AttributeDefinition.java",
+      "Config.java",
+      "item/PhoneItem.java",
+      "item/PhoneUpgradeItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "api/record/ArmorTarget.java",
+    "name": "ArmorTarget",
+    "folder": "api/record",
+    "doc": "ArmorTarget：存放供多个系统传递结构化状态的轻量数据记录。",
+    "links": [
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java"
+    ]
+  },
+  {
+    "path": "api/record/TemporaryBlockState.java",
+    "name": "TemporaryBlockState",
+    "folder": "api/record",
+    "doc": "TemporaryBlockState：存放供多个系统传递结构化状态的轻量数据记录。",
+    "links": []
+  },
+  {
+    "path": "api/TaczTabRegistry.java",
+    "name": "TaczTabRegistry",
+    "folder": "api",
+    "doc": "管理 TACZ 附件工作台标签页及其注册 API。",
+    "links": []
+  },
+  {
+    "path": "api/turret/TurretAimHelper.java",
+    "name": "TurretAimHelper",
+    "folder": "api/turret",
+    "doc": "TurretAimHelper：存放炮台瞄准、战斗、实体绑定和流体处理辅助逻辑。",
+    "links": [
+      "block/TurretBlockEntity.java",
+      "Config.java"
+    ]
+  },
+  {
+    "path": "api/turret/TurretCombatHelper.java",
+    "name": "TurretCombatHelper",
+    "folder": "api/turret",
+    "doc": "TurretCombatHelper：存放炮台瞄准、战斗、实体绑定和流体处理辅助逻辑。",
+    "links": [
+      "api/turret/TurretAimHelper.java",
+      "api/turret/TurretEntityBindingHelper.java",
+      "api/TurretTemperature.java",
+      "block/TurretBlock.java",
+      "block/TurretBlockEntity.java",
+      "Config.java",
+      "entity/TurretEntity.java"
+    ]
+  },
+  {
+    "path": "api/turret/TurretEntityBindingHelper.java",
+    "name": "TurretEntityBindingHelper",
+    "folder": "api/turret",
+    "doc": "TurretEntityBindingHelper：存放炮台瞄准、战斗、实体绑定和流体处理辅助逻辑。",
+    "links": [
+      "block/TurretBlockEntity.java",
+      "entity/TurretEntity.java",
+      "init/RegistryEntities.java"
+    ]
+  },
+  {
+    "path": "api/turret/TurretFluidHandler.java",
+    "name": "TurretFluidHandler",
+    "folder": "api/turret",
+    "doc": "TurretFluidHandler：存放炮台瞄准、战斗、实体绑定和流体处理辅助逻辑。",
+    "links": [
+      "block/TurretBlockEntity.java"
+    ]
+  },
+  {
+    "path": "api/turret/TurretFluidState.java",
+    "name": "TurretFluidState",
+    "folder": "api/turret",
+    "doc": "TurretFluidState：存放炮台瞄准、战斗、实体绑定和流体处理辅助逻辑。",
+    "links": [
+      "api/TurretFluid.java",
+      "api/TurretFluidManager.java",
+      "api/TurretTemperature.java",
+      "block/TurretBlockEntity.java"
+    ]
+  },
+  {
+    "path": "api/TurretFluid.java",
+    "name": "TurretFluid",
+    "folder": "api",
+    "doc": "TurretFluid：对外提供可复用的手机升级、护甲、冷却 HUD、暴露风险和炮台接口。",
+    "links": [
+      "api/TurretFluidManager.java"
+    ]
+  },
+  {
+    "path": "api/TurretFluidManager.java",
+    "name": "TurretFluidManager",
+    "folder": "api",
+    "doc": "TurretFluidManager：对外提供可复用的手机升级、护甲、冷却 HUD、暴露风险和炮台接口。",
+    "links": [
+      "api/TurretFluid.java"
+    ]
+  },
+  {
+    "path": "api/TurretTemperature.java",
+    "name": "TurretTemperature",
+    "folder": "api",
+    "doc": "TurretTemperature：对外提供可复用的手机升级、护甲、冷却 HUD、暴露风险和炮台接口。",
+    "links": [
+      "block/TurretBlockEntity.java",
+      "Config.java"
+    ]
+  },
+  {
+    "path": "block/SupplyBlock.java",
+    "name": "SupplyBlock",
+    "folder": "block",
+    "doc": "SupplyBlock：实现补给方块、炮台方块及其方块实体行为。",
+    "links": [
+      "block/SupplyBlockEntity.java",
+      "event/server/SupplyEvents.java",
+      "init/RegistryBlocks.java",
+      "init/RegistryItems.java",
+      "item/AmmoBagItem.java",
+      "item/ArmorPlateItem.java",
+      "item/FirstAidKitItem.java"
+    ]
+  },
+  {
+    "path": "block/SupplyBlockEntity.java",
+    "name": "SupplyBlockEntity",
+    "folder": "block",
+    "doc": "SupplyBlockEntity：实现补给方块、炮台方块及其方块实体行为。",
+    "links": [
+      "block/SupplyBlock.java",
+      "init/RegistryBlockEntities.java"
+    ]
+  },
+  {
+    "path": "block/TurretBlock.java",
+    "name": "TurretBlock",
+    "folder": "block",
+    "doc": "TurretBlock：实现补给方块、炮台方块及其方块实体行为。",
+    "links": [
+      "block/TurretBlockEntity.java",
+      "init/RegistryItems.java",
+      "menu/TurretMenu.java"
+    ]
+  },
+  {
+    "path": "block/TurretBlockEntity.java",
+    "name": "TurretBlockEntity",
+    "folder": "block",
+    "doc": "负责炮台 tick、流体、温度和交互状态。",
+    "links": [
+      "api/turret/TurretAimHelper.java",
+      "api/turret/TurretCombatHelper.java",
+      "api/turret/TurretEntityBindingHelper.java",
+      "api/turret/TurretFluidHandler.java",
+      "api/turret/TurretFluidState.java",
+      "api/TurretTemperature.java",
+      "block/TurretBlock.java",
+      "Config.java",
+      "entity/TurretEntity.java",
+      "init/RegistryBlockEntities.java"
+    ]
+  },
+  {
+    "path": "client/base/StringListEditScreen.java",
+    "name": "StringListEditScreen",
+    "folder": "client/base",
+    "doc": "StringListEditScreen：存放可复用的客户端基础界面组件。",
+    "links": []
+  },
+  {
+    "path": "client/ClientArmorSlotTooltip.java",
+    "name": "ClientArmorSlotTooltip",
+    "folder": "client",
+    "doc": "ClientArmorSlotTooltip：客户端状态同步、提示信息和客户端功能入口。",
+    "links": [
+      "tooltip/ArmorSlotTooltip.java"
+    ]
+  },
+  {
+    "path": "client/ClientArmorStateSync.java",
+    "name": "ClientArmorStateSync",
+    "folder": "client",
+    "doc": "ClientArmorStateSync：客户端状态同步、提示信息和客户端功能入口。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "event/server/ArmorCurioEvents.java",
+      "network/SyncArmorStatePacket.java"
+    ]
+  },
+  {
+    "path": "client/ClientEquipmentBoxStateSync.java",
+    "name": "ClientEquipmentBoxStateSync",
+    "folder": "client",
+    "doc": "ClientEquipmentBoxStateSync：客户端状态同步、提示信息和客户端功能入口。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "network/SyncEquipmentBoxStatePacket.java"
+    ]
+  },
+  {
+    "path": "client/model/ArmorGeoModel.java",
+    "name": "ArmorGeoModel",
+    "folder": "client/model",
+    "doc": "ArmorGeoModel：存放 GeckoLib 模型定义和模型资源绑定。",
+    "links": [
+      "item/ArmorCurioItem.java"
+    ]
+  },
+  {
+    "path": "client/model/EquipmentBoxGeoModel.java",
+    "name": "EquipmentBoxGeoModel",
+    "folder": "client/model",
+    "doc": "EquipmentBoxGeoModel：存放 GeckoLib 模型定义和模型资源绑定。",
+    "links": [
+      "item/base/EquipmentBoxItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "client/model/SupplyBlockGeoModel.java",
+    "name": "SupplyBlockGeoModel",
+    "folder": "client/model",
+    "doc": "SupplyBlockGeoModel：存放 GeckoLib 模型定义和模型资源绑定。",
+    "links": [
+      "block/SupplyBlock.java",
+      "block/SupplyBlockEntity.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "client/model/TurretGeoModel.java",
+    "name": "TurretGeoModel",
+    "folder": "client/model",
+    "doc": "绑定炮台实体的 GeckoLib 模型资源。",
+    "links": [
+      "entity/TurretEntity.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "client/render/ArmorCurioRenderer.java",
+    "name": "ArmorCurioRenderer",
+    "folder": "client/render",
+    "doc": "ArmorCurioRenderer：负责 HUD、方块、实体和装备的客户端渲染。",
+    "links": [
+      "client/model/ArmorGeoModel.java",
+      "item/ArmorCurioItem.java"
+    ]
+  },
+  {
+    "path": "client/render/ArmorHudRenderer.java",
+    "name": "ArmorHudRenderer",
+    "folder": "client/render",
+    "doc": "ArmorHudRenderer：负责 HUD、方块、实体和装备的客户端渲染。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/CurioHelper.java",
+      "api/helper/TextureFontHelper.java",
+      "Config.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "client/render/CooldownHudRenderer.java",
+    "name": "CooldownHudRenderer",
+    "folder": "client/render",
+    "doc": "渲染冷却 HUD、概率属性 HUD 和 TAB 文本区域。",
+    "links": [
+      "api/CooldownHud.java",
+      "api/CooldownHudClientManager.java"
+    ]
+  },
+  {
+    "path": "client/render/EquipmentBoxHudRenderer.java",
+    "name": "EquipmentBoxHudRenderer",
+    "folder": "client/render",
+    "doc": "EquipmentBoxHudRenderer：负责 HUD、方块、实体和装备的客户端渲染。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "api/helper/RenderHelper.java",
+      "Config.java",
+      "item/AmmoBoxItem.java",
+      "item/base/EquipmentBoxItem.java",
+      "item/ClothesBoxItem.java",
+      "item/MedicalBoxItem.java"
+    ]
+  },
+  {
+    "path": "client/render/EquipmentBoxRenderer.java",
+    "name": "EquipmentBoxRenderer",
+    "folder": "client/render",
+    "doc": "EquipmentBoxRenderer：负责 HUD、方块、实体和装备的客户端渲染。",
+    "links": [
+      "client/model/EquipmentBoxGeoModel.java",
+      "item/base/EquipmentBoxItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "client/render/ExposureRiskHudRenderer.java",
+    "name": "ExposureRiskHudRenderer",
+    "folder": "client/render",
+    "doc": "ExposureRiskHudRenderer：负责 HUD、方块、实体和装备的客户端渲染。",
+    "links": [
+      "api/helper/RenderHelper.java",
+      "api/helper/TextureFontHelper.java",
+      "Config.java",
+      "exposure/ExposureRisk.java"
+    ]
+  },
+  {
+    "path": "client/render/SupplyBlockRenderer.java",
+    "name": "SupplyBlockRenderer",
+    "folder": "client/render",
+    "doc": "SupplyBlockRenderer：负责 HUD、方块、实体和装备的客户端渲染。",
+    "links": [
+      "block/SupplyBlockEntity.java",
+      "client/model/SupplyBlockGeoModel.java"
+    ]
+  },
+  {
+    "path": "client/render/TurretEntityRenderer.java",
+    "name": "TurretEntityRenderer",
+    "folder": "client/render",
+    "doc": "渲染炮台实体模型和炮管姿态。",
+    "links": [
+      "client/model/TurretGeoModel.java",
+      "entity/TurretEntity.java"
+    ]
+  },
+  {
+    "path": "client/screen/ArmorScreen.java",
+    "name": "ArmorScreen",
+    "folder": "client/screen",
+    "doc": "ArmorScreen：负责手机、护甲、炮台和配置等客户端界面。",
+    "links": [
+      "client/render/ArmorCurioRenderer.java",
+      "menu/ArmorMenu.java"
+    ]
+  },
+  {
+    "path": "client/screen/HudConfigScreen.java",
+    "name": "HudConfigScreen",
+    "folder": "client/screen",
+    "doc": "HudConfigScreen：负责手机、护甲、炮台和配置等客户端界面。",
+    "links": [
+      "api/helper/RenderHelper.java",
+      "client/render/EquipmentBoxHudRenderer.java",
+      "client/render/ExposureRiskHudRenderer.java",
+      "Config.java"
+    ]
+  },
+  {
+    "path": "client/screen/PayDayConfigScreen.java",
+    "name": "PayDayConfigScreen",
+    "folder": "client/screen",
+    "doc": "PayDayConfigScreen：负责手机、护甲、炮台和配置等客户端界面。",
+    "links": [
+      "api/helper/ConfigScreenHelper.java",
+      "client/base/StringListEditScreen.java",
+      "Config.java"
+    ]
+  },
+  {
+    "path": "client/screen/PhoneScreen.java",
+    "name": "PhoneScreen",
+    "folder": "client/screen",
+    "doc": "PhoneScreen：负责手机、护甲、炮台和配置等客户端界面。",
+    "links": [
+      "menu/PhoneMenu.java"
+    ]
+  },
+  {
+    "path": "client/screen/TurretScreen.java",
+    "name": "TurretScreen",
+    "folder": "client/screen",
+    "doc": "TurretScreen：负责手机、护甲、炮台和配置等客户端界面。",
+    "links": [
+      "api/TurretFluidManager.java",
+      "block/TurretBlockEntity.java",
+      "menu/TurretMenu.java"
+    ]
+  },
+  {
+    "path": "command/ExposureRiskCommand.java",
+    "name": "ExposureRiskCommand",
+    "folder": "command",
+    "doc": "ExposureRiskCommand：提供与暴露风险相关的服务器命令。",
+    "links": [
+      "exposure/ExposureRisk.java"
+    ]
+  },
+  {
+    "path": "compat/jade/PayDayJadePlugin.java",
+    "name": "PayDayJadePlugin",
+    "folder": "compat/jade",
+    "doc": "PayDayJadePlugin：提供 Jade/Waila 信息提供器。",
+    "links": [
+      "api/TurretFluid.java",
+      "api/TurretFluidManager.java",
+      "api/TurretTemperature.java",
+      "block/TurretBlock.java",
+      "block/TurretBlockEntity.java",
+      "entity/TurretEntity.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "compat/jei/PayDayJeiPlugin.java",
+    "name": "PayDayJeiPlugin",
+    "folder": "compat/jei",
+    "doc": "向 JEI 注册 PayDay 配方、信息和容器界面。",
+    "links": [
+      "api/TurretFluid.java",
+      "api/TurretFluidManager.java",
+      "client/screen/ArmorScreen.java",
+      "compat/jei/TurretFluidJeiRecipe.java",
+      "compat/jei/TurretFluidRecipeCategory.java",
+      "init/RegistryItems.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "compat/jei/TurretFluidJeiRecipe.java",
+    "name": "TurretFluidJeiRecipe",
+    "folder": "compat/jei",
+    "doc": "TurretFluidJeiRecipe：提供 JEI 配方类别、配方数据和界面集成。",
+    "links": [
+      "api/TurretFluid.java"
+    ]
+  },
+  {
+    "path": "compat/jei/TurretFluidRecipeCategory.java",
+    "name": "TurretFluidRecipeCategory",
+    "folder": "compat/jei",
+    "doc": "TurretFluidRecipeCategory：提供 JEI 配方类别、配方数据和界面集成。",
+    "links": [
+      "compat/jei/TurretFluidJeiRecipe.java",
+      "init/RegistryItems.java"
+    ]
+  },
+  {
+    "path": "compat/kubejs/ArmorCurioBuilder.java",
+    "name": "ArmorCurioBuilder",
+    "folder": "compat/kubejs",
+    "doc": "ArmorCurioBuilder：向 KubeJS 暴露手机升级、护甲和护甲槽构建器。",
+    "links": [
+      "api/helper/AttributeModifierHelper.java",
+      "api/phone/AttributeDefinition.java",
+      "item/ArmorCurioItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "compat/kubejs/ArmorSlotBuilder.java",
+    "name": "ArmorSlotBuilder",
+    "folder": "compat/kubejs",
+    "doc": "ArmorSlotBuilder：向 KubeJS 暴露手机升级、护甲和护甲槽构建器。",
+    "links": [
+      "api/helper/AttributeModifierHelper.java",
+      "item/ArmorSlotItem.java"
+    ]
+  },
+  {
+    "path": "compat/kubejs/PayDayKubeJSPlugin.java",
+    "name": "PayDayKubeJSPlugin",
+    "folder": "compat/kubejs",
+    "doc": "注册 PayDay 的 KubeJS 构建器和脚本入口。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/CooldownHud.java",
+      "api/CooldownHudManager.java",
+      "api/ExposureRiskModifier.java",
+      "api/helper/PhoneUpgradeHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "api/PhoneUpgradeRecipeGenerator.java",
+      "api/ProbabilityHudManager.java",
+      "api/TaczTabRegistry.java",
+      "api/TurretFluid.java",
+      "api/TurretFluidManager.java",
+      "compat/kubejs/ArmorCurioBuilder.java",
+      "compat/kubejs/ArmorSlotBuilder.java",
+      "compat/kubejs/PhoneUpgradeBuilder.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "compat/kubejs/PhoneUpgradeBuilder.java",
+    "name": "PhoneUpgradeBuilder",
+    "folder": "compat/kubejs",
+    "doc": "向 KubeJS 提供手机升级构建器。",
+    "links": [
+      "api/KeyActivate.java",
+      "api/phone/ArmorSoltModifier.java",
+      "api/phone/CurioTick.java",
+      "api/phone/ProxyEvent.java",
+      "api/PhoneUpgradeAction.java",
+      "item/PhoneUpgradeItem.java"
+    ]
+  },
+  {
+    "path": "Config.java",
+    "name": "Config",
+    "folder": "",
+    "doc": "定义模组服务端和客户端配置项。",
+    "links": [
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "datagen/PhoneUpgradeRecipeProvider.java",
+    "name": "PhoneUpgradeRecipeProvider",
+    "folder": "datagen",
+    "doc": "PhoneUpgradeRecipeProvider：生成手机升级相关的数据包配方资源。",
+    "links": [
+      "api/PhoneUpgradeRecipeGenerator.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "effect/FearEffect.java",
+    "name": "FearEffect",
+    "folder": "effect",
+    "doc": "FearEffect：定义 PayDay 自己提供的状态效果。",
+    "links": []
+  },
+  {
+    "path": "effect/HowlEffect.java",
+    "name": "HowlEffect",
+    "folder": "effect",
+    "doc": "HowlEffect：定义 PayDay 自己提供的状态效果。",
+    "links": []
+  },
+  {
+    "path": "effect/InfiltrationEffect.java",
+    "name": "InfiltrationEffect",
+    "folder": "effect",
+    "doc": "InfiltrationEffect：定义 PayDay 自己提供的状态效果。",
+    "links": []
+  },
+  {
+    "path": "entity/TurretEntity.java",
+    "name": "TurretEntity",
+    "folder": "entity",
+    "doc": "定义负责渲染和瞄准姿态的炮台实体。",
+    "links": [
+      "api/TurretTemperature.java",
+      "block/TurretBlock.java",
+      "block/TurretBlockEntity.java",
+      "init/RegistryItems.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientArmorHudEvents.java",
+    "name": "ClientArmorHudEvents",
+    "folder": "event/client",
+    "doc": "ClientArmorHudEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "client/render/ArmorHudRenderer.java",
+      "event/client/ClientEventUtil.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientCooldownHudEvents.java",
+    "name": "ClientCooldownHudEvents",
+    "folder": "event/client",
+    "doc": "ClientCooldownHudEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "api/CooldownHudClientManager.java",
+      "client/render/CooldownHudRenderer.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientEquipmentBoxHudEvents.java",
+    "name": "ClientEquipmentBoxHudEvents",
+    "folder": "event/client",
+    "doc": "ClientEquipmentBoxHudEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "client/render/EquipmentBoxHudRenderer.java",
+      "Config.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientEventUtil.java",
+    "name": "ClientEventUtil",
+    "folder": "event/client",
+    "doc": "ClientEventUtil：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "item/ArmorCurioItem.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientExposureRiskHudEvents.java",
+    "name": "ClientExposureRiskHudEvents",
+    "folder": "event/client",
+    "doc": "ClientExposureRiskHudEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "client/render/ExposureRiskHudRenderer.java",
+      "client/screen/PayDayConfigScreen.java",
+      "Config.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientInputEvents.java",
+    "name": "ClientInputEvents",
+    "folder": "event/client",
+    "doc": "ClientInputEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "api/PhoneUpgradeAction.java",
+      "client/screen/HudConfigScreen.java",
+      "init/PayDayClient.java",
+      "network/ActivateHackerSkillPacket.java",
+      "network/OpenArmorMenuPacket.java",
+      "network/OpenPhoneMenuPacket.java",
+      "network/PayDayNetwork.java",
+      "network/UseEquipmentBoxPacket.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientPlayerRenderEvents.java",
+    "name": "ClientPlayerRenderEvents",
+    "folder": "event/client",
+    "doc": "ClientPlayerRenderEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "event/client/ClientEventUtil.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/client/ClientTurretAimEvents.java",
+    "name": "ClientTurretAimEvents",
+    "folder": "event/client",
+    "doc": "ClientTurretAimEvents：处理客户端输入、渲染和 HUD 事件。",
+    "links": [
+      "block/TurretBlockEntity.java",
+      "Config.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/server/ArmorCurioEvents.java",
+    "name": "ArmorCurioEvents",
+    "folder": "event/server",
+    "doc": "ArmorCurioEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "Config.java",
+      "event/server/EquipmentBoxEvents.java",
+      "event/server/ServerEventUtil.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java",
+      "item/base/EquipmentBoxItem.java",
+      "network/PayDayNetwork.java",
+      "network/SyncArmorStatePacket.java"
+    ]
+  },
+  {
+    "path": "event/server/ArmorDamageEvents.java",
+    "name": "ArmorDamageEvents",
+    "folder": "event/server",
+    "doc": "ArmorDamageEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/CurioHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "event/server/ServerEventUtil.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "event/server/CommandEvents.java",
+    "name": "CommandEvents",
+    "folder": "event/server",
+    "doc": "CommandEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "command/ExposureRiskCommand.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/server/CooldownHudEvents.java",
+    "name": "CooldownHudEvents",
+    "folder": "event/server",
+    "doc": "CooldownHudEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "api/CooldownHudManager.java",
+      "api/ProbabilityHudManager.java"
+    ]
+  },
+  {
+    "path": "event/server/EquipmentBoxEvents.java",
+    "name": "EquipmentBoxEvents",
+    "folder": "event/server",
+    "doc": "EquipmentBoxEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "block/SupplyBlock.java",
+      "event/server/ArmorCurioEvents.java",
+      "event/server/ServerEventUtil.java",
+      "event/server/SupplyEvents.java",
+      "item/AmmoBagItem.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorPlateItem.java",
+      "item/base/EquipmentBoxItem.java",
+      "item/ClothesBoxItem.java",
+      "item/FirstAidKitItem.java",
+      "network/PayDayNetwork.java",
+      "network/SyncEquipmentBoxStatePacket.java"
+    ]
+  },
+  {
+    "path": "event/server/ExposureRiskEvents.java",
+    "name": "ExposureRiskEvents",
+    "folder": "event/server",
+    "doc": "ExposureRiskEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "exposure/ExposureRisk.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/AntisocialEvents.java",
+    "name": "AntisocialEvents",
+    "folder": "event/server/phone",
+    "doc": "AntisocialEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "api/helper/PhoneUpgradeHelper.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/AssassinEvents.java",
+    "name": "AssassinEvents",
+    "folder": "event/server/phone",
+    "doc": "AssassinEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/CooldownHud.java",
+      "api/CooldownHudManager.java",
+      "api/helper/CurioHelper.java",
+      "api/record/ArmorTarget.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/DebuffEvents.java",
+    "name": "DebuffEvents",
+    "folder": "event/server/phone",
+    "doc": "DebuffEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/PhoneUpgradeAction.java",
+      "init/RegistryAttributes.java",
+      "init/RegistryEffects.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/HackerEvents.java",
+    "name": "HackerEvents",
+    "folder": "event/server/phone",
+    "doc": "HackerEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "init/RegistryAttributes.java",
+      "init/RegistryEffects.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/LeaderEvents.java",
+    "name": "LeaderEvents",
+    "folder": "event/server/phone",
+    "doc": "LeaderEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "api/PhoneUpgradeAction.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/MuscleEvents.java",
+    "name": "MuscleEvents",
+    "folder": "event/server/phone",
+    "doc": "MuscleEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/ThiefEvents.java",
+    "name": "ThiefEvents",
+    "folder": "event/server/phone",
+    "doc": "ThiefEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "api/record/TemporaryBlockState.java"
+    ]
+  },
+  {
+    "path": "event/server/phone/UniversalityEvents.java",
+    "name": "UniversalityEvents",
+    "folder": "event/server/phone",
+    "doc": "UniversalityEvents：处理各条手机特殊升级路线的服务器事件。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "api/helper/PhoneUpgradeHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "init/RegistryAttributes.java",
+      "item/PhoneItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/server/ServerEventUtil.java",
+    "name": "ServerEventUtil",
+    "folder": "event/server",
+    "doc": "ServerEventUtil：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/CurioHelper.java",
+      "Config.java",
+      "item/ArmorSlotItem.java"
+    ]
+  },
+  {
+    "path": "event/server/SupplyEvents.java",
+    "name": "SupplyEvents",
+    "folder": "event/server",
+    "doc": "SupplyEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/CurioHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "block/SupplyBlock.java",
+      "event/server/EquipmentBoxEvents.java",
+      "event/server/ServerEventUtil.java",
+      "item/AmmoBagItem.java",
+      "item/AmmoBoxItem.java",
+      "item/ArmorBoxItem.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorPlateItem.java",
+      "item/ArmorSlotItem.java",
+      "item/ClothesBoxItem.java",
+      "item/FirstAidKitItem.java",
+      "item/MedicalBoxItem.java",
+      "item/PhoneItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "event/server/TestEffectStickEvents.java",
+    "name": "TestEffectStickEvents",
+    "folder": "event/server",
+    "doc": "TestEffectStickEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "item/TestEffectStickItem.java"
+    ]
+  },
+  {
+    "path": "event/server/TurretEvents.java",
+    "name": "TurretEvents",
+    "folder": "event/server",
+    "doc": "TurretEvents：处理服务器侧护甲、补给、炮台、冷却和暴露风险事件。",
+    "links": [
+      "block/TurretBlock.java",
+      "block/TurretBlockEntity.java",
+      "entity/TurretEntity.java"
+    ]
+  },
+  {
+    "path": "exposure/ExposureRisk.java",
+    "name": "ExposureRisk",
+    "folder": "exposure",
+    "doc": "ExposureRisk：定义暴露风险数据和运行时规则。",
+    "links": [
+      "api/ExposureRiskModifier.java",
+      "api/helper/CurioHelper.java",
+      "api/phone/AttributeDefinition.java",
+      "Config.java",
+      "init/RegistryAttributes.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "init/PayDayClient.java",
+    "name": "PayDayClient",
+    "folder": "init",
+    "doc": "PayDayClient：集中进行注册表、客户端入口和手机升级内容初始化。",
+    "links": [
+      "client/ClientArmorSlotTooltip.java",
+      "client/render/ArmorCurioRenderer.java",
+      "client/render/EquipmentBoxRenderer.java",
+      "client/render/SupplyBlockRenderer.java",
+      "client/render/TurretEntityRenderer.java",
+      "client/screen/ArmorScreen.java",
+      "client/screen/PayDayConfigScreen.java",
+      "client/screen/PhoneScreen.java",
+      "client/screen/TurretScreen.java",
+      "init/RegistryBlockEntities.java",
+      "init/RegistryEntities.java",
+      "item/ArmorCurioItem.java",
+      "item/base/EquipmentBoxItem.java",
+      "item/PhoneUpgradeItem.java",
+      "menu/ArmorMenu.java",
+      "menu/PhoneMenu.java",
+      "menu/TurretMenu.java",
+      "PayDay.java",
+      "tooltip/ArmorSlotTooltip.java"
+    ]
+  },
+  {
+    "path": "init/PhoneUpgradeConfig.java",
+    "name": "PhoneUpgradeConfig",
+    "folder": "init",
+    "doc": "集中定义内置手机升级及其路线配置。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/CooldownHud.java",
+      "api/CooldownHudManager.java",
+      "api/helper/CurioHelper.java",
+      "api/helper/PhoneUpgradeHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "event/server/phone/AntisocialEvents.java",
+      "event/server/phone/AssassinEvents.java",
+      "event/server/phone/DebuffEvents.java",
+      "event/server/phone/HackerEvents.java",
+      "event/server/phone/LeaderEvents.java",
+      "event/server/phone/MuscleEvents.java",
+      "event/server/phone/ThiefEvents.java",
+      "init/RegistryAttributes.java",
+      "init/RegistryEffects.java",
+      "item/ArmorCurioItem.java",
+      "item/base/EquipmentBoxItem.java",
+      "item/PhoneItem.java",
+      "item/PhoneUpgradeItem.java"
+    ]
+  },
+  {
+    "path": "init/RegistryAttributes.java",
+    "name": "RegistryAttributes",
+    "folder": "init",
+    "doc": "注册 PayDay 提供的自定义实体属性。",
+    "links": [
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "init/RegistryBlockEntities.java",
+    "name": "RegistryBlockEntities",
+    "folder": "init",
+    "doc": "RegistryBlockEntities：集中进行注册表、客户端入口和手机升级内容初始化。",
+    "links": [
+      "block/SupplyBlockEntity.java",
+      "block/TurretBlockEntity.java",
+      "init/RegistryBlocks.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "init/RegistryBlocks.java",
+    "name": "RegistryBlocks",
+    "folder": "init",
+    "doc": "RegistryBlocks：集中进行注册表、客户端入口和手机升级内容初始化。",
+    "links": [
+      "block/SupplyBlock.java",
+      "block/TurretBlock.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "init/RegistryEffects.java",
+    "name": "RegistryEffects",
+    "folder": "init",
+    "doc": "RegistryEffects：集中进行注册表、客户端入口和手机升级内容初始化。",
+    "links": [
+      "effect/FearEffect.java",
+      "effect/HowlEffect.java",
+      "effect/InfiltrationEffect.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "init/RegistryEntities.java",
+    "name": "RegistryEntities",
+    "folder": "init",
+    "doc": "RegistryEntities：集中进行注册表、客户端入口和手机升级内容初始化。",
+    "links": [
+      "entity/TurretEntity.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "init/RegistryItems.java",
+    "name": "RegistryItems",
+    "folder": "init",
+    "doc": "RegistryItems：集中进行注册表、客户端入口和手机升级内容初始化。",
+    "links": [
+      "api/phone/AttributeDefinition.java",
+      "api/PhoneUpgradeAction.java",
+      "block/TurretBlock.java",
+      "init/PhoneUpgradeConfig.java",
+      "init/RegistryBlocks.java",
+      "item/AmmoBagItem.java",
+      "item/AmmoBoxItem.java",
+      "item/ArmorBoxItem.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorPlateItem.java",
+      "item/ArmorSlotItem.java",
+      "item/ClothesBoxItem.java",
+      "item/FirstAidKitItem.java",
+      "item/MedicalBoxItem.java",
+      "item/PhoneItem.java",
+      "item/PhoneUpgradeItem.java",
+      "item/TestEffectStickItem.java",
+      "item/TurretItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "item/AmmoBagItem.java",
+    "name": "AmmoBagItem",
+    "folder": "item",
+    "doc": "AmmoBagItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "block/SupplyBlock.java",
+      "item/base/SupplyItem.java"
+    ]
+  },
+  {
+    "path": "item/AmmoBoxItem.java",
+    "name": "AmmoBoxItem",
+    "folder": "item",
+    "doc": "AmmoBoxItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "item/AmmoBagItem.java",
+      "item/base/EquipmentBoxItem.java"
+    ]
+  },
+  {
+    "path": "item/ArmorBoxItem.java",
+    "name": "ArmorBoxItem",
+    "folder": "item",
+    "doc": "ArmorBoxItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "item/ArmorPlateItem.java",
+      "item/base/EquipmentBoxItem.java"
+    ]
+  },
+  {
+    "path": "item/ArmorCurioItem.java",
+    "name": "ArmorCurioItem",
+    "folder": "item",
+    "doc": "ArmorCurioItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "api/ArmorModifierRegistry.java",
+      "api/phone/AttributeDefinition.java",
+      "event/server/ArmorCurioEvents.java",
+      "item/ArmorSlotItem.java",
+      "tooltip/ArmorSlotTooltip.java"
+    ]
+  },
+  {
+    "path": "item/ArmorPlateItem.java",
+    "name": "ArmorPlateItem",
+    "folder": "item",
+    "doc": "ArmorPlateItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "block/SupplyBlock.java",
+      "item/base/SupplyItem.java"
+    ]
+  },
+  {
+    "path": "item/ArmorSlotItem.java",
+    "name": "ArmorSlotItem",
+    "folder": "item",
+    "doc": "ArmorSlotItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "Config.java"
+    ]
+  },
+  {
+    "path": "item/base/EquipmentBoxItem.java",
+    "name": "EquipmentBoxItem",
+    "folder": "item/base",
+    "doc": "EquipmentBoxItem：提供设备箱和补给物品的基础实现。",
+    "links": [
+      "client/render/EquipmentBoxRenderer.java",
+      "event/server/ArmorCurioEvents.java",
+      "item/ClothesBoxItem.java",
+      "item/PhoneItem.java"
+    ]
+  },
+  {
+    "path": "item/base/SupplyItem.java",
+    "name": "SupplyItem",
+    "folder": "item/base",
+    "doc": "SupplyItem：提供设备箱和补给物品的基础实现。",
+    "links": [
+      "block/SupplyBlock.java"
+    ]
+  },
+  {
+    "path": "item/ClothesBoxItem.java",
+    "name": "ClothesBoxItem",
+    "folder": "item",
+    "doc": "ClothesBoxItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "item/ArmorCurioItem.java",
+      "item/base/EquipmentBoxItem.java"
+    ]
+  },
+  {
+    "path": "item/FirstAidKitItem.java",
+    "name": "FirstAidKitItem",
+    "folder": "item",
+    "doc": "FirstAidKitItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "block/SupplyBlock.java",
+      "item/base/SupplyItem.java"
+    ]
+  },
+  {
+    "path": "item/MedicalBoxItem.java",
+    "name": "MedicalBoxItem",
+    "folder": "item",
+    "doc": "MedicalBoxItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "item/base/EquipmentBoxItem.java",
+      "item/FirstAidKitItem.java"
+    ]
+  },
+  {
+    "path": "item/PhoneItem.java",
+    "name": "PhoneItem",
+    "folder": "item",
+    "doc": "实现手机物品和升级读取逻辑。",
+    "links": [
+      "api/ArmorModifier.java",
+      "api/helper/CurioHelper.java",
+      "api/PhoneUpgradeAction.java",
+      "api/ProbabilityHudManager.java",
+      "init/PayDayClient.java",
+      "item/PhoneUpgradeItem.java"
+    ]
+  },
+  {
+    "path": "item/PhoneUpgradeItem.java",
+    "name": "PhoneUpgradeItem",
+    "folder": "item",
+    "doc": "实现手机升级物品。",
+    "links": [
+      "api/PhoneUpgradeAction.java"
+    ]
+  },
+  {
+    "path": "item/TestEffectStickItem.java",
+    "name": "TestEffectStickItem",
+    "folder": "item",
+    "doc": "TestEffectStickItem：实现 PayDay 物品及其交互行为。",
+    "links": []
+  },
+  {
+    "path": "item/TurretItem.java",
+    "name": "TurretItem",
+    "folder": "item",
+    "doc": "TurretItem：实现 PayDay 物品及其交互行为。",
+    "links": [
+      "block/TurretBlock.java"
+    ]
+  },
+  {
+    "path": "menu/ArmorMenu.java",
+    "name": "ArmorMenu",
+    "folder": "menu",
+    "doc": "ArmorMenu：定义手机、护甲和炮台容器菜单及其槽位。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "event/server/ArmorCurioEvents.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorSlotItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "menu/PhoneMenu.java",
+    "name": "PhoneMenu",
+    "folder": "menu",
+    "doc": "PhoneMenu：定义手机、护甲和炮台容器菜单及其槽位。",
+    "links": [
+      "api/helper/CurioHelper.java",
+      "item/PhoneItem.java",
+      "item/PhoneUpgradeItem.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "menu/TurretMenu.java",
+    "name": "TurretMenu",
+    "folder": "menu",
+    "doc": "TurretMenu：定义手机、护甲和炮台容器菜单及其槽位。",
+    "links": [
+      "block/TurretBlockEntity.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "mixin/AttachmentDataUtilsMixin.java",
+    "name": "AttachmentDataUtilsMixin",
+    "folder": "mixin",
+    "doc": "AttachmentDataUtilsMixin：通过 Mixin 修改原版或其他模组的目标行为。",
+    "links": [
+      "api/PhoneUpgradeAction.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "mixin/BlockDataAccessor.java",
+    "name": "BlockDataAccessor",
+    "folder": "mixin",
+    "doc": "BlockDataAccessor：通过 Mixin 修改原版或其他模组的目标行为。",
+    "links": []
+  },
+  {
+    "path": "mixin/CommonBlockIndexMixin.java",
+    "name": "CommonBlockIndexMixin",
+    "folder": "mixin",
+    "doc": "向 TACZ 附件工作台公共标签页添加 PayDay 内容。",
+    "links": [
+      "api/TaczTabRegistry.java",
+      "mixin/BlockDataAccessor.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "network/ActivateHackerSkillPacket.java",
+    "name": "ActivateHackerSkillPacket",
+    "folder": "network",
+    "doc": "ActivateHackerSkillPacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "api/PhoneUpgradeAction.java"
+    ]
+  },
+  {
+    "path": "network/CooldownHudSyncPacket.java",
+    "name": "CooldownHudSyncPacket",
+    "folder": "network",
+    "doc": "CooldownHudSyncPacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "api/CooldownHudClientManager.java"
+    ]
+  },
+  {
+    "path": "network/OpenArmorMenuPacket.java",
+    "name": "OpenArmorMenuPacket",
+    "folder": "network",
+    "doc": "OpenArmorMenuPacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "menu/ArmorMenu.java"
+    ]
+  },
+  {
+    "path": "network/OpenPhoneMenuPacket.java",
+    "name": "OpenPhoneMenuPacket",
+    "folder": "network",
+    "doc": "OpenPhoneMenuPacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "menu/PhoneMenu.java"
+    ]
+  },
+  {
+    "path": "network/PayDayNetwork.java",
+    "name": "PayDayNetwork",
+    "folder": "network",
+    "doc": "PayDayNetwork：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "network/ActivateHackerSkillPacket.java",
+      "network/CooldownHudSyncPacket.java",
+      "network/OpenArmorMenuPacket.java",
+      "network/OpenPhoneMenuPacket.java",
+      "network/SyncArmorStatePacket.java",
+      "network/SyncEquipmentBoxStatePacket.java",
+      "network/UseEquipmentBoxPacket.java",
+      "PayDay.java"
+    ]
+  },
+  {
+    "path": "network/SyncArmorStatePacket.java",
+    "name": "SyncArmorStatePacket",
+    "folder": "network",
+    "doc": "SyncArmorStatePacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "client/ClientArmorStateSync.java"
+    ]
+  },
+  {
+    "path": "network/SyncEquipmentBoxStatePacket.java",
+    "name": "SyncEquipmentBoxStatePacket",
+    "folder": "network",
+    "doc": "SyncEquipmentBoxStatePacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "client/ClientEquipmentBoxStateSync.java"
+    ]
+  },
+  {
+    "path": "network/UseEquipmentBoxPacket.java",
+    "name": "UseEquipmentBoxPacket",
+    "folder": "network",
+    "doc": "UseEquipmentBoxPacket：定义客户端与服务器之间的网络数据包和网络通道。",
+    "links": [
+      "event/server/EquipmentBoxEvents.java"
+    ]
+  },
+  {
+    "path": "PayDay.java",
+    "name": "PayDay",
+    "folder": "",
+    "doc": "模组主入口，注册模组内容并连接 Forge 事件总线。",
+    "links": [
+      "api/TurretFluidManager.java",
+      "Config.java",
+      "datagen/PhoneUpgradeRecipeProvider.java",
+      "event/server/ArmorCurioEvents.java",
+      "event/server/ArmorDamageEvents.java",
+      "event/server/CommandEvents.java",
+      "event/server/CooldownHudEvents.java",
+      "event/server/ExposureRiskEvents.java",
+      "event/server/phone/DebuffEvents.java",
+      "event/server/phone/HackerEvents.java",
+      "event/server/phone/LeaderEvents.java",
+      "event/server/phone/MuscleEvents.java",
+      "event/server/phone/ThiefEvents.java",
+      "event/server/phone/UniversalityEvents.java",
+      "event/server/SupplyEvents.java",
+      "event/server/TestEffectStickEvents.java",
+      "event/server/TurretEvents.java",
+      "init/RegistryAttributes.java",
+      "init/RegistryBlockEntities.java",
+      "init/RegistryBlocks.java",
+      "init/RegistryEffects.java",
+      "init/RegistryEntities.java",
+      "init/RegistryItems.java",
+      "menu/ArmorMenu.java",
+      "menu/PhoneMenu.java",
+      "menu/TurretMenu.java",
+      "network/PayDayNetwork.java"
+    ]
+  },
+  {
+    "path": "tooltip/ArmorSlotTooltip.java",
+    "name": "ArmorSlotTooltip",
+    "folder": "tooltip",
+    "doc": "ArmorSlotTooltip：提供护甲槽等物品的客户端提示组件。",
+    "links": []
+  }
+]

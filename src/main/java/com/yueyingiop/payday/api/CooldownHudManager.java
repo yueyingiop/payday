@@ -26,8 +26,7 @@ public final class CooldownHudManager {
     private CooldownHudManager() {
     }
 
-    /**
-     * 添加或覆盖一个 HUD。
+    /** 添加或覆盖一个 HUD。
      *
      * <p>计时型会从调用时开始倒计时，概率型会永久显示，触发型会显示五秒。</p>
      *
@@ -51,8 +50,7 @@ public final class CooldownHudManager {
         send(serverPlayer, normalizedId, entry, false);
     }
 
-    /**
-     * 启动一个计时型 HUD。
+    /** 启动一个计时型 HUD。
      *
      * @param player HUD 所属玩家
      * @param id HUD 唯一 ID
@@ -65,8 +63,7 @@ public final class CooldownHudManager {
         show(player, id, hud);
     }
 
-    /**
-     * 显示或更新一个永久概率型 HUD。
+    /** 显示或更新一个永久概率型 HUD。
      *
      * @param player HUD 所属玩家
      * @param id HUD 唯一 ID
@@ -91,6 +88,48 @@ public final class CooldownHudManager {
             throw new IllegalArgumentException("trigger requires a TRIGGER cooldown HUD");
         }
         show(player, id, hud);
+    }
+
+    /**
+     * 按条件显示一个持续存在的触发型 HUD。
+     *
+     * <p>条件成立时 HUD 一直存在，条件失效时立即移除。该方法与
+     * {@link #trigger(Player, String, CooldownHud)} 不同，不会自动在五秒后消失。</p>
+     *
+     * @param player HUD 所属玩家
+     * @param id HUD 唯一 ID
+     * @param hud 触发型 HUD 描述；条件失效时可以传入 {@code null}
+     * @param active 条件当前是否成立
+     */
+    public static void setTriggerActive(Player player, String id, CooldownHud hud,
+                                         boolean active) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        String normalizedId = requireId(id);
+        Map<String, Entry> entries = HUDS.computeIfAbsent(serverPlayer.getUUID(),
+                ignored -> new LinkedHashMap<>());
+        if (!active) {
+            if (entries.remove(normalizedId) != null) {
+                send(serverPlayer, normalizedId, null, true);
+            }
+            if (entries.isEmpty()) {
+                HUDS.remove(serverPlayer.getUUID());
+            }
+            return;
+        }
+        if (hud == null || hud.type() != CooldownHud.Type.TRIGGER) {
+            throw new IllegalArgumentException(
+                    "setTriggerActive requires a TRIGGER cooldown HUD when active");
+        }
+        Entry previous = entries.get(normalizedId);
+        if (previous != null && previous.endTick() == Long.MAX_VALUE
+                && sameHud(previous.hud(), hud)) {
+            return;
+        }
+        Entry entry = new Entry(hud, Long.MAX_VALUE, 0L);
+        entries.put(normalizedId, entry);
+        send(serverPlayer, normalizedId, entry, false);
     }
 
     /**
@@ -225,6 +264,10 @@ public final class CooldownHudManager {
                         hud == null ? 0.0D : hud.value(),
                         hud == null ? net.minecraft.network.chat.Component.translatable(
                                 "cooldown_hud.payday.unknown") : hud.name(),
+                        hud != null && hud.showValue(),
+                        hud == null || hud.percentage(),
+                        hud == null ? 0 : hud.textureU(),
+                        hud == null ? 0 : hud.textureV(),
                         remaining, total));
     }
 
@@ -233,6 +276,18 @@ public final class CooldownHudManager {
             throw new IllegalArgumentException("Cooldown HUD id must not be blank");
         }
         return id;
+    }
+
+    /** 判断两个 HUD 描述是否可以复用同一份客户端状态。 */
+    private static boolean sameHud(CooldownHud first, CooldownHud second) {
+        return first.type() == second.type()
+                && java.util.Objects.equals(first.texture(), second.texture())
+                && first.value() == second.value()
+                && java.util.Objects.equals(first.name(), second.name())
+                && first.showValue() == second.showValue()
+                && first.percentage() == second.percentage()
+                && first.textureU() == second.textureU()
+                && first.textureV() == second.textureV();
     }
 
     private record Entry(CooldownHud hud, long endTick, long totalTicks) {

@@ -1,0 +1,141 @@
+[
+  {
+    "id": "phone",
+    "title": "手机升级与属性",
+    "description": "手机升级定义、属性修饰器、升级事件和 KubeJS/API 接入关系。",
+    "files": [
+      "api/ArmorModifier.java",
+      "api/ArmorModifierRegistry.java",
+      "api/PhoneUpgradeAction.java",
+      "api/PhoneUpgradeRecipeGenerator.java",
+      "api/helper/AttributeModifierHelper.java",
+      "api/helper/PhoneUpgradeHelper.java",
+      "api/phone/AmmoExpansion.java",
+      "api/phone/ArmorSoltModifier.java",
+      "api/phone/AttributeDefinition.java",
+      "api/phone/CurioTick.java",
+      "api/phone/DamageImmunity.java",
+      "api/phone/ProxyEvent.java",
+      "api/phone/ProxyEventDefinition.java",
+      "compat/kubejs/PhoneUpgradeBuilder.java",
+      "event/server/phone/AntisocialEvents.java",
+      "event/server/phone/AssassinEvents.java",
+      "event/server/phone/HackerEvents.java",
+      "event/server/phone/MuscleEvents.java",
+      "event/server/phone/ThiefEvents.java",
+      "event/server/phone/UniversalityEvents.java",
+      "init/PhoneUpgradeConfig.java"
+    ],
+    "count": 21
+  },
+  {
+    "id": "hud",
+    "title": "概率型 CDHUD",
+    "description": "冷却 HUD、概率属性合并、同步、客户端事件和渲染链路。",
+    "files": [
+      "api/CooldownHud.java",
+      "api/CooldownHudClientManager.java",
+      "api/CooldownHudManager.java",
+      "api/ProbabilityHudManager.java",
+      "client/render/CooldownHudRenderer.java",
+      "event/client/ClientCooldownHudEvents.java",
+      "event/server/CooldownHudEvents.java",
+      "network/CooldownHudSyncPacket.java"
+    ],
+    "count": 8
+  },
+  {
+    "id": "armor",
+    "title": "护甲饰品",
+    "description": "护甲饰品、护盾、护甲槽、装备界面和伤害处理。",
+    "files": [
+      "api/ArmorModifier.java",
+      "api/ArmorModifierRegistry.java",
+      "api/helper/CurioHelper.java",
+      "block/SupplyBlockEntity.java",
+      "client/ClientArmorSlotTooltip.java",
+      "client/ClientArmorStateSync.java",
+      "client/render/ArmorCurioRenderer.java",
+      "client/render/ArmorHudRenderer.java",
+      "client/screen/ArmorScreen.java",
+      "event/client/ClientArmorHudEvents.java",
+      "event/client/ClientPlayerRenderEvents.java",
+      "event/server/ArmorCurioEvents.java",
+      "event/server/ArmorDamageEvents.java",
+      "item/ArmorBoxItem.java",
+      "item/ArmorCurioItem.java",
+      "item/ArmorPlateItem.java",
+      "item/ArmorSlotItem.java",
+      "item/ClothesBoxItem.java",
+      "item/MedicalBoxItem.java",
+      "menu/ArmorMenu.java",
+      "network/OpenArmorMenuPacket.java",
+      "network/SyncArmorStatePacket.java",
+      "tooltip/ArmorSlotTooltip.java"
+    ],
+    "count": 23
+  },
+  {
+    "id": "turret",
+    "title": "炮台",
+    "description": "炮台方块实体、炮台实体模型、瞄准、战斗、流体和界面。",
+    "files": [
+      "api/TurretFluid.java",
+      "api/TurretFluidManager.java",
+      "api/TurretTemperature.java",
+      "api/turret/TurretAimHelper.java",
+      "api/turret/TurretCombatHelper.java",
+      "api/turret/TurretEntityBindingHelper.java",
+      "api/turret/TurretFluidHandler.java",
+      "api/turret/TurretFluidState.java",
+      "block/TurretBlock.java",
+      "block/TurretBlockEntity.java",
+      "client/model/TurretGeoModel.java",
+      "client/render/TurretEntityRenderer.java",
+      "client/screen/TurretScreen.java",
+      "entity/TurretEntity.java",
+      "event/client/ClientTurretAimEvents.java",
+      "event/server/TurretEvents.java",
+      "init/RegistryBlockEntities.java",
+      "init/RegistryEntities.java",
+      "item/TurretItem.java",
+      "menu/TurretMenu.java"
+    ],
+    "count": 20
+  },
+  {
+    "id": "exposure",
+    "title": "暴露风险",
+    "description": "暴露风险属性、配置、命令、服务器计算和客户端 HUD。",
+    "files": [
+      "Config.java",
+      "api/ExposureRiskModifier.java",
+      "client/render/ExposureRiskHudRenderer.java",
+      "command/ExposureRiskCommand.java",
+      "event/client/ClientExposureRiskHudEvents.java",
+      "event/server/ExposureRiskEvents.java",
+      "exposure/ExposureRisk.java"
+    ],
+    "count": 7
+  },
+  {
+    "id": "compat",
+    "title": "外部模组兼容",
+    "description": "JEI、Jade、KubeJS、TACZ 标签页和数据生成集成。",
+    "files": [
+      "api/PhoneUpgradeRecipeGenerator.java",
+      "api/TaczTabRegistry.java",
+      "compat/jade/PayDayJadePlugin.java",
+      "compat/jei/PayDayJeiPlugin.java",
+      "compat/jei/TurretFluidJeiRecipe.java",
+      "compat/jei/TurretFluidRecipeCategory.java",
+      "compat/kubejs/ArmorCurioBuilder.java",
+      "compat/kubejs/ArmorSlotBuilder.java",
+      "compat/kubejs/PayDayKubeJSPlugin.java",
+      "compat/kubejs/PhoneUpgradeBuilder.java",
+      "datagen/PhoneUpgradeRecipeProvider.java",
+      "mixin/CommonBlockIndexMixin.java"
+    ],
+    "count": 12
+  }
+]

@@ -119,6 +119,14 @@ public final class PayDayConfigScreen extends Screen {
                                     Config.EXPOSURE_SPECIAL_ITEM_RISKS.set(values);
                                     refreshSpecialItemRisksButton();
                                 })));
+                addActionButton(
+                        "编辑属性 HUD 图标白名单 (" + Config.PROBABILITY_HUD_ATTRIBUTE_ICONS.get().size() + "项)",
+                        x, y, () -> minecraft.setScreen(new StringListEditScreen(
+                                this,
+                                Component.literal("属性 HUD 图标白名单"),
+                                Component.literal("格式：属性ID.-图标资源路径；内置图标表：payday:gui/cd_attribute"),
+                                Config.PROBABILITY_HUD_ATTRIBUTE_ICONS.get(),
+                                Config.PROBABILITY_HUD_ATTRIBUTE_ICONS::set)));
             }
             case HUD -> {
                 addToggle("开启精简 HUD", x, y, Config.COMPACT_HUD::set, Config.COMPACT_HUD.get());

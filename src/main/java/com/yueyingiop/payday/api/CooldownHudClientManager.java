@@ -45,7 +45,9 @@ public final class CooldownHudClientManager {
         }
         long now = gameTime();
         ENTRIES.put(packet.id(), new Entry(
-                CooldownHud.of(types[packet.type()], texture, packet.value(), packet.name()),
+                CooldownHud.of(types[packet.type()], texture, packet.value(), packet.name(),
+                        packet.showValue(), packet.percentage(), packet.textureU(),
+                        packet.textureV()),
                 now + Math.max(0L, packet.remainingTicks()),
                 Math.max(0L, packet.totalTicks())));
     }

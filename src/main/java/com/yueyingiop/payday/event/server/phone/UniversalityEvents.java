@@ -7,10 +7,12 @@ import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
 import com.yueyingiop.payday.init.RegistryAttributes;
 import com.yueyingiop.payday.item.PhoneItem;
+import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
 
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraftforge.event.TickEvent;
@@ -54,6 +56,9 @@ public final class UniversalityEvents {
     public static void addPlayerAttributes(EntityAttributeModificationEvent event) {
         if (!event.has(EntityType.PLAYER, RegistryAttributes.RANGED_DAMAGE.get())) {
             event.add(EntityType.PLAYER, RegistryAttributes.RANGED_DAMAGE.get(), 0.0D);
+        }
+        if (!event.has(EntityType.PLAYER, RegistryAttributes.HEADSHOT_DAMAGE.get())) {
+            event.add(EntityType.PLAYER, RegistryAttributes.HEADSHOT_DAMAGE.get(), 0.0D);
         }
         if (!event.has(EntityType.PLAYER, RegistryAttributes.DODGE_CHANCE.get())) {
             event.add(EntityType.PLAYER, RegistryAttributes.DODGE_CHANCE.get(), 0.0D);
@@ -134,6 +139,32 @@ public final class UniversalityEvents {
         if (after != before) {
             event.setAmount((float) after);
             // PayDay.LOGGER.info("[RangedDamageDebug] Applied modifiers: before={}, after={}", before, after);
+        }
+    }
+
+    /**
+     * Applies the player's generic headshot attribute to every TACZ headshot.
+     *
+     * <p>The event's existing multiplier is the runtime base value, so
+     * {@code ADDITION}, {@code MULTIPLY_BASE}, and {@code MULTIPLY_TOTAL}
+     * retain the same meaning as vanilla attributes. This also makes the
+     * attribute usable by KubeJS-created phone upgrades.</p>
+     *
+     * @param event TACZ headshot event
+     */
+    @SubscribeEvent
+    public static void headshotDamage(EntityHurtByGunEvent.Pre event) {
+        if (event.getLogicalSide().isClient() || !event.isHeadShot()
+                || !(event.getAttacker() instanceof Player player)) {
+            return;
+        }
+
+        AttributeInstance attribute = player.getAttribute(
+                RegistryAttributes.HEADSHOT_DAMAGE.get());
+        if (attribute != null) {
+            double multiplier = PhoneUpgradeHelper.applyAttributeModifiers(
+                    event.getHeadshotMultiplier(), attribute);
+            event.setHeadshotMultiplier((float) multiplier);
         }
     }
 

@@ -67,6 +67,15 @@ KubeJS 推荐传入字符串，例如 `payday:ranged_damage`。字符串会延�
 
 返回当前 Builder。
 
+TACZ 爆头属性由 PayDay 的通用事件统一应用，不需要在 KubeJS 中额外注册爆头事件：
+
+```js
+.attribute('payday:headshot_damage', 0.25, 'MULTIPLY_TOTAL')
+```
+
+计算时使用 TACZ 当前爆头倍率作为基础值：`ADDITION` 直接加值，`MULTIPLY_BASE`
+按基础值增加，`MULTIPLY_TOTAL` 按当前总值增加。
+
 ### 2.2.1. effect(effectId, durationTicks, amplifier)
 
 通过注册表 ID 添加药水效果。

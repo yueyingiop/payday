@@ -15,6 +15,10 @@ public final class RegistryAttributes {
             () -> new RangedAttribute("attribute.name.payday.ranged_damage", 0.0D, 0.0D, 1.0E9D)
                     .setSyncable(true));
 
+    public static final RegistryObject<Attribute> HEADSHOT_DAMAGE = ATTRIBUTES.register("headshot_damage",
+            () -> new RangedAttribute("attribute.name.payday.headshot_damage", 0.0D, 0.0D, 1.0E9D)
+                    .setSyncable(true));
+
     public static final RegistryObject<Attribute> DODGE_CHANCE = ATTRIBUTES.register("dodge_chance",
             () -> new RangedAttribute("attribute.name.payday.dodge_chance", 0.0D, 0.0D, 10000.0D)
                     .setSyncable(true));
