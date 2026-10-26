@@ -9,6 +9,9 @@ import java.util.Locale;
 
 /** Shared parsing for KubeJS attribute modifier definitions. */
 public final class AttributeModifierHelper {
+    private static final ResourceLocation TACZ_BULLET_RESISTANCE =
+            ResourceLocation.fromNamespaceAndPath("tacz", "tacz.bullet_resistance");
+
     private AttributeModifierHelper() {
     }
 
@@ -24,6 +27,17 @@ public final class AttributeModifierHelper {
             throw new IllegalArgumentException("Unknown attribute: " + attributeId);
         }
         return attribute;
+    }
+
+    /** Converts PayDay's basis-point resistance amount to TACZ's decimal storage amount. */
+    public static double runtimeAmount(Attribute attribute, double amount,
+                                       AttributeModifier.Operation operation) {
+        ResourceLocation id = ForgeRegistries.ATTRIBUTES.getKey(attribute);
+        if (TACZ_BULLET_RESISTANCE.equals(id)
+                && operation == AttributeModifier.Operation.ADDITION) {
+            return amount / 10000.0D;
+        }
+        return amount;
     }
 
     /**

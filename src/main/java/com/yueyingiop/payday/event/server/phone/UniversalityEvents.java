@@ -7,6 +7,7 @@ import com.yueyingiop.payday.api.helper.CurioHelper;
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
 import com.yueyingiop.payday.init.RegistryAttributes;
 import com.yueyingiop.payday.item.PhoneItem;
+import com.tacz.guns.init.ModAttributes;
 import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
 
 import net.minecraft.tags.DamageTypeTags;
@@ -65,6 +66,9 @@ public final class UniversalityEvents {
         }
         if (!event.has(EntityType.PLAYER, RegistryAttributes.EXPOSURE_RISK.get())) {
             event.add(EntityType.PLAYER, RegistryAttributes.EXPOSURE_RISK.get(), 0.0D);
+        }
+        if (!event.has(EntityType.PLAYER, ModAttributes.BULLET_RESISTANCE.get())) {
+            event.add(EntityType.PLAYER, ModAttributes.BULLET_RESISTANCE.get(), 0.0D);
         }
     }
 
@@ -162,8 +166,8 @@ public final class UniversalityEvents {
         AttributeInstance attribute = player.getAttribute(
                 RegistryAttributes.HEADSHOT_DAMAGE.get());
         if (attribute != null) {
-            double multiplier = PhoneUpgradeHelper.applyAttributeModifiers(
-                    event.getHeadshotMultiplier(), attribute);
+            double bonus = Math.max(0.0D, attribute.getValue()) / 10000.0D;
+            double multiplier = event.getHeadshotMultiplier() * (1.0D + bonus);
             event.setHeadshotMultiplier((float) multiplier);
         }
     }

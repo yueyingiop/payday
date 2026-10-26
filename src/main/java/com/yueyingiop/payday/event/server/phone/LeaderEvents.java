@@ -1,6 +1,5 @@
 package com.yueyingiop.payday.event.server.phone;
 
-import com.yueyingiop.payday.api.PhoneUpgradeAction;
 import com.yueyingiop.payday.item.PhoneItem;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -103,24 +102,6 @@ public final class LeaderEvents {
                     bonus, AttributeModifier.Operation.MULTIPLY_TOTAL));
         }
         target.setHealth(Math.min(target.getHealth(), target.getMaxHealth()));
-    }
-
-    /** 处理领袖系列对伤害减免的加成。 */
-    public static float applyLeaderReduction(Player leader, LivingEntity target, float amount) {
-        if (!isActiveLeader(leader, target)
-                || target.getPersistentData().getBoolean(PhoneUpgradeAction.PIERCE_REDUCTION)) {
-            return amount;
-        }
-        int level = PhoneItem.installedSeriesLevel(leader, "leader");
-        double reduction = leader == target && leader.getHealth() <= leader.getMaxHealth() * 0.5D
-                ? 0.16D : 0.08D;
-        if (leader == target && level >= 2) {
-            reduction += 0.05D;
-        }
-        if (leader == target && level >= 5) {
-            reduction += 0.10D;
-        }
-        return amount * (float) Math.max(0.0D, 1.0D - reduction);
     }
 
     /** 长跑冠军：将玩家新增的饥饿消耗降低75%。 */

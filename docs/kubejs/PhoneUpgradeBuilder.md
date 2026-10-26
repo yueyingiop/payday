@@ -182,10 +182,18 @@ StartupEvents.registry('item', event => {
 .attribute('minecraft:generic.movement_speed', 0.15, 'MULTIPLY_BASE')
 ```
 
-TACZ 爆头伤害也可以直接使用通用属性，不需要额外的事件回调：
+爆头伤害也可以直接使用通用属性，不需要额外的事件回调。该属性使用万分比，
+`2500` 代表 `25%`：
 
 ```js
-.attribute('payday:headshot_damage', 0.25, 'MULTIPLY_TOTAL')
+.attribute('payday:headshot_damage', 2500, 'ADDITION')
+```
+
+闪避率和伤害减免同样使用万分比。TACZ 伤害减免的 `800` 代表 `8%`，PayDay
+会自动转换为 TACZ 的实际存储格式：
+
+```js
+.attribute('tacz:tacz.bullet_resistance', 800, 'ADDITION')
 ```
 
 ### effect(effectId, durationTicks, amplifier)

@@ -113,7 +113,7 @@ public final class CooldownHudRenderer {
         }
 
         String value = String.format(Locale.ROOT, "%.1f", entry.remainingSeconds());
-        drawCompactDigits(graphics, value, x + 22, y + 3, 17);
+        drawRightAlignedDigits(graphics, value, x + 22, y + 3, 17);
     }
 
     private static void renderProbability(GuiGraphics graphics,
@@ -122,10 +122,15 @@ public final class CooldownHudRenderer {
         if (textMode) {
             renderProbabilityName(graphics, entry.hud(), x, y);
         } else if (entry.hud().showValue()) {
-            String value = entry.hud().percentage()
-                    ? Integer.toString((int) Math.round(entry.hud().value()))
-                    : formatNumber(entry.hud().value());
-            drawCompactDigits(graphics, value, x + 20, y + 3, 18);
+            if (entry.hud().showPercentage()) {
+                drawRightAlignedPercentage(graphics,
+                        formatNumber(entry.hud().value() / 100.0D), x + 20, y + 3, 18);
+            } else {
+                String value = entry.hud().percentage()
+                        ? Integer.toString((int) Math.round(entry.hud().value()))
+                        : formatNumber(entry.hud().value());
+                drawRightAlignedDigits(graphics, value, x + 20, y + 3, 18);
+            }
         }
     }
 
@@ -177,8 +182,9 @@ public final class CooldownHudRenderer {
         }
     }
 
+    /** Draws compact numeric glyphs from the supplied left edge, clipping to maxWidth. */
     private static void drawCompactDigits(GuiGraphics graphics, String value,
-                                           int x, int y, int maxWidth) {
+                                          int x, int y, int maxWidth) {
         int cursor = x;
         for (int i = 0; i < value.length(); i++) {
             char character = value.charAt(i);
@@ -205,6 +211,40 @@ public final class CooldownHudRenderer {
                 cursor += 1 + DIGIT_SPACING;
             }
         }
+    }
+
+    /** Draws compact numeric glyphs with their right edge aligned to maxWidth. */
+    private static void drawRightAlignedDigits(GuiGraphics graphics, String value,
+                                                int x, int y, int maxWidth) {
+        int drawX = x + Math.max(0, maxWidth - compactDigitsWidth(value));
+        drawCompactDigits(graphics, value, drawX, y, maxWidth - (drawX - x));
+    }
+
+    /** Draws a basis-point value followed by the percent glyph from cd.png. */
+    private static void drawRightAlignedPercentage(GuiGraphics graphics, String value,
+                                                   int x, int y, int maxWidth) {
+        int valueWidth = compactDigitsWidth(value);
+        int totalWidth = valueWidth + DIGIT_SPACING + 5;
+        int drawX = x + Math.max(0, maxWidth - totalWidth);
+        drawCompactDigits(graphics, value, drawX, y, Math.min(valueWidth, maxWidth));
+        int percentX = drawX + valueWidth + DIGIT_SPACING;
+        if (percentX + 5 <= x + maxWidth) {
+            graphics.blit(TEXTURE, percentX, y, 1, 52, 5, 5,
+                    TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        }
+    }
+
+    /** Calculates the visible width of the compact numeric glyph sequence. */
+    private static int compactDigitsWidth(String value) {
+        int width = 0;
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+            width += character == '.' ? 1 : DIGIT_WIDTH;
+            if (i + 1 < value.length()) {
+                width += DIGIT_SPACING;
+            }
+        }
+        return width;
     }
 
     /** 将属性原始值格式化为不带百分号的紧凑数字。 */

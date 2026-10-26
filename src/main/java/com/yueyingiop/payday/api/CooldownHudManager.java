@@ -266,6 +266,7 @@ public final class CooldownHudManager {
                                 "cooldown_hud.payday.unknown") : hud.name(),
                         hud != null && hud.showValue(),
                         hud == null || hud.percentage(),
+                        hud != null && hud.showPercentage(),
                         hud == null ? 0 : hud.textureU(),
                         hud == null ? 0 : hud.textureV(),
                         remaining, total));
@@ -286,6 +287,7 @@ public final class CooldownHudManager {
                 && java.util.Objects.equals(first.name(), second.name())
                 && first.showValue() == second.showValue()
                 && first.percentage() == second.percentage()
+                && first.showPercentage() == second.showPercentage()
                 && first.textureU() == second.textureU()
                 && first.textureV() == second.textureV();
     }

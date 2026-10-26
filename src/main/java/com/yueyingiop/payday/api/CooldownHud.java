@@ -46,18 +46,21 @@ public final class CooldownHud {
     private final Component name;
     private final boolean showValue;
     private final boolean percentage;
+    private final boolean showPercentage;
     private final int textureU;
     private final int textureV;
 
     /** 创建不可变的 HUD 描述对象。 */
     private CooldownHud(Type type, ResourceLocation texture, double value, Component name,
-                        boolean showValue, boolean percentage, int textureU, int textureV) {
+                        boolean showValue, boolean percentage, boolean showPercentage,
+                        int textureU, int textureV) {
         this.type = type;
         this.texture = texture;
         this.value = value;
         this.name = name;
         this.showValue = showValue;
         this.percentage = percentage;
+        this.showPercentage = showPercentage;
         this.textureU = textureU;
         this.textureV = textureV;
     }
@@ -111,6 +114,15 @@ public final class CooldownHud {
                 .texturePosition(textureU, textureV).build();
     }
 
+    /** 创建一个已经解析好的冷却 HUD，并指定百分号显示和纹理分块坐标。 */
+    public static CooldownHud of(Type type, ResourceLocation texture, double value,
+                                 Component name, boolean showValue, boolean percentage,
+                                 int textureU, int textureV, boolean showPercentage) {
+        return new Builder().type(type).texture(texture).value(value).showName(name)
+                .showValue(showValue).percentage(percentage).showPercentage(showPercentage)
+                .texturePosition(textureU, textureV).build();
+    }
+
     /**
      * 获取 HUD 类型。
      *
@@ -132,8 +144,9 @@ public final class CooldownHud {
     /**
      * 获取 HUD 数值。
      *
-     * <p>计时型单位为秒；概率型默认按百分比数值处理，也可以通过
-     * {@link Builder#percentage(boolean)} 使用原始数值；触发型忽略该数值。</p>
+     * <p>计时型单位为秒；概率型的数字格式由
+     * {@link Builder#percentage(boolean)} 和 {@link Builder#showPercentage(boolean)} 控制；
+     * 触发型忽略该数值。</p>
      *
      * @return HUD 数值
      */
@@ -151,9 +164,14 @@ public final class CooldownHud {
         return showValue;
     }
 
-    /** 获取概率型 HUD 是否按百分比数值格式绘制。 */
+    /** 获取概率型 HUD 是否按整数数值格式绘制。 */
     public boolean percentage() {
         return percentage;
+    }
+
+    /** 获取概率型 HUD 是否在数值后绘制百分号。 */
+    public boolean showPercentage() {
+        return showPercentage;
     }
 
     /** 获取图标纹理的横向分块坐标。 */
@@ -174,6 +192,7 @@ public final class CooldownHud {
         private Component name;
         private boolean showValue = true;
         private boolean percentage = true;
+        private boolean showPercentage;
         private int textureU;
         private int textureV;
 
@@ -249,9 +268,22 @@ public final class CooldownHud {
             return this;
         }
 
-        /** 设置概率型 HUD 是否按百分比数值格式绘制。 */
+        /** 设置概率型 HUD 是否按整数数值格式绘制。 */
         public Builder percentage(boolean percentage) {
             this.percentage = percentage;
+            return this;
+        }
+
+        /**
+         * 设置概率型 HUD 是否在数值后绘制百分号。
+         *
+         * <p>启用后，数值按万分比解释，例如 {@code 1000} 显示为 {@code 10%}。</p>
+         *
+         * @param showPercentage 是否显示百分号
+         * @return 当前构造器
+         */
+        public Builder showPercentage(boolean showPercentage) {
+            this.showPercentage = showPercentage;
             return this;
         }
 
@@ -290,7 +322,7 @@ public final class CooldownHud {
             }
             double normalizedValue = switch (type) {
                 case TIMER -> Math.max(0.0D, Math.min(999.9D, value));
-                case PROBABILITY -> percentage
+                case PROBABILITY -> percentage && !showPercentage
                         ? Math.max(-999.0D, Math.min(999.0D, value))
                         : Math.max(-999999.0D, Math.min(999999.0D, value));
                 case TRIGGER -> 0.0D;
@@ -298,7 +330,7 @@ public final class CooldownHud {
             Component normalizedName = name == null
                     ? Component.translatable("cooldown_hud.payday.unknown") : name;
             return new CooldownHud(type, texture, normalizedValue, normalizedName,
-                    showValue, percentage, textureU, textureV);
+                    showValue, percentage, showPercentage, textureU, textureV);
         }
 
         /** 解析字符串形式的纹理资源路径。 */

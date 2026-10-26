@@ -20,6 +20,7 @@ import com.yueyingiop.payday.event.server.TestEffectStickEvents;
 import com.yueyingiop.payday.event.server.TurretEvents;
 import com.yueyingiop.payday.event.server.CooldownHudEvents;
 import com.yueyingiop.payday.event.server.phone.DebuffEvents;
+import com.yueyingiop.payday.event.server.phone.DamageReductionEvents;
 import com.yueyingiop.payday.event.server.phone.HackerEvents;
 import com.yueyingiop.payday.event.server.phone.LeaderEvents;
 import com.yueyingiop.payday.event.server.phone.MuscleEvents;
@@ -96,6 +97,7 @@ public class PayDay
         MinecraftForge.EVENT_BUS.register(LeaderEvents.class);
         MinecraftForge.EVENT_BUS.register(MuscleEvents.class);
         MinecraftForge.EVENT_BUS.register(DebuffEvents.class);
+        MinecraftForge.EVENT_BUS.register(DamageReductionEvents.class);
         MinecraftForge.EVENT_BUS.register(ThiefEvents.class);
         MinecraftForge.EVENT_BUS.register(TestEffectStickEvents.class);
         MinecraftForge.EVENT_BUS.register(TurretEvents.class);

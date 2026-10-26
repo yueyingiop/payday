@@ -67,14 +67,21 @@ KubeJS 推荐传入字符串，例如 `payday:ranged_damage`。字符串会延�
 
 返回当前 Builder。
 
-TACZ 爆头属性由 PayDay 的通用事件统一应用，不需要在 KubeJS 中额外注册爆头事件：
+爆头伤害属性由 PayDay 的通用事件统一应用，不需要在 KubeJS 中额外注册爆头事件。
+爆头伤害使用万分比，`1` 代表 `0.01%`，应使用 `ADDITION`：
 
 ```js
-.attribute('payday:headshot_damage', 0.25, 'MULTIPLY_TOTAL')
+.attribute('payday:headshot_damage', 2500, 'ADDITION')
 ```
 
-计算时使用 TACZ 当前爆头倍率作为基础值：`ADDITION` 直接加值，`MULTIPLY_BASE`
-按基础值增加，`MULTIPLY_TOTAL` 按当前总值增加。
+闪避率和伤害减免也使用相同的万分比规则。TACZ 的伤害减免属性可以使用：
+
+```js
+.attribute('tacz:tacz.bullet_resistance', 800, 'ADDITION')
+```
+
+这表示 `8%`；PayDay 会在写入 TACZ 属性时转换为 TACZ 所需的实际小数值。
+其他原版属性仍按照 `ADDITION`、`MULTIPLY_BASE` 和 `MULTIPLY_TOTAL` 的原有规则计算。
 
 ### 2.2.1. effect(effectId, durationTicks, amplifier)
 

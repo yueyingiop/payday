@@ -52,8 +52,8 @@ PayDay 内置的 `payday:gui/cd_attribute` 纹理表时，可以用它选择图�
 ### `value(value)`
 
 - `TIMER`：冷却时间，单位为秒，最大显示值为 `999.9`。
-- `PROBABILITY`：默认百分比数值范围为 `-999` 到 `999`；原始数值范围为
-  `-999999` 到 `999999`。
+- `PROBABILITY`：普通整数显示范围为 `-999` 到 `999`；原始数值或带百分号的万分比
+  显示范围为 `-999999` 到 `999999`。
 - `TRIGGER`：该值会被忽略。
 
 当调用 `.percentage(false)` 时，`PROBABILITY` 会显示原始数值，不进行百分比格式处理，
@@ -61,7 +61,23 @@ PayDay 内置的 `payday:gui/cd_attribute` 纹理表时，可以用它选择图�
 
 ### `percentage(percentage)`
 
-设置概率型 HUD 是否按百分比数值格式绘制。默认值为 `true`，普通概率型 HUD 不需要修改。
+设置概率型 HUD 的数字是否按整数格式绘制。默认值为 `true`；属性原始值需要保留小数时，
+可以设置为 `false`。
+
+### `showPercentage(showPercentage)`
+
+设置概率型 HUD 是否在数字后绘制百分号。启用后，数值按万分比解释，`1000` 会显示为
+`10%`，百分号使用 `cd.png` 中的百分号纹理。启用后会自动允许万分比数值范围，
+也可以同时关闭 `percentage()` 的整数格式：
+
+```js
+CooldownHud.builder()
+    .type('PROBABILITY')
+    .value(1000)
+    .percentage(false)
+    .showPercentage(true)
+    .build()
+```
 
 属性汇总 HUD 使用：
 
@@ -69,17 +85,18 @@ PayDay 内置的 `payday:gui/cd_attribute` 纹理表时，可以用它选择图�
 CooldownHud.builder()
     .type('PROBABILITY')
     .texture('payday:gui/cd_attribute')
-    .texturePosition(0, 0)
-    .value(0.15)
+    .texturePosition(0, 16)
+    .value(1500)
     .percentage(false)
-    .showName(Component.translatable('attribute.name.minecraft.generic.movement_speed'))
+    .showPercentage(true)
+    .showName(Component.translatable('attribute.name.payday.dodge_chance'))
     .build()
 ```
 
 ### `showValue(showValue)`
 
-控制是否绘制右侧数字，默认值为 `true`。属性汇总 HUD 仍然显示数字，只通过
-`.percentage(false)` 改为原始属性值格式；只有确实不需要数字时才使用 `.showValue(false)`。
+控制是否绘制右侧数字，默认值为 `true`。需要显示属性原始值时使用
+`.percentage(false)`；万分比属性使用 `.showPercentage(true)` 显示百分号。
 
 ### `showName(name)`
 
@@ -225,14 +242,16 @@ PlayerEvents.hurt(event => {
 手机装备或升级变化后，PayDay 会自动重建内置概率型 HUD。自动 HUD 使用手机升级物品作为
 图标；按住 Tab 时会切换到文本背景并显示属性名称。
 
-属性 HUD 直接读取玩家当前属性最终值，不显示百分比格式。内置属性图标来自
+属性 HUD 直接读取玩家当前属性最终值。爆头伤害、闪避率和伤害减免使用万分比显示，
+例如 `2500` 显示为 `25%`。内置属性图标来自
 `payday:gui/cd_attribute`，每格大小为 16x16，顺序为：速度、近战、远程、爆头、闪避、减伤。
 
 以下内容会自动显示：
 
 - `PhoneUpgradeAction.attribute(...)` 声明的属性；名称使用属性自己的翻译键。
-- 击杀掉落和经验掉落加成。
-- 护甲饰品升级插槽提供的护盾值加成和护盾冷却缩短。
-- 头盔飞舞、叶蔽于林、衣帽间和玩命关头的对应属性。
+- 相同属性只显示一个，并直接读取玩家当前的最终属性值。
+- 远程攻击力在最终值为 `0` 时不显示。
+
+击杀掉落、经验掉落、护盾值、护盾冷却、初始伤害和生命恢复速度不再自动显示为概率型 HUD。
 
 自动 HUD 使用内部 ID 前缀管理，不会删除 KubeJS 通过 `CooldownHudManager` 创建的 HUD。

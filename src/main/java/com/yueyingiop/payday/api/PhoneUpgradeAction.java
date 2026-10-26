@@ -219,7 +219,10 @@ public final class PhoneUpgradeAction {
             UUID id = UUID.nameUUIDFromBytes((source + definition.attribute().getDescriptionId())
                     .getBytes(StandardCharsets.UTF_8));
             instance.removeModifier(id);
-            instance.addTransientModifier(new AttributeModifier(id, source, definition.amount(), definition.operation()));
+            double amount = AttributeModifierHelper.runtimeAmount(
+                    definition.attribute(), definition.amount(), definition.operation());
+            instance.addTransientModifier(new AttributeModifier(id, source, amount,
+                    definition.operation()));
         }
         for (MobEffectInstance effect : effects) {
             entity.addEffect(new MobEffectInstance(effect));

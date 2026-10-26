@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
@@ -153,10 +154,30 @@ public final class PhoneUpgradeHelper {
      *
      * @param event 受伤事件
      * @param attacker 预期的近战攻击者
-     * @return 伤害来源的直接实体和实体是否都是指定攻击者
+     * @return 来源实体是指定攻击者，且直接实体是攻击者或为空
      */
     public static boolean isMeleeHit(LivingHurtEvent event, LivingEntity attacker) {
-        return event.getSource().getEntity() == attacker && event.getSource().getDirectEntity() == attacker;
+        return isMeleeHit(event.getSource(), attacker);
+    }
+
+    /**
+     * 判断一次已结算伤害事件是否由指定实体直接近战造成。
+     *
+     * <p>该事件发生在 {@link LivingHurtEvent} 之后，适合在伤害结算完成后
+     * 施加“命中后”效果，避免效果被当前伤害事件立即消费。</p>
+     *
+     * @param event 已结算伤害事件
+     * @param attacker 预期的近战攻击者
+     * @return 是否由指定实体直接近战造成
+     */
+    public static boolean isMeleeHit(LivingDamageEvent event, LivingEntity attacker) {
+        return isMeleeHit(event.getSource(), attacker);
+    }
+
+    /** 判断伤害来源是否是指定实体的直接近战伤害。 */
+    public static boolean isMeleeHit(DamageSource source, LivingEntity attacker) {
+        return source.getEntity() == attacker
+                && (source.getDirectEntity() == attacker || source.getDirectEntity() == null);
     }
 
     /**
@@ -254,6 +275,22 @@ public final class PhoneUpgradeHelper {
      * @param duration 渗透效果持续时间，单位为游戏刻
      */
     public static void applyInfiltrationOnMeleeHit(LivingHurtEvent event,
+                                                    LivingEntity attacker, int duration) {
+        if (!isMeleeHit(event, attacker) || event.getEntity() == attacker) {
+            return;
+        }
+        event.getEntity().addEffect(new MobEffectInstance(
+                RegistryEffects.INFILTRATION.get(), duration, 0, false, true, true));
+    }
+
+    /**
+     * 在伤害结算完成后给近战目标施加渗透效果。
+     *
+     * @param event 已结算伤害事件
+     * @param attacker 预期的近战攻击者
+     * @param duration 渗透效果持续时间，单位为游戏刻
+     */
+    public static void applyInfiltrationOnMeleeHit(LivingDamageEvent event,
                                                     LivingEntity attacker, int duration) {
         if (!isMeleeHit(event, attacker) || event.getEntity() == attacker) {
             return;

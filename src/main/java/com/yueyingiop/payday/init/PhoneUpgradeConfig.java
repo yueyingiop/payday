@@ -8,7 +8,6 @@ import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
 import com.yueyingiop.payday.event.server.phone.AntisocialEvents;
 import com.yueyingiop.payday.event.server.phone.HackerEvents;
 import com.yueyingiop.payday.event.server.phone.AssassinEvents;
-import com.yueyingiop.payday.event.server.phone.LeaderEvents;
 import com.yueyingiop.payday.event.server.phone.MuscleEvents;
 import com.yueyingiop.payday.event.server.phone.ThiefEvents;
 import com.yueyingiop.payday.item.PhoneItem;
@@ -35,11 +34,13 @@ import net.minecraft.world.entity.projectile.Projectile;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import com.tacz.guns.api.event.common.AttachmentPropertyEvent;
 import com.tacz.guns.api.GunProperties;
+import com.tacz.guns.init.ModAttributes;
 import com.tacz.guns.resource.pojo.data.gun.InaccuracyType;
 import java.util.EnumMap;
 import java.util.Map;
@@ -111,8 +112,8 @@ public final class PhoneUpgradeConfig {
     // 头盔飞舞
     public static final PhoneUpgradeAction MISC_HELMET_DANCE = PhoneUpgradeAction.builder()
         // 1.爆头伤害+25%〔来自于TACZ〕
-        .attribute(RegistryAttributes.HEADSHOT_DAMAGE, 0.25D,
-                AttributeModifier.Operation.MULTIPLY_TOTAL)
+        .attribute(RegistryAttributes.HEADSHOT_DAMAGE, 2500.0D,
+                AttributeModifier.Operation.ADDITION)
         .build();
 
     // 叶蔽于林
@@ -246,14 +247,8 @@ public final class PhoneUpgradeConfig {
     //#region 领队
     public static final PhoneUpgradeAction LEADER1 = PhoneUpgradeAction.builder()
         // 半径16格内的自己及其他玩家提供8%伤害减免；自身生命值低于50%时变为16%。
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
-            if (!(owner instanceof Player leader) || !(event.getEntity() instanceof Player target)
-                    || leader.distanceToSqr(target) > 256.0D) {
-                return;
-            }
-            event.setAmount(LeaderEvents.applyLeaderReduction(
-                    leader, target, event.getAmount()));
-        })
+        .attribute(ModAttributes.BULLET_RESISTANCE, 0.0D,
+                AttributeModifier.Operation.ADDITION)
         .build();
     public static final PhoneUpgradeAction LEADER2 = PhoneUpgradeAction.builder()
         // 饥饿值消耗降低75%；自身伤害减免再次+5%。由团队刷新和LEADER1统一处理。
@@ -482,35 +477,23 @@ public final class PhoneUpgradeConfig {
     //#region 渗透者
     public static final PhoneUpgradeAction INFILTRATOR1 = PhoneUpgradeAction.builder()
         // 半径8格内存在3个及以上非友善生物时, 给予12%伤害减免
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
-            if (owner instanceof Player player && event.getEntity() == player
-                    && !PhoneUpgradeHelper.isPiercing(event)
-                    && PhoneUpgradeHelper.countUnfriendly(player, 8.0D) >= 3) {
-                event.setAmount(event.getAmount() * 0.88F);
-            }
-        })
+        .attribute(ModAttributes.BULLET_RESISTANCE, 0.0D,
+                AttributeModifier.Operation.ADDITION)
         .build();
 
     public static final PhoneUpgradeAction INFILTRATOR2 = PhoneUpgradeAction.builder()
         // 半径16格内存在非友善生物时, 给予8%伤害减免
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
-            if (owner instanceof Player player && event.getEntity() == player
-                    && !PhoneUpgradeHelper.isPiercing(event)
-                    && PhoneUpgradeHelper.countUnfriendly(player, 16.0D) >= 1) {
-                event.setAmount(event.getAmount() * 0.92F);
-            }
-        })
+        .attribute(ModAttributes.BULLET_RESISTANCE, 0.0D,
+                AttributeModifier.Operation.ADDITION)
         .build();
 
     public static final PhoneUpgradeAction INFILTRATOR3 = PhoneUpgradeAction.builder()
         // 伤害减免; 近战命中后给予1秒渗透
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
+        .attribute(ModAttributes.BULLET_RESISTANCE, 0.0D,
+                AttributeModifier.Operation.ADDITION)
+        .addProxyEvent(LivingDamageEvent.class, (event, owner) -> {
             if (!(owner instanceof Player player)) {
                 return;
-            }
-            if (event.getEntity() == player && !PhoneUpgradeHelper.isPiercing(event)
-                    && PhoneUpgradeHelper.countUnfriendly(player, 16.0D) >= 1) {
-                event.setAmount(event.getAmount() * 0.92F);
             }
             PhoneUpgradeHelper.applyInfiltrationOnMeleeHit(event, player, 20);
         })
@@ -518,13 +501,11 @@ public final class PhoneUpgradeConfig {
 
     public static final PhoneUpgradeAction INFILTRATOR4 = PhoneUpgradeAction.builder()
         // 伤害减免; 近战命中后的渗透持续7.5秒
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
+        .attribute(ModAttributes.BULLET_RESISTANCE, 0.0D,
+                AttributeModifier.Operation.ADDITION)
+        .addProxyEvent(LivingDamageEvent.class, (event, owner) -> {
             if (!(owner instanceof Player player)) {
                 return;
-            }
-            if (event.getEntity() == player && !PhoneUpgradeHelper.isPiercing(event)
-                    && PhoneUpgradeHelper.countUnfriendly(player, 16.0D) >= 1) {
-                event.setAmount(event.getAmount() * 0.92F);
             }
             PhoneUpgradeHelper.applyInfiltrationOnMeleeHit(event, player, 150);
         })
@@ -554,7 +535,7 @@ public final class PhoneUpgradeConfig {
     //#region 反社会者
     public static final PhoneUpgradeAction ANTISOCIAL1 = PhoneUpgradeAction.builder()
         // 半径8格内有至少3个非友善生物时, 近战命中非友善生物后给予1秒渗透。
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
+        .addProxyEvent(LivingDamageEvent.class, (event, owner) -> {
             if (!(owner instanceof Player player)
                     || !AntisocialEvents.isQualifiedMeleeHit(event, player, 8.0D, 3)) {
                 return;
@@ -568,6 +549,8 @@ public final class PhoneUpgradeConfig {
         .armorSoltModifier(modifier -> modifier.addArmorMaxMultiplier(0.10D))
         .build();
     public static final PhoneUpgradeAction ANTISOCIAL3 = PhoneUpgradeAction.builder()
+        .attribute(ModAttributes.BULLET_RESISTANCE, 0.0D,
+                AttributeModifier.Operation.ADDITION)
         // 近战击杀恢复10%最大生命值, 每1秒至多生效一次。
         .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
             if (!(owner instanceof Player player)
@@ -581,14 +564,6 @@ public final class PhoneUpgradeConfig {
             }
             player.heal(player.getMaxHealth() * 0.10F);
             player.getPersistentData().putLong(key, now + 20L);
-        })
-        // 半径16格内有至少1个非友善生物时, 受到伤害降低8%。
-        .addProxyEvent(LivingHurtEvent.class, (event, owner) -> {
-            if (owner instanceof Player player && event.getEntity() == player
-                    && !PhoneUpgradeHelper.isPiercing(event)
-                    && PhoneUpgradeHelper.countUnfriendly(player, 16.0D) >= 1) {
-                event.setAmount(event.getAmount() * 0.92F);
-            }
         })
         .build();
     public static final PhoneUpgradeAction ANTISOCIAL4 = PhoneUpgradeAction.builder()
@@ -678,6 +653,12 @@ public final class PhoneUpgradeConfig {
                         }
                     }
                     player.getPersistentData().putLong(key, now + 300L);
+                    CooldownHudManager.startTimer(player, "payday_anarchist5_armor",
+                            CooldownHud.builder()
+                                    .type(CooldownHud.Type.TIMER)
+                                    .texture("payday:item/phone_upgrade/generated/special_anarchist_5")
+                                    .value(15.0D)
+                                    .build());
                 })
         // 玩家获取经验数量+25%。
         .addProxyEvent(LivingExperienceDropEvent.class,
@@ -698,6 +679,7 @@ public final class PhoneUpgradeConfig {
             }
             player.addEffect(new MobEffectInstance(RegistryEffects.HOWL.get(), 100, 0, false, true, true));
             player.getPersistentData().putLong(HACKER1_COOLDOWN_END, now + 900L);
+            startHacker1CooldownHud(player, 45.0D);
             return true;
         })
         .addProxyEvent(LivingDeathEvent.class, (event, owner) -> {
@@ -707,8 +689,9 @@ public final class PhoneUpgradeConfig {
             }
             long now = player.level().getGameTime();
             long cooldownEnd = player.getPersistentData().getLong(HACKER1_COOLDOWN_END);
-            player.getPersistentData().putLong(HACKER1_COOLDOWN_END,
-                    Math.max(now, cooldownEnd - 100L));
+            long nextEnd = Math.max(now, cooldownEnd - 100L);
+            player.getPersistentData().putLong(HACKER1_COOLDOWN_END, nextEnd);
+            refreshHacker1CooldownHud(player, nextEnd);
         })
         .build();
 
@@ -778,5 +761,25 @@ public final class PhoneUpgradeConfig {
                 (event, owner) -> PhoneUpgradeHelper.applyExperienceBonus(event, owner, 0.25D))
         .build();
     //#endregion
+
+    /** Starts the HACKER1 activation cooldown HUD. */
+    private static void startHacker1CooldownHud(Player player, double seconds) {
+        CooldownHudManager.startTimer(player, "payday_hacker1_skill",
+                CooldownHud.builder()
+                        .type(CooldownHud.Type.TIMER)
+                        .texture("payday:item/phone_upgrade/generated/special_hacker_1")
+                        .value(seconds)
+                        .build());
+    }
+
+    /** Synchronizes the HACKER1 HUD after a kill reduces its remaining cooldown. */
+    private static void refreshHacker1CooldownHud(Player player, long cooldownEnd) {
+        long remaining = cooldownEnd - player.level().getGameTime();
+        if (remaining <= 0L) {
+            CooldownHudManager.remove(player, "payday_hacker1_skill");
+            return;
+        }
+        startHacker1CooldownHud(player, remaining / 20.0D);
+    }
 
 }

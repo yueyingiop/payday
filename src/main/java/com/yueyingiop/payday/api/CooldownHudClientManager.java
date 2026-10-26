@@ -47,7 +47,7 @@ public final class CooldownHudClientManager {
         ENTRIES.put(packet.id(), new Entry(
                 CooldownHud.of(types[packet.type()], texture, packet.value(), packet.name(),
                         packet.showValue(), packet.percentage(), packet.textureU(),
-                        packet.textureV()),
+                        packet.textureV(), packet.showPercentage()),
                 now + Math.max(0L, packet.remainingTicks()),
                 Math.max(0L, packet.totalTicks())));
     }

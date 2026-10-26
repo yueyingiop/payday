@@ -1,7 +1,10 @@
 package com.yueyingiop.payday.event.server.phone;
 
 import com.yueyingiop.payday.api.helper.PhoneUpgradeHelper;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
 /** 处理反社会者系列的近战命中条件。 */
@@ -20,8 +23,23 @@ public final class AntisocialEvents {
      */
     public static boolean isQualifiedMeleeHit(LivingHurtEvent event, Player player,
                                                double radius, int minimumUnfriendly) {
-        return PhoneUpgradeHelper.isMeleeHit(event, player)
-                && PhoneUpgradeHelper.isUnfriendly(player, event.getEntity())
+        return isQualifiedMeleeHit(event.getSource(), event.getEntity(), player, radius,
+                minimumUnfriendly);
+    }
+
+    /** 判断伤害结算完成后的近战命中是否满足反社会者1条件。 */
+    public static boolean isQualifiedMeleeHit(LivingDamageEvent event, Player player,
+                                               double radius, int minimumUnfriendly) {
+        return isQualifiedMeleeHit(event.getSource(), event.getEntity(), player, radius,
+                minimumUnfriendly);
+    }
+
+    /** 复用伤害来源、目标和附近生物的统一判定。 */
+    private static boolean isQualifiedMeleeHit(DamageSource source, LivingEntity target,
+                                                Player player, double radius,
+                                                int minimumUnfriendly) {
+        return PhoneUpgradeHelper.isMeleeHit(source, player)
+                && PhoneUpgradeHelper.isUnfriendly(player, target)
                 && PhoneUpgradeHelper.countUnfriendly(player, radius) >= minimumUnfriendly;
     }
 }
