@@ -19,6 +19,7 @@ import com.yueyingiop.payday.event.server.CommandEvents;
 import com.yueyingiop.payday.event.server.TestEffectStickEvents;
 import com.yueyingiop.payday.event.server.TurretEvents;
 import com.yueyingiop.payday.event.server.CooldownHudEvents;
+import com.yueyingiop.payday.event.server.SkillEvents;
 import com.yueyingiop.payday.event.server.phone.DebuffEvents;
 import com.yueyingiop.payday.event.server.phone.DamageReductionEvents;
 import com.yueyingiop.payday.event.server.phone.HackerEvents;
@@ -102,6 +103,7 @@ public class PayDay
         MinecraftForge.EVENT_BUS.register(TestEffectStickEvents.class);
         MinecraftForge.EVENT_BUS.register(TurretEvents.class);
         MinecraftForge.EVENT_BUS.register(CooldownHudEvents.class);
+        MinecraftForge.EVENT_BUS.register(SkillEvents.class);
     }
 
     private static void gatherData(GatherDataEvent event) {

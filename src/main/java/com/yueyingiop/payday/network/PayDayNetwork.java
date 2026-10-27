@@ -71,5 +71,26 @@ public final class PayDayNetwork {
             CooldownHudSyncPacket::decode,
             CooldownHudSyncPacket::handle
         );
+        CHANNEL.registerMessage(
+            id++,
+            RequestSkillStatePacket.class,
+            RequestSkillStatePacket::encode,
+            RequestSkillStatePacket::decode,
+            RequestSkillStatePacket::handle
+        );
+        CHANNEL.registerMessage(
+            id++,
+            SkillActionPacket.class,
+            SkillActionPacket::encode,
+            SkillActionPacket::decode,
+            SkillActionPacket::handle
+        );
+        CHANNEL.registerMessage(
+            id++,
+            SyncSkillStatePacket.class,
+            SyncSkillStatePacket::encode,
+            SyncSkillStatePacket::decode,
+            SyncSkillStatePacket::handle
+        );
     }
 }

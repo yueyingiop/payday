@@ -39,6 +39,12 @@ public final class ClientInputEvents {
             return;
         }
 
+        if (PayDayClient.OPEN_SKILL.matches(event.getKey(), event.getScanCode())
+                && minecraft.screen == null) {
+            minecraft.setScreen(new com.yueyingiop.payday.client.screen.SkillScreen());
+            return;
+        }
+
         if (PhoneUpgradeAction.hasBoundActivationKey(event.getKey())
                 && minecraft.screen == null) {
             PayDayNetwork.CHANNEL.sendToServer(new ActivateHackerSkillPacket(event.getKey()));

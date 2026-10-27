@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>技能效果系统设计草案</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10151b;
+      --panel: #171e26;
+      --panel-2: #1d2731;
+      --line: #334455;
+      --line-strong: #4f6d85;
+      --text: #e9f0f5;
+      --muted: #9baab6;
+      --blue: #67b7ff;
+      --cyan: #63e4d2;
+      --yellow: #f4c36a;
+      --purple: #caa7ff;
+      --shadow: 0 12px 28px rgba(0, 0, 0, .22);
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.65 "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .app-shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 22px 16px;
+      border-right: 1px solid var(--line);
+      background: #121920;
+    }
+    .brand { margin: 0 10px 6px; color: var(--text); font-size: 17px; font-weight: 700; }
+    .brand-note { margin: 0 10px 22px; color: var(--muted); font-size: 12px; }
+    .toc { display: grid; gap: 4px; }
+    .toc a {
+      display: block;
+      padding: 7px 10px;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      border-radius: 4px;
+    }
+    .toc a:hover, .toc a.active {
+      border-left-color: var(--blue);
+      color: var(--text);
+      background: rgba(103, 183, 255, .09);
+      text-decoration: none;
+    }
+    .side-stat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin: 22px 8px 0; }
+    .side-stat div { padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,.025); }
+    .side-stat strong { display: block; color: var(--blue); font-size: 18px; }
+    .side-stat span { color: var(--muted); font-size: 11px; }
+    main { min-width: 0; }
+    .hero {
+      padding: 48px clamp(22px, 5vw, 76px) 34px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(120deg, #16232d 0%, #131a21 58%, #171b27 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--cyan); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+    h1, h2, h3, h4 { line-height: 1.25; }
+    h1 { max-width: 920px; margin: 0; font-size: clamp(28px, 4vw, 46px); }
+    .hero p { max-width: 860px; margin: 16px 0 0; color: var(--muted); font-size: 15px; }
+    .notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 8px 11px;
+      border: 1px solid rgba(244,195,106,.35);
+      border-radius: 5px;
+      color: #ffe2a7;
+      background: rgba(244,195,106,.08);
+      font-size: 12px;
+    }
+    .content { width: min(1320px, 100%); padding: 28px clamp(22px, 5vw, 76px) 72px; }
+    section { scroll-margin-top: 20px; margin: 0 0 48px; }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+    }
+    h2 { margin: 0; font-size: 24px; }
+    h3 { margin: 0 0 8px; font-size: 17px; }
+    h4 { margin: 0 0 5px; font-size: 14px; }
+    .section-head p, .muted { margin: 0; color: var(--muted); }
+    .section-head p { max-width: 650px; font-size: 13px; text-align: right; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .panel {
+      min-width: 0;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .panel p { color: var(--muted); }
+    .panel > p:last-child { margin-bottom: 0; }
+    .panel strong { color: var(--text); }
+    .accent-blue { border-top: 2px solid var(--blue); }
+    .accent-cyan { border-top: 2px solid var(--cyan); }
+    .accent-yellow { border-top: 2px solid var(--yellow); }
+    .accent-purple { border-top: 2px solid var(--purple); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .pill {
+      display: inline-block;
+      padding: 2px 7px;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      color: #c9d9e5;
+      background: rgba(103,183,255,.06);
+      font-size: 12px;
+    }
+    .tag-blue { color: var(--blue); border-color: rgba(103,183,255,.42); }
+    .tag-cyan { color: var(--cyan); border-color: rgba(99,228,210,.42); }
+    .tag-yellow { color: var(--yellow); border-color: rgba(244,195,106,.42); }
+    .tag-purple { color: var(--purple); border-color: rgba(202,167,255,.42); }
+    .mindmap-toolbar, .catalog-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .tool-button, .select, .search {
+      min-height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--panel-2);
+      color: var(--text);
+    }
+    .tool-button { padding: 6px 10px; cursor: pointer; }
+    .tool-button:hover { border-color: var(--blue); background: #263849; }
+    .select, .search { padding: 5px 9px; }
+    .search { width: min(300px, 100%); }
+    .mindmap-wrap { overflow: auto; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: #111920; }
+    .mindmap { width: max-content; min-width: 100%; display: flex; justify-content: flex-start; }
+    .mindmap > .tree { width: max-content; }
+    .tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+    .tree > li > .tree-node { margin-bottom: 18px; }
+    .tree ul { position: relative; display: flex; justify-content: center; gap: 12px; padding-top: 26px; }
+    .tree ul::before { content: ""; position: absolute; top: 0; left: 9%; right: 9%; border-top: 1px solid var(--line-strong); }
+    .tree li { position: relative; padding-top: 26px; }
+    .tree ul > li::before { content: ""; position: absolute; top: 0; left: 50%; height: 26px; border-left: 1px solid var(--line-strong); }
+    .tree ul > li:first-child::after, .tree ul > li:last-child::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      width: 51%;
+      height: 1px;
+      background: #111920;
+    }
+    .tree ul > li:first-child::after { left: 0; }
+    .tree ul > li:last-child::after { right: 0; }
+    .tree-node {
+      position: relative;
+      min-width: 150px;
+      max-width: 220px;
+      padding: 9px 11px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--panel-2);
+      text-align: center;
+    }
+    .tree-node.root { min-width: 230px; border-color: var(--cyan); background: #17302f; }
+    .tree-node button { width: 100%; border: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; font-weight: 700; }
+    .tree-node small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 400; }
+    .tree-node .toggle { position: absolute; top: 3px; right: 5px; width: auto; color: var(--blue); font-size: 12px; }
+    .tree-node.closed + ul { display: none; }
+    .tree-node.closed .toggle::after { content: " +"; }
+    .tree-node:not(.closed) .toggle::after { content: " −"; }
+    .flow { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 8px; align-items: stretch; }
+    .flow-step { position: relative; padding: 14px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 36%; color: var(--blue); font-size: 18px; z-index: 1; }
+    .flow-step em { display: block; margin-bottom: 5px; color: var(--blue); font-style: normal; font-size: 11px; }
+    .flow-step p { margin: 0; color: var(--muted); font-size: 12px; }
+    .rule-list, .plain-list { margin: 8px 0 0; padding-left: 20px; color: var(--muted); }
+    .rule-list li, .plain-list li { margin: 5px 0; }
+    .rule-list strong, .plain-list strong { color: var(--text); }
+    .code {
+      overflow: auto;
+      margin: 11px 0 0;
+      padding: 13px;
+      border: 1px solid #2d3d4c;
+      border-radius: 5px;
+      background: #0d1318;
+      color: #cfe4f2;
+      font: 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+      white-space: pre;
+    }
+    .code .comment { color: #718999; }
+    .code .key { color: var(--cyan); }
+    .code .string { color: #f3c783; }
+    .reference-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .reference-grid .panel { height: 100%; }
+    .mapping-table { width: 100%; border-collapse: collapse; }
+    .mapping-table th, .mapping-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    .mapping-table th { color: #c8d9e6; background: rgba(255,255,255,.035); font-size: 12px; }
+    .mapping-table td { color: var(--muted); }
+    .mapping-table td:first-child { color: var(--text); font-weight: 700; white-space: nowrap; }
+    .decision-table { width: 100%; border-collapse: collapse; }
+    .decision-table th, .decision-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    .decision-table th { color: #c8d9e6; background: rgba(255,255,255,.035); font-size: 12px; }
+    .decision-table td { color: var(--muted); }
+    .decision-table td:first-child { color: var(--text); font-weight: 700; }
+    .catalog-summary { margin: 0 0 13px; color: var(--muted); }
+    .catalog-list { display: grid; gap: 10px; }
+    .category-block { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+    .category-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+    .category-title h3 { margin: 0; font-size: 15px; }
+    .series-block { border-bottom: 1px solid var(--line); }
+    .series-block:last-child { border-bottom: 0; }
+    .series-title { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; color: var(--cyan); font-weight: 700; }
+    .skill-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 10px 10px; }
+    .skill-card { min-width: 0; border: 1px solid #2c3b48; border-radius: 5px; background: #151d25; }
+    .skill-card summary { cursor: pointer; padding: 8px 9px; color: var(--text); font-weight: 700; }
+    .skill-card summary::marker { color: var(--blue); }
+    .skill-card summary small { color: var(--muted); font-weight: 400; }
+    .skill-detail { padding: 0 9px 9px; color: var(--muted); font-size: 12px; }
+    .skill-detail p { margin: 7px 0 0; }
+    .skill-detail b { color: var(--blue); }
+    .skill-detail .mastery b { color: var(--purple); }
+    .skill-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+    .pseudo-block { margin-top: 10px; border-top: 1px solid #2c3b48; }
+    .pseudo-block summary { cursor: pointer; padding: 8px 0 0; color: var(--cyan); font-size: 12px; font-weight: 700; }
+    .pseudo-block.kjs summary { color: var(--yellow); }
+    .pseudo-code { margin: 7px 0 0; font-size: 11px; line-height: 1.55; }
+    .empty { padding: 22px; border: 1px dashed var(--line-strong); color: var(--muted); text-align: center; }
+    .footer-note { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    @media (max-width: 1000px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .toc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .side-stat { display: none; }
+      .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow-step:not(:last-child)::after { display: none; }
+      .reference-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .hero { padding-top: 30px; }
+      .toc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2, .grid-3, .skill-grid { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 7px; text-align: left; }
+      .flow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">技能效果系统</div>
+      <p class="brand-note">架构设计草案 · 只讨论方案</p>
+      <nav class="toc" aria-label="文档导航">
+        <a href="#overview">目标与边界</a>
+        <a href="#mindmap">思维导图</a>
+        <a href="#model">核心模型</a>
+        <a href="#phone-model">现有架构映射</a>
+        <a href="#pipeline">运行时流程</a>
+        <a href="#taxonomy">效果分类</a>
+        <a href="#kjs">KJS 扩展</a>
+        <a href="#stacking">叠加与安全</a>
+        <a href="#lifecycle">生命周期</a>
+        <a href="#roadmap">落地顺序</a>
+        <a href="#catalog">技能目录</a>
+        <a href="#questions">待确认问题</a>
+      </nav>
+      <div class="side-stat" id="side-stat"></div>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <p class="eyebrow">PAYDAY SKILL SYSTEM / DESIGN NOTE</p>
+        <h1>技能效果系统设计草案</h1>
+        <p>目标是把表格中的技能效果整理成一套可复用、可测试、可由 KubeJS 扩展的声明式系统。这里先确定领域模型、运行时边界和脚本接口，暂时不编写具体技能效果 Java 代码。</p>
+        <div class="notice">本页面是设计讨论稿：示例 API、字段名和执行语义都属于草案，确认后再进入实现。</div>
+      </header>
+
+      <div class="content">
+        <section id="overview">
+          <div class="section-head">
+            <h2>目标与边界</h2>
+            <p>先稳定“技能是什么、何时生效、如何撤销、脚本如何扩展”这四件事。</p>
+          </div>
+          <div class="grid-3">
+            <article class="panel accent-cyan">
+              <h3>希望得到的能力</h3>
+              <ul class="plain-list">
+                <li>一份技能定义可以同时服务 GUI、存档、运行时和脚本。</li>
+                <li>基础级与精通级只是同一技能的两个阶段，不复制整套逻辑。</li>
+                <li>被动、条件被动、事件触发、资源操作和临时状态使用统一管线。</li>
+                <li>技能重置、遗忘、玩家死亡或重载后，可以可靠地卸载旧效果。</li>
+              </ul>
+            </article>
+            <article class="panel accent-yellow">
+              <h3>暂时不做的事情</h3>
+              <ul class="plain-list">
+                <li>不在本稿中决定每个技能的最终 Java 类实现。</li>
+                <li>不把所有效果硬编码成 GUI 点击事件。</li>
+                <li>不允许 KJS 直接写内部 NBT 或依赖私有运行时对象。</li>
+                <li>不把客户端显示状态当作服务端技能状态。</li>
+              </ul>
+            </article>
+            <article class="panel accent-purple">
+              <h3>核心原则</h3>
+              <div class="pill-row">
+                <span class="pill tag-blue">数据声明</span>
+                <span class="pill tag-cyan">服务端权威</span>
+                <span class="pill tag-yellow">可撤销</span>
+                <span class="pill tag-purple">可测试</span>
+                <span class="pill">可脚本化</span>
+                <span class="pill">可观测</span>
+              </div>
+              <p>技能效果不应散落在 GUI、事件监听器、武器类和玩家 NBT 中；它们应由统一的运行时按来源管理。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="mindmap">
+          <div class="section-head">
+            <h2>思维导图</h2>
+            <p>点击节点名称可展开或收起分支；先看主干，再进入具体模块。</p>
+          </div>
+          <div class="mindmap-toolbar">
+            <button class="tool-button" type="button" id="expand-all">展开全部</button>
+            <button class="tool-button" type="button" id="collapse-all">收起细节</button>
+            <span class="muted">树图中的每个节点对应后文的一组设计决策。</span>
+          </div>
+          <div class="mindmap-wrap">
+            <div class="mindmap" id="mindmap-tree" aria-label="技能效果系统思维导图"></div>
+          </div>
+        </section>
+
+        <section id="model">
+          <div class="section-head">
+            <h2>核心模型</h2>
+            <p>技能定义描述“有什么”，运行时状态描述“谁拥有、当前是什么阶段”。</p>
+          </div>
+          <div class="grid-2">
+            <article class="panel accent-blue">
+              <h3>SkillDefinition：稳定的技能身份</h3>
+              <p>技能的身份和展示信息应稳定，不能因为 GUI 排列、语言变化或脚本加载顺序而改变。建议用完整 ID 作为唯一键，例如 <code>payday:mastermind/medical/field_medic</code>。</p>
+              <pre class="code"><span class="key">SkillDefinition</span> {
+  id: <span class="string">"payday:mastermind/medical/field_medic"</span>
+  category: <span class="string">"mastermind"</span>
+  series: <span class="string">"medical"</span>
+  tier: 3
+  displayName: <span class="string">"Component.translatable(...)"</span>
+  baseCost: 3
+  masteryCost: 6
+  base: EffectSpec[]
+  mastery: EffectSpec[]
+  prerequisites: ConditionSpec[]
+}</pre>
+            </article>
+            <article class="panel accent-cyan">
+              <h3>EffectSpec：效果的声明</h3>
+              <p>效果只描述意图和参数，不保存玩家当前值。执行时由统一的处理器把它转换成属性修饰、事件监听、资源变化或临时状态。</p>
+              <pre class="code"><span class="key">EffectSpec</span> {
+  type: <span class="string">"attribute_modifier"</span>
+  target: <span class="string">"self"</span>
+  attribute: <span class="string">"movement_speed"</span>
+  operation: <span class="string">"multiply_total"</span>
+  value: 0.28
+  when: ConditionSpec[]
+  duration: <span class="string">"10s"</span>
+  cooldown: <span class="string">"30s"</span>
+  stacking: <span class="string">"replace_by_source"</span>
+}</pre>
+            </article>
+            <article class="panel accent-yellow">
+              <h3>ConditionSpec：统一条件表达式</h3>
+              <p>“附近有敌人”“有变节敌人”“生命值低于 30%”“正在冲刺”都应成为可复用条件，而不是散落在各个技能处理器中的特殊判断。</p>
+              <div class="pill-row">
+                <span class="pill">player_state</span>
+                <span class="pill">weapon_tag</span>
+                <span class="pill">health_ratio</span>
+                <span class="pill">armor_ratio</span>
+                <span class="pill">exposure</span>
+                <span class="pill">nearby_entities</span>
+                <span class="pill">hostage_count</span>
+                <span class="pill">converted_enemy</span>
+                <span class="pill">movement</span>
+                <span class="pill">equipment</span>
+              </div>
+            </article>
+            <article class="panel accent-purple">
+              <h3>SkillRuntime：玩家身上的运行时</h3>
+              <p>它只属于服务端玩家，保存技能等级、已注册效果的来源句柄、冷却、充能和临时状态。GUI 获取的是同步后的只读快照。</p>
+              <ul class="plain-list">
+                <li><strong>activate</strong>：学习基础级或精通级后安装对应效果。</li>
+                <li><strong>deactivate</strong>：遗忘时按 sourceId 卸载，而不是猜测要减多少。</li>
+                <li><strong>rebuild</strong>：登录、重载、版本迁移后从技能等级重建全部效果。</li>
+                <li><strong>sync</strong>：只同步 GUI 必需的等级、点数和临时提示。</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="phone-model">
+          <div class="section-head">
+            <h2>现有 PhoneUpgrade 架构映射</h2>
+            <p>技能系统应复用现有动作模型的优点，同时把物品升级的身份、技能阶段和运行时状态分开。</p>
+          </div>
+          <div class="reference-grid">
+            <article class="panel accent-blue">
+              <h3>PhoneUpgradeAction</h3>
+              <p>它是当前项目最接近“效果计划”的对象：不可变、可组合，并在应用时处理属性修饰、药水效果、Curios tick、护甲槽修改、事件代理、伤害规则、弹匣扩容和按键激活。</p>
+              <div class="pill-row"><span class="pill">attribute</span><span class="pill">effect</span><span class="pill">curioTick</span><span class="pill">addProxyEvent</span><span class="pill">immune</span><span class="pill">ammoExpansion</span><span class="pill">bindKeyActivate</span></div>
+            </article>
+            <article class="panel accent-cyan">
+              <h3>PhoneUpgradeConfig</h3>
+              <p>它承担内置效果注册表的角色：<code>basic(series, level)</code> 负责基础系列工厂，静态字段负责复杂特殊效果。技能系统可以保留这种“通用工厂 + 明确命名定义”的组织方式。</p>
+              <div class="pill-row"><span class="pill">基础工厂</span><span class="pill">特殊定义</span><span class="pill">稳定 ID</span><span class="pill">集中校验</span></div>
+            </article>
+            <article class="panel accent-yellow">
+              <h3>PhoneUpgradeBuilder / KJS</h3>
+              <p>KJS Builder 已经把动作能力映射为脚本链式 API。技能 API 应复用这些动作名，而不是另造一套互不兼容的属性、事件和概率命名。</p>
+              <div class="pill-row"><span class="pill">category</span><span class="pill">series</span><span class="pill">level</span><span class="pill">prerequisite</span><span class="pill">effectKey</span><span class="pill">action</span></div>
+            </article>
+          </div>
+          <div class="panel" style="margin-top:14px">
+            <h3>与 PhoneUpgradeBuilder 对齐的 KJS 形状</h3>
+            <p>下面的 API 仍是草案，但方法名尽量沿用现有 <code>PhoneUpgradeBuilder</code> 和 <code>PhoneUpgradeAction.Builder</code>。这样现有手机升级脚本和未来技能脚本可以共享属性、药水效果、事件代理、概率免疫、弹匣扩容和按键激活的概念。</p>
+            <pre class="code"><span class="comment">// 建议的技能 Builder：skill.stage(...).action(...) 内部复用 PhoneUpgradeAction.Builder</span>
+skills.register(<span class="string">"payday:skill/mastermind/medical/1"</span>, skill =&gt; {
+  skill.category(<span class="string">"mastermind"</span>).series(<span class="string">"medical"</span>).tier(1)
+  skill.displayName(<span class="string">"skill.payday.mastermind.medical.1"</span>)
+  skill.base(stage =&gt; stage.cost(1).action(action =&gt; action
+    .addProxyEvent(<span class="string">"payday:medical_bag_thrown"</span>, event =&gt; {
+      event.when(<span class="string">"owner_is_player"</span>).then(<span class="string">"apply_damage_reduction"</span>, { value: 0.15, duration: <span class="string">"5s"</span> })
+    })
+  ))
+})</pre>
+          </div>
+          <div class="panel" style="margin-top:14px">
+            <h3>建议的兼容层</h3>
+            <table class="mapping-table">
+              <thead><tr><th>技能系统对象</th><th>参考现有对象</th><th>职责</th></tr></thead>
+              <tbody>
+                <tr><td>SkillDefinition</td><td>PhoneUpgradeItem 的系列、等级、前置元数据</td><td>保存稳定技能 ID、Component 名称、阶级、基础/精通成本和阶段定义；不直接保存玩家当前等级。</td></tr>
+                <tr><td>SkillStageDefinition</td><td>PhoneUpgradeConfig 中一个静态 PhoneUpgradeAction</td><td>描述某一阶段的效果计划，能够编译为一个或多个 PhoneUpgradeAction 或新的 EffectBinding。</td></tr>
+                <tr><td>SkillEffectCompiler</td><td>PhoneUpgradeAction.Builder</td><td>把 EffectSpec 编译成现有的 attribute/effect/curioTick/addProxyEvent 等动作；复杂效果落到专用处理器。</td></tr>
+                <tr><td>SkillRuntime</td><td>PhoneItem.installedActions + 服务端事件分发</td><td>根据玩家已学习的阶段安装、卸载和重建效果；每个效果绑定 skillId、stage 和 effectIndex。</td></tr>
+                <tr><td>SkillKjsBuilder</td><td>PhoneUpgradeBuilder</td><td>暴露相同的动作 Builder 能力，并额外提供技能阶段、条件、触发器、前置关系和生命周期事件。</td></tr>
+              </tbody>
+            </table>
+            <pre class="code"><span class="comment">// 伪代码：把声明式阶段编译为现有 PhoneUpgradeAction 能力</span>
+PhoneUpgradeAction action = SkillEffectCompiler.compile(stage,
+    PhoneUpgradeAction.builder()
+        .attribute(...)
+        .effect(...)
+        .addProxyEvent(...)
+        .build());
+
+runtime.bind(sourceId, action);
+runtime.unbind(sourceId); <span class="comment">// 按来源回收，而不是反向猜测数值</span></pre>
+          </div>
+          <div class="panel" style="margin-top:14px">
+            <h3>与当前代码的边界</h3>
+            <p>PhoneUpgradeAction 目前适合“装备即生效”的手机升级。技能系统还需要学习等级、阶段依赖、临时状态、条件重算和 KJS 注册生命周期。因此建议保留 PhoneUpgradeAction 作为底层动作适配器，而不是让它直接承担技能点、GUI 同步或玩家技能等级存档。</p>
+          </div>
+        </section>
+
+        <section id="pipeline">
+          <div class="section-head">
+            <h2>运行时流程</h2>
+            <p>所有入口最终汇聚到同一条效果管线，避免 KJS 和原生技能走两套规则。</p>
+          </div>
+          <div class="flow">
+            <div class="flow-step"><em>01 · 事件或状态变化</em><h4>Trigger</h4><p>击杀、爆头、投掷医疗包、受到伤害、换弹、按键或定时 tick。</p></div>
+            <div class="flow-step"><em>02 · 查找技能</em><h4>Runtime</h4><p>从玩家已激活技能索引中取得相关 EffectBinding。</p></div>
+            <div class="flow-step"><em>03 · 判断条件</em><h4>Condition</h4><p>用统一上下文判断自身、武器、目标、范围和资源状态。</p></div>
+            <div class="flow-step"><em>04 · 调度执行</em><h4>Dispatcher</h4><p>处理冷却、概率、优先级、叠加策略和效果来源。</p></div>
+            <div class="flow-step"><em>05 · 改变世界</em><h4>Action</h4><p>修改属性、资源、状态、目标或生成可撤销的临时实例。</p></div>
+          </div>
+          <div class="grid-2" style="margin-top:14px">
+            <article class="panel">
+              <h3>事件上下文应该包含什么</h3>
+              <ul class="plain-list">
+                <li><strong>actor</strong>：拥有技能的玩家。</li>
+                <li><strong>target</strong>：受到影响的实体，可为空。</li>
+                <li><strong>item / weapon</strong>：触发事件时使用的物品。</li>
+                <li><strong>position / level</strong>：范围判断和世界操作所需信息。</li>
+                <li><strong>cause</strong>：伤害类型、击杀来源、事件来源。</li>
+                <li><strong>transaction</strong>：本次事件中可撤销、可记录的变化集合。</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3>事件与主动调用的边界</h3>
+              <p>事件适合“发生了某件事后自动反应”，主动调用适合“玩家明确使用某个能力”。两者都通过 Dispatcher 进入，以便统一检查技能等级、冷却和权限。</p>
+              <pre class="code"><span class="comment">// 伪代码：不是当前项目的实现代码</span>
+dispatcher.dispatch(<span class="string">"entity_killed"</span>, context)
+dispatcher.invoke(<span class="string">"payday:medical/medic_bag"</span>, actor, args)</pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="taxonomy">
+          <div class="section-head">
+            <h2>效果分类</h2>
+            <p>按表格中的效果描述归纳，先建立少量稳定原语，再由它们组合复杂技能。</p>
+          </div>
+          <div class="grid-3">
+            <article class="panel accent-blue"><h3>被动数值修改</h3><p>稳定性、精准度、装填速度、移动速度、伤害、伤害减免、容量、护甲和生命值。</p><div class="pill-row"><span class="pill">attribute_modifier</span><span class="pill">capacity_modifier</span><span class="pill">damage_modifier</span></div></article>
+            <article class="panel accent-cyan"><h3>条件被动</h3><p>只有满足上下文条件才提供修改，例如附近敌人数量、低生命、暴露值、静止、冲刺、开镜。</p><div class="pill-row"><span class="pill">conditional_modifier</span><span class="pill">condition_group</span></div></article>
+            <article class="panel accent-yellow"><h3>事件触发</h3><p>投掷医疗包、爆头、击杀、呼喊、受到伤害、即将死亡、换弹、使用物品后执行动作。</p><div class="pill-row"><span class="pill">event_listener</span><span class="pill">probability</span><span class="pill">cooldown</span></div></article>
+            <article class="panel accent-purple"><h3>资源操作</h3><p>恢复生命、护甲、护盾，补充弹药，消耗医疗包，改变技能点或经验。</p><div class="pill-row"><span class="pill">resource_delta</span><span class="pill">resource_transfer</span></div></article>
+            <article class="panel accent-blue"><h3>临时状态</h3><p>持续时间、冷却、触发次数、充能、不可叠加或按来源替换，应该由状态实例统一管理。</p><div class="pill-row"><span class="pill">temporary_status</span><span class="pill">charges</span><span class="pill">duration</span></div></article>
+            <article class="panel accent-cyan"><h3>目标与范围</h3><p>自身、队友、附近敌人、人质、变节敌人和指定武器；范围选择器应独立于具体动作。</p><div class="pill-row"><span class="pill">self</span><span class="pill">ally</span><span class="pill">nearby</span><span class="pill">hostage</span></div></article>
+            <article class="panel accent-yellow"><h3>特殊效果</h3><p>不死图腾、伤害类型转换、武器模式限制、装备替换或自动使用物品等，不要强行伪装成普通属性。</p><div class="pill-row"><span class="pill">special_action</span><span class="pill">guarded_trigger</span></div></article>
+            <article class="panel accent-purple"><h3>组合效果</h3><p>一个技能阶段可以有多个 EffectSpec；复杂效果由条件、目标选择、动作和冷却组合，不复制一份新类。</p><div class="pill-row"><span class="pill">sequence</span><span class="pill">parallel</span><span class="pill">fallback</span></div></article>
+            <article class="panel"><h3>技能效果不是 GUI 逻辑</h3><p>GUI 只负责选择技能、显示状态和发送请求。真正的学习校验、资源扣除、效果激活与撤销必须在服务端完成。</p><div class="pill-row"><span class="pill tag-yellow">server_authority</span><span class="pill">client_snapshot</span></div></article>
+          </div>
+        </section>
+
+        <section id="kjs">
+          <div class="section-head">
+            <h2>KJS 扩展设计</h2>
+            <p>脚本使用稳定的公共入口；内部实现可以替换，脚本不应依赖私有类和内部存储。</p>
+          </div>
+          <div class="grid-2">
+            <article class="panel accent-cyan">
+              <h3>建议提供的公共能力</h3>
+              <ul class="plain-list">
+                <li><strong>注册技能：</strong>添加新技能、阶段、成本、前置条件和翻译键。</li>
+                <li><strong>修改技能：</strong>在已有基础级或精通级上追加、替换或移除效果。</li>
+                <li><strong>注册条件：</strong>为脚本提供可组合的条件节点或命名条件。</li>
+                <li><strong>注册触发器：</strong>监听稳定的领域事件，而不是 Minecraft 内部事件细节。</li>
+                <li><strong>注册处理器：</strong>为新 EffectSpec 类型提供参数校验和执行逻辑。</li>
+                <li><strong>监听技能生命周期：</strong>激活、升级、遗忘、单树重置、全树重置。</li>
+              </ul>
+            </article>
+            <article class="panel accent-blue">
+              <h3>伪代码：脚本侧定义技能</h3>
+              <pre class="code"><span class="comment">// 设计草案，不是当前可执行 KJS API</span>
+skills.register(<span class="string">"payday:technician/repair/field_repair"</span>, skill =&gt; {
+  skill.displayName = <span class="string">"skill.payday.technician.repair.field_repair"</span>
+  skill.tier = 2
+  skill.base.cost = 2
+  skill.base.effect(<span class="string">"attribute_modifier"</span>, {
+    target: <span class="string">"self"</span>, attribute: <span class="string">"repair_speed"</span>, value: 0.25
+  })
+  skill.mastery.effect(<span class="string">"event_action"</span>, {
+    trigger: <span class="string">"repair_completed"</span>, action: <span class="string">"restore_armor"</span>, amount: 10
+  })
+})</pre>
+            </article>
+            <article class="panel accent-yellow">
+              <h3>伪代码：修改原有技能</h3>
+              <pre class="code"><span class="comment">// 使用稳定 ID，不通过中文显示名定位</span>
+skills.modify(<span class="string">"payday:mastermind/medical/field_medic"</span>, skill =&gt; {
+  skill.base.effects.add({
+    type: <span class="string">"conditional_modifier"</span>,
+    when: conditions.all(<span class="string">"is_sprinting"</span>, <span class="string">"has_medical_bag"</span>),
+    action: actions.modify(<span class="string">"movement_speed"</span>, 0.10)
+  })
+})</pre>
+            </article>
+            <article class="panel accent-purple">
+              <h3>伪代码：监听生命周期</h3>
+              <pre class="code"><span class="comment">// 脚本只能观察或调用公开上下文</span>
+skills.events.on(<span class="string">"activated"</span>, event =&gt; {
+  if (event.skill.id == <span class="string">"payday:..."</span>) {
+    event.player.tell(<span class="string">"技能已激活"</span>)
+  }
+})
+
+skills.events.on(<span class="string">"reset_tree"</span>, event =&gt; {
+  // 记录、成就或额外提示；不要直接改内部等级
+})</pre>
+            </article>
+          </div>
+          <div class="panel" style="margin-top:14px">
+            <h3>KJS 边界建议</h3>
+            <table class="decision-table">
+              <thead><tr><th>允许脚本做什么</th><th>不建议脚本做什么</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr><td>声明效果参数、条件、触发器和叠加策略</td><td>直接修改玩家技能等级 NBT</td><td>避免绕过前置条件、点数和同步逻辑。</td></tr>
+                <tr><td>注册自定义处理器并接收只读上下文</td><td>持有内部实体处理器或事件总线对象</td><td>防止脚本绑定实现细节，方便升级。</td></tr>
+                <tr><td>调用公开的资源、状态和目标选择 API</td><td>任意执行没有权限检查的命令</td><td>统一安全策略、日志和服务端权限。</td></tr>
+                <tr><td>监听技能生命周期事件</td><td>在事件回调中递归触发同一事件</td><td>需要调度器识别来源并限制递归深度。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="stacking">
+          <div class="section-head">
+            <h2>叠加、优先级与安全</h2>
+            <p>这些规则越早确定，后续新增技能和 KJS 扩展越不容易出现互相覆盖的问题。</p>
+          </div>
+          <div class="grid-2">
+            <article class="panel">
+              <h3>每个效果都要有来源 ID</h3>
+              <p>推荐来源格式：<code>skillId + stage + effectIndex</code>。属性修改、临时状态和事件监听都绑定来源，遗忘时按来源回收。</p>
+              <pre class="code">sourceId = <span class="string">"payday:mastermind/medical/field_medic#base/0"</span></pre>
+            </article>
+            <article class="panel">
+              <h3>叠加策略至少分五类</h3>
+              <div class="pill-row"><span class="pill">stack</span><span class="pill">replace</span><span class="pill">max</span><span class="pill">min</span><span class="pill">refresh_duration</span></div>
+              <p>例如同源临时减伤可以刷新持续时间；不同来源的移动速度可以相加，但应设置上限；同一特殊状态通常按优先级保留一个。</p>
+            </article>
+            <article class="panel">
+              <h3>数值与时间统一规范</h3>
+              <ul class="plain-list">
+                <li>百分比用明确的比例数值保存，不把“28%”作为自由文本解析。</li>
+                <li>时间使用 tick 或带单位的 Duration 类型，展示文本另行翻译。</li>
+                <li>乘法、加法、最终值修改必须明确 operation。</li>
+                <li>所有效果参数在注册时校验，错误脚本应给出带技能 ID 的日志。</li>
+              </ul>
+            </article>
+            <article class="panel">
+              <h3>安全与性能</h3>
+              <ul class="plain-list">
+                <li>技能效果只在服务端判定和执行，客户端不能自行发放资源。</li>
+                <li>高频事件先做候选技能索引，再执行条件，避免遍历所有技能。</li>
+                <li>范围查询、附近实体扫描和复杂条件要有缓存或节流。</li>
+                <li>KJS 处理器应限制执行时间、递归深度和每 tick 调用数量。</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="lifecycle">
+          <div class="section-head">
+            <h2>生命周期与重建</h2>
+            <p>可重建比“在线修改很多状态”更重要：运行时应能从最小持久化数据恢复。</p>
+          </div>
+          <div class="grid-3">
+            <article class="panel accent-blue"><h3>登录 / 加载</h3><p>读取玩家技能等级和技能点，校验定义版本，构建 SkillRuntime，再同步 GUI 快照。</p></article>
+            <article class="panel accent-cyan"><h3>学习 / 精通</h3><p>服务端验证点数和前置条件，更新等级，安装新增阶段的效果，广播状态变化。</p></article>
+            <article class="panel accent-yellow"><h3>遗忘 / 重置</h3><p>先按来源卸载效果，再回收技能点；如果高阶条件失效，按依赖顺序递归遗忘。</p></article>
+            <article class="panel accent-purple"><h3>死亡 / 复活</h3><p>永久被动通常保留；临时状态按设计清理或保留，必须由效果类型声明，而不是统一猜测。</p></article>
+            <article class="panel accent-blue"><h3>脚本重载</h3><p>冻结新事件注册，卸载脚本来源，重新注册定义和处理器，再从玩家技能等级重建。</p></article>
+            <article class="panel accent-cyan"><h3>版本迁移</h3><p>技能 ID 和效果参数应支持迁移表；不能依赖列表序号，否则新增技能会破坏旧存档。</p></article>
+          </div>
+        </section>
+
+        <section id="roadmap">
+          <div class="section-head">
+            <h2>建议落地顺序</h2>
+            <p>先实现最小闭环，再逐步覆盖表格中的复杂效果。</p>
+          </div>
+          <div class="panel">
+            <table class="decision-table">
+              <thead><tr><th>阶段</th><th>先解决什么</th><th>验收标准</th></tr></thead>
+              <tbody>
+                <tr><td>1. 身份与数据</td><td>稳定技能 ID、阶段、成本、翻译键、前置条件和持久化格式。</td><td>GUI、存档和脚本都不依赖列表序号。</td></tr>
+                <tr><td>2. 运行时骨架</td><td>SkillRuntime、EffectBinding、来源 ID、activate/deactivate/rebuild。</td><td>学习、遗忘、单树重置和全树重置都能无残留回收。</td></tr>
+                <tr><td>3. 基础原语</td><td>属性修改、资源变化、持续状态、冷却、概率、目标选择。</td><td>能覆盖表格中最常见的被动和事件效果。</td></tr>
+                <tr><td>4. 领域事件</td><td>击杀、爆头、受伤、换弹、投掷物品、呼喊、濒死等统一事件。</td><td>效果处理器不直接耦合 GUI 或具体武器实现。</td></tr>
+                <tr><td>5. KJS 公共层</td><td>注册、修改、监听、校验、错误报告和来源隔离。</td><td>脚本可以新增一个技能而不用重新编译核心模组。</td></tr>
+                <tr><td>6. 复杂效果</td><td>不死图腾、伤害类型转换、模式限制、自动使用物品等特殊处理器。</td><td>复杂效果仍能被测试、撤销并显示来源。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="catalog">
+          <div class="section-head">
+            <h2>技能目录</h2>
+            <p>来自 <code>F:/forge_mdk/想法/skill.xls</code> 的只读提取。每个技能卡片都包含基础/精通效果原文，以及对应的 Java、KJS 阶段伪代码。</p>
+          </div>
+          <div class="catalog-toolbar">
+            <label>大类 <select class="select" id="category-filter"><option value="">全部</option></select></label>
+            <label>系列 <select class="select" id="series-filter"><option value="">全部</option></select></label>
+            <input class="search" id="skill-search" type="search" placeholder="搜索技能名或效果文本">
+            <button class="tool-button" type="button" id="reset-filter">清除筛选</button>
+          </div>
+          <p class="catalog-summary" id="catalog-summary"></p>
+          <div class="notice" style="margin:0 0 13px">技能伪代码只展示“如何接入 PhoneUpgradeAction / PhoneUpgradeBuilder”的形状；数值、事件类和专用处理器仍需在实现阶段确认。</div>
+          <div class="catalog-list" id="catalog-list"></div>
+        </section>
+
+        <section id="questions">
+          <div class="section-head">
+            <h2>待确认问题</h2>
+            <p>这些问题会直接影响 EffectSpec 和 KJS API，建议在开始写实现前定下来。</p>
+          </div>
+          <div class="panel">
+            <table class="decision-table">
+              <thead><tr><th>问题</th><th>推荐的初始选择</th><th>需要确认的原因</th></tr></thead>
+              <tbody>
+                <tr><td>技能 ID 是否永远独立于中文名称？</td><td>是，ID 只允许稳定的英文路径。</td><td>翻译和改名不会破坏存档、KJS 和迁移。</td></tr>
+                <tr><td>基础级与精通级如何叠加？</td><td>精通包含基础级；激活精通时保留基础效果并追加精通效果。</td><td>表格描述通常是“基础效果 + 精通额外效果”，需要明确是否存在覆盖例外。</td></tr>
+                <tr><td>同类百分比修改如何叠加？</td><td>默认按 operation 和来源分别计算，特殊效果显式声明上限或替换。</td><td>避免不同技能互相覆盖、遗忘后数值无法恢复。</td></tr>
+                <tr><td>KJS 是否允许注册全新 EffectSpec 类型？</td><td>允许，但必须注册参数 schema、处理器和权限/性能限制。</td><td>这是可复用性和稳定性之间的主要边界。</td></tr>
+                <tr><td>复杂效果是否需要事务回滚？</td><td>资源和属性操作需要；外部副作用必须记录来源并提供补偿动作。</td><td>事件中途失败时，避免只扣资源但没有施加效果。</td></tr>
+                <tr><td>客户端是否展示脚本自定义文本？</td><td>通过翻译键和结构化参数同步，不同步任意富文本脚本。</td><td>保证可翻译、可控长度且不让客户端执行脚本内容。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <p class="footer-note">本稿只记录设计方向。下一步应先确认“效果原语、事件上下文、叠加策略、KJS 边界”四项，再开始实现最小运行时闭环。</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="./skill-catalog.js"></script>
+  <script>
+    (() => {
+      const catalog = window.SKILL_CATALOG || { categories: [], counts: {} };
+      const byId = (id) => document.getElementById(id);
+
+      const mindmapData = {
+        label: "技能效果系统",
+        note: "可复用 · 服务端权威 · 支持 KJS",
+        children: [
+          { label: "声明式技能数据", note: "SkillDefinition / EffectSpec", children: [
+            { label: "稳定技能 ID" }, { label: "基础 / 精通阶段" }, { label: "成本与前置条件" }, { label: "翻译与 GUI 快照" }, { label: "PhoneUpgradeAction 兼容编译" }
+          ]},
+          { label: "运行时状态", note: "SkillRuntime", children: [
+            { label: "等级与技能点" }, { label: "EffectBinding" }, { label: "冷却 / 充能" }, { label: "重建与同步" }
+          ]},
+          { label: "条件系统", note: "ConditionSpec", children: [
+            { label: "玩家 / 武器状态" }, { label: "生命 / 护甲 / 暴露值" }, { label: "附近实体" }, { label: "人质 / 变节敌人" }
+          ]},
+          { label: "触发器与事件", note: "TriggerSpec", children: [
+            { label: "击杀 / 爆头" }, { label: "投掷 / 使用物品" }, { label: "受伤 / 濒死" }, { label: "换弹 / 呼喊" }
+          ]},
+          { label: "效果执行器", note: "EffectDispatcher", children: [
+            { label: "属性与资源" }, { label: "临时状态" }, { label: "目标与范围" }, { label: "特殊处理器" }
+          ]},
+          { label: "生命周期", note: "可撤销 / 可重建", children: [
+            { label: "激活与升级" }, { label: "遗忘与重置" }, { label: "死亡与复活" }, { label: "脚本重载 / 版本迁移" }
+          ]},
+          { label: "KJS 扩展 API", note: "稳定公共边界", children: [
+            { label: "注册 / 修改技能" }, { label: "注册条件与事件" }, { label: "注册效果处理器" }, { label: "监听生命周期" }
+          ]},
+          { label: "叠加与安全", note: "来源 / 优先级 / 限制", children: [
+            { label: "sourceId" }, { label: "stack / replace / max" }, { label: "服务端校验" }, { label: "性能与递归限制" }
+          ]},
+          { label: "测试与调试", note: "可观测", children: [
+            { label: "条件单测" }, { label: "激活 / 撤销测试" }, { label: "脚本错误报告" }, { label: "效果来源日志" }
+          ]}
+        ]
+      };
+
+      function createMindmapNode(item, isRoot) {
+        const li = document.createElement("li");
+        const node = document.createElement("div");
+        node.className = "tree-node" + (isRoot ? " root" : "");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = item.label;
+        button.addEventListener("click", () => {
+          if (item.children && item.children.length) node.classList.toggle("closed");
+        });
+        node.appendChild(button);
+        if (item.note) {
+          const note = document.createElement("small");
+          note.textContent = item.note;
+          node.appendChild(note);
+        }
+        if (item.children && item.children.length) {
+          const toggle = document.createElement("button");
+          toggle.className = "toggle";
+          toggle.type = "button";
+          toggle.setAttribute("aria-label", "展开或收起");
+          toggle.addEventListener("click", () => node.classList.toggle("closed"));
+          node.appendChild(toggle);
+          const children = document.createElement("ul");
+          item.children.forEach((child) => children.appendChild(createMindmapNode(child, false)));
+          li.appendChild(node);
+          li.appendChild(children);
+        } else {
+          li.appendChild(node);
+        }
+        return li;
+      }
+
+      function renderMindmap() {
+        const root = document.createElement("ul");
+        root.className = "tree";
+        root.appendChild(createMindmapNode(mindmapData, true));
+        byId("mindmap-tree").replaceChildren(root);
+      }
+
+      function setMindmapState(closed) {
+        document.querySelectorAll("#mindmap-tree .tree-node").forEach((node) => {
+          const hasChildren = node.parentElement && [...node.parentElement.children].some((element) => element.tagName === "UL");
+          if (hasChildren) node.classList.toggle("closed", closed);
+        });
+      }
+
+      byId("expand-all").addEventListener("click", () => setMindmapState(false));
+      byId("collapse-all").addEventListener("click", () => setMindmapState(true));
+      renderMindmap();
+
+      function populateFilters() {
+        const categoryFilter = byId("category-filter");
+        const seriesFilter = byId("series-filter");
+        catalog.categories.forEach((category) => {
+          const option = document.createElement("option");
+          option.value = category.id;
+          option.textContent = category.name + " (" + category.id + ")";
+          categoryFilter.appendChild(option);
+        });
+        catalog.categories.flatMap((category) => category.series).forEach((series) => {
+          const option = document.createElement("option");
+          option.value = series.id;
+          option.textContent = series.name + " (" + series.id + ")";
+          seriesFilter.appendChild(option);
+        });
+      }
+
+      function skillMatches(skill, query) {
+        if (!query) return true;
+        return [skill.name, skill.base, skill.mastery].join(" ").toLowerCase().includes(query.toLowerCase());
+      }
+
+      function escapeHtml(value) {
+        return String(value || "").replace(/[&<>\"']/g, (character) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+        }[character]));
+      }
+
+      function formatEffect(value) {
+        return escapeHtml(value).replace(/\n/g, "<br>");
+      }
+
+      function parseStage(value) {
+        const lines = String(value || "").split(/\r?\n/);
+        const header = lines.shift() || "";
+        const costMatch = header.match(/(?:基础|精通)(\d+)/);
+        return {
+          cost: costMatch ? costMatch[1] : "TODO",
+          header,
+          effect: lines.join("\n").trim() || header
+        };
+      }
+
+      function skillId(category, series, skill) {
+        return "payday:skill/" + category.id + "/" + series.id + "/" + skill.index;
+      }
+
+      function skillConstant(category, series, skill) {
+        return "SKILL_" + [category.id, series.id, skill.index].join("_").replace(/[^a-zA-Z0-9_]/g, "_").toUpperCase();
+      }
+
+      function skillTier(index) {
+        return index === 1 ? 1 : index <= 3 ? 2 : index <= 5 ? 3 : 4;
+      }
+
+      function commentLines(text, indent) {
+        return String(text || "").split(/\r?\n/).map((line) => indent + "// " + line);
+      }
+
+      function hasAny(text, words) {
+        return words.some((word) => text.includes(word));
+      }
+
+      function javaActionPseudo(effect) {
+        const lines = ["PhoneUpgradeAction.builder()"];
+        const hasModifier = hasAny(effect, ["增加", "提高", "降低", "减少", "翻倍", "上限", "容量", "伤害", "速度", "精准", "稳定", "护盾", "生命", "暴露", "装填", "射速", "射程", "闪避", "抗性"]);
+        const hasEvent = hasAny(effect, ["当", "若", "击杀", "爆头", "受到", "使用", "扔出", "投掷", "交互", "即将", "成功", "触发", "攻击", "命中", "站立", "瞄准", "开镜", "换弹", "冷却", "每秒"]);
+        const hasTick = hasAny(effect, ["每秒", "持续", "站立", "暴露风险", "血量越低", "护盾值为0", "移动状态", "拥有"]);
+        const hasAmmo = hasAny(effect, ["弹药", "弹容量", "弹匣", "弹夹"]);
+        const hasKey = hasAny(effect, ["按X键", "按键"]);
+
+        if (hasModifier) lines.push("    .attribute(/* Attributes / RegistryAttributes */, /* value */, /* operation */)");
+        if (hasAmmo) lines.push("    .ammoExpansion(/* amount */, PhoneUpgradeAction.Operation.MULTIPLY /* or ADDITION */)");
+        if (hasKey) lines.push("    .bindKeyActivate(/* InputConstants.KEY_* */, player -> { /* active action */ })");
+        if (hasEvent) {
+          lines.push("    .addProxyEvent(/* Forge/domain event */, (event, owner) -> {");
+          lines.push("        // ConditionSpec + TargetSelector + Cooldown + ActionSpec");
+          lines.push("    })");
+        }
+        if (hasTick) {
+          lines.push("    .curioTick((identifier, index, owner, source) -> {");
+          lines.push("        // Re-evaluate the condition and refresh a source-bound modifier/state");
+          lines.push("    })");
+        }
+        if (!hasModifier && !hasAmmo && !hasKey && !hasEvent && !hasTick) {
+          lines.push("    // SkillEffectCompiler dispatches this to a dedicated EffectSpec handler");
+        }
+        lines.push("    .build()");
+        return lines.join("\n");
+      }
+
+      function kjsActionPseudo(effect) {
+        const lines = ["action => action"];
+        const hasModifier = hasAny(effect, ["增加", "提高", "降低", "减少", "翻倍", "上限", "容量", "伤害", "速度", "精准", "稳定", "护盾", "生命", "暴露", "装填", "射速", "射程", "闪避", "抗性"]);
+        const hasEvent = hasAny(effect, ["当", "若", "击杀", "爆头", "受到", "使用", "扔出", "投掷", "交互", "即将", "成功", "触发", "攻击", "命中", "站立", "瞄准", "开镜", "换弹", "冷却", "每秒"]);
+        const hasTick = hasAny(effect, ["每秒", "持续", "站立", "暴露风险", "血量越低", "护盾值为0", "移动状态", "拥有"]);
+        const hasAmmo = hasAny(effect, ["弹药", "弹容量", "弹匣", "弹夹"]);
+        const hasKey = hasAny(effect, ["按X键", "按键"]);
+
+        if (hasModifier) lines.push("  .attribute(/* attribute id */, /* value */, \"MULTIPLY_TOTAL\")");
+        if (hasAmmo) lines.push("  .ammoExpansion(/* amount */, \"MULTIPLY\")");
+        if (hasKey) lines.push("  .bindKeyActivate(/* key */, player => { /* active action */ })");
+        if (hasEvent) {
+          lines.push("  .addProxyEvent(\"<domain event class>\", (event, owner) => {");
+          lines.push("    // conditions.all(...); actions.*(...); cooldown(...)");
+          lines.push("  })");
+        }
+        if (hasTick) {
+          lines.push("  .curioTick((identifier, index, owner, source) => {");
+          lines.push("    // refresh a source-bound modifier/state while the condition is true");
+          lines.push("  })");
+        }
+        if (!hasModifier && !hasAmmo && !hasKey && !hasEvent && !hasTick) {
+          lines.push("  // skills.effects.register(...) handles this special EffectSpec");
+        }
+        return lines.join("\n");
+      }
+
+      function makeJavaPseudoCode(category, series, skill) {
+        const base = parseStage(skill.base);
+        const mastery = parseStage(skill.mastery);
+        const id = skillId(category, series, skill);
+        const constant = skillConstant(category, series, skill);
+        const tier = skillTier(skill.index);
+        return [
+          "SkillDefinition " + constant + " = SkillDefinition.builder(\"" + id + "\")",
+          "    .displayName(Component.translatable(\"skill.payday." + category.id + "." + series.id + "." + skill.index + "\"))",
+          "    .category(\"" + category.id + "\").series(\"" + series.id + "\").tier(" + tier + ")",
+          "    .base(SkillStage.builder().cost(" + base.cost + ")",
+          ...commentLines(base.effect, "        "),
+          "        .action(",
+          ...javaActionPseudo(base.effect).split("\n").map((line) => "            " + line),
+          "        )",
+          "        .build())",
+          "    .mastery(SkillStage.builder().cost(" + mastery.cost + ")",
+          ...commentLines(mastery.effect, "        "),
+          "        .action(",
+          ...javaActionPseudo(mastery.effect).split("\n").map((line) => "            " + line),
+          "        )",
+          "        .build())",
+          "    .build();"
+        ].join("\n");
+      }
+
+      function makeKjsPseudoCode(category, series, skill) {
+        const base = parseStage(skill.base);
+        const mastery = parseStage(skill.mastery);
+        const id = skillId(category, series, skill);
+        const tier = skillTier(skill.index);
+        return [
+          "skills.register(\"" + id + "\", skill => {",
+          "  skill.category(\"" + category.id + "\").series(\"" + series.id + "\").tier(" + tier + ")",
+          "  skill.displayName(\"skill.payday." + category.id + "." + series.id + "." + skill.index + "\")",
+          "  skill.base(stage => stage.cost(" + base.cost + ").action(",
+          ...commentLines(base.effect, "    "),
+          ...kjsActionPseudo(base.effect).split("\n").map((line) => "    " + line),
+          "  ))",
+          "  skill.mastery(stage => stage.cost(" + mastery.cost + ").action(",
+          ...commentLines(mastery.effect, "    "),
+          ...kjsActionPseudo(mastery.effect).split("\n").map((line) => "    " + line),
+          "  ))",
+          "})"
+        ].join("\n");
+      }
+
+      function makePseudoBlock(label, code, className) {
+        const block = document.createElement("details");
+        block.className = "pseudo-block " + className;
+        const summary = document.createElement("summary");
+        summary.textContent = label;
+        const pre = document.createElement("pre");
+        pre.className = "code pseudo-code";
+        pre.textContent = code;
+        block.append(summary, pre);
+        return block;
+      }
+
+      function makeSkillCard(category, series, skill) {
+        const details = document.createElement("details");
+        details.className = "skill-card";
+        const summary = document.createElement("summary");
+        const base = parseStage(skill.base);
+        const mastery = parseStage(skill.mastery);
+        summary.innerHTML = "T" + skill.index + " · " + escapeHtml(skill.name) + " <small>基础 " + escapeHtml(base.cost) + " / 精通 " + escapeHtml(mastery.cost) + "</small>";
+        details.appendChild(summary);
+        const detail = document.createElement("div");
+        detail.className = "skill-detail";
+        const meta = document.createElement("div");
+        meta.className = "skill-meta";
+        meta.innerHTML = "<span class=\"pill tag-blue\">" + escapeHtml(skillId(category, series, skill)) + "</span><span class=\"pill\">第 " + skillTier(skill.index) + " 阶</span>";
+        const baseText = document.createElement("p");
+        baseText.innerHTML = "<b>基础</b> " + formatEffect(skill.base);
+        const masteryText = document.createElement("p");
+        masteryText.className = "mastery";
+        masteryText.innerHTML = "<b>精通</b> " + formatEffect(skill.mastery);
+        detail.append(meta, baseText, masteryText);
+        detail.appendChild(makePseudoBlock("Java 伪代码 · SkillDefinition + PhoneUpgradeAction.Builder", makeJavaPseudoCode(category, series, skill), "java"));
+        detail.appendChild(makePseudoBlock("KJS 伪代码 · SkillKjsBuilder + PhoneUpgradeBuilder 能力", makeKjsPseudoCode(category, series, skill), "kjs"));
+        details.appendChild(detail);
+        return details;
+      }
+
+      function renderCatalog() {
+        const details = document.createElement("details");
+        details.className = "skill-card";
+        const summary = document.createElement("summary");
+        summary.innerHTML = "T" + skill.index + " · " + escapeHtml(skill.name) + " <small>基础 / 精通</small>";
+        details.appendChild(summary);
+        const detail = document.createElement("div");
+        detail.className = "skill-detail";
+        const base = document.createElement("p");
+        base.innerHTML = "<b>基础</b> " + formatEffect(skill.base);
+        const mastery = document.createElement("p");
+        mastery.className = "mastery";
+        mastery.innerHTML = "<b>精通</b> " + formatEffect(skill.mastery);
+        detail.append(base, mastery);
+        details.appendChild(detail);
+        return details;
+      }
+
+      function renderCatalog() {
+        const selectedCategory = byId("category-filter").value;
+        const selectedSeries = byId("series-filter").value;
+        const query = byId("skill-search").value.trim();
+        const list = byId("catalog-list");
+        let visibleSkills = 0;
+        let visibleSeries = 0;
+        list.replaceChildren();
+
+        catalog.categories.forEach((category) => {
+          if (selectedCategory && category.id !== selectedCategory) return;
+          const categoryBlock = document.createElement("div");
+          categoryBlock.className = "category-block";
+          let categoryVisible = false;
+          category.series.forEach((series) => {
+            if (selectedSeries && series.id !== selectedSeries) return;
+            const skills = series.skills.filter((skill) => skillMatches(skill, query));
+            if (!skills.length) return;
+            categoryVisible = true;
+            visibleSeries += 1;
+            visibleSkills += skills.length;
+            const seriesBlock = document.createElement("div");
+            seriesBlock.className = "series-block";
+            const seriesTitle = document.createElement("div");
+            seriesTitle.className = "series-title";
+            seriesTitle.innerHTML = "<span>" + escapeHtml(series.name) + "</span><small>" + escapeHtml(series.id) + " · " + skills.length + " 个可见技能</small>";
+            const skillGrid = document.createElement("div");
+            skillGrid.className = "skill-grid";
+            skills.forEach((skill) => skillGrid.appendChild(makeSkillCard(category, series, skill)));
+            seriesBlock.append(seriesTitle, skillGrid);
+            categoryBlock.appendChild(seriesBlock);
+          });
+          if (!categoryVisible) return;
+          const title = document.createElement("div");
+          title.className = "category-title";
+          title.innerHTML = "<h3>" + escapeHtml(category.name) + " <small>" + escapeHtml(category.id) + "</small></h3><span class=\"pill\">" + category.series.length + " 个系列</span>";
+          categoryBlock.prepend(title);
+          list.appendChild(categoryBlock);
+        });
+
+        byId("catalog-summary").textContent = "当前显示 " + visibleSkills + " 个技能，覆盖 " + visibleSeries + " 个系列。展开技能卡片可查看基础和精通效果原文。";
+        if (!visibleSkills) list.innerHTML = "<div class=\"empty\">没有匹配的技能。可以清除筛选，或换一个技能名/效果关键词。</div>";
+      }
+
+      function updateSeriesFilter() {
+        const selectedCategory = byId("category-filter").value;
+        const seriesFilter = byId("series-filter");
+        const current = seriesFilter.value;
+        seriesFilter.replaceChildren(new Option("全部", ""));
+        catalog.categories.filter((category) => !selectedCategory || category.id === selectedCategory)
+          .flatMap((category) => category.series)
+          .forEach((series) => seriesFilter.appendChild(new Option(series.name + " (" + series.id + ")", series.id)));
+        if ([...seriesFilter.options].some((option) => option.value === current)) seriesFilter.value = current;
+      }
+
+      ["category-filter", "series-filter", "skill-search"].forEach((id) => byId(id).addEventListener("input", renderCatalog));
+      byId("category-filter").addEventListener("change", () => { updateSeriesFilter(); renderCatalog(); });
+      byId("reset-filter").addEventListener("click", () => {
+        byId("category-filter").value = "";
+        updateSeriesFilter();
+        byId("series-filter").value = "";
+        byId("skill-search").value = "";
+        renderCatalog();
+      });
+      populateFilters();
+      updateSeriesFilter();
+      renderCatalog();
+
+      const counts = catalog.counts || {};
+      byId("side-stat").innerHTML = [
+        [counts.categories || 0, "大类"],
+        [counts.series || 0, "系列"],
+        [counts.skills || 0, "技能"],
+        [counts.stages || 0, "效果阶段"]
+      ].map(([value, label]) => "<div><strong>" + value + "</strong><span>" + label + "</span></div>").join("");
+
+      const links = [...document.querySelectorAll(".toc a")];
+      const sections = links.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          links.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id));
+        });
+      }, { rootMargin: "-20% 0px -70% 0px" });
+      sections.forEach((section) => observer.observe(section));
+    })();
+  </script>
+</body>
+</html>
+

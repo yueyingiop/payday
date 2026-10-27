@@ -10,6 +10,7 @@ import com.yueyingiop.payday.client.screen.ArmorScreen;
 import com.yueyingiop.payday.client.screen.PhoneScreen;
 import com.yueyingiop.payday.client.screen.TurretScreen;
 import com.yueyingiop.payday.client.screen.PayDayConfigScreen;
+import com.yueyingiop.payday.client.screen.SkillScreen;
 import com.yueyingiop.payday.tooltip.ArmorSlotTooltip;
 
 import net.minecraftforge.api.distmarker.Dist;
@@ -50,6 +51,7 @@ public final class PayDayClient {
     public static final KeyMapping HACKER_SKILL = new KeyMapping("key.payday.hacker_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.categories.payday");
     public static final KeyMapping MODIFIER = new KeyMapping("key.payday.modifier", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_SHIFT, "key.categories.payday");
     public static final KeyMapping OPEN_HUD_CONFIG = new KeyMapping("key.payday.open_hud_config", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.payday");
+    public static final KeyMapping OPEN_SKILL = new KeyMapping("key.payday.open_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.payday");
 
     /** 注册手机升级物品的显式贴图颜色；默认白色，因此不会改变原始纹理。 */
     @SubscribeEvent
@@ -105,6 +107,7 @@ public final class PayDayClient {
         event.register(HACKER_SKILL);
         event.register(MODIFIER);
         event.register(OPEN_HUD_CONFIG);
+        event.register(OPEN_SKILL);
     }
 
     /** 注册补给方块实体的客户端渲染器。 */
